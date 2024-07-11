@@ -1,4 +1,4 @@
-package com.heslin.postopia.model.response;
+package com.heslin.postopia.dto.response;
 
 import org.springframework.http.HttpStatus;
 

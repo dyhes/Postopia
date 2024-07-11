@@ -4,7 +4,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 
-import com.heslin.postopia.model.response.BasicApiResponseEntity;
+import com.heslin.postopia.dto.response.BasicApiResponseEntity;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
