@@ -8,10 +8,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.heslin.postopia.dto.Credential;
 import com.heslin.postopia.dto.Message;
+import com.heslin.postopia.dto.response.ApiResponse;
+import com.heslin.postopia.dto.response.ApiResponseEntity;
+import com.heslin.postopia.dto.response.BasicApiResponseEntity;
 import com.heslin.postopia.exception.BadRequestException;
-import com.heslin.postopia.model.response.ApiResponse;
-import com.heslin.postopia.model.response.ApiResponseEntity;
-import com.heslin.postopia.model.response.BasicApiResponseEntity;
 import com.heslin.postopia.service.jwt.JWTService;
 import com.heslin.postopia.service.login.LoginService;
 import com.heslin.postopia.service.signup.SignupService;
