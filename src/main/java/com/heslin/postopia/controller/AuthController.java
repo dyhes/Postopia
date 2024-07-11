@@ -6,9 +6,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.heslin.postopia.dto.Credential;
+import com.heslin.postopia.dto.Message;
 import com.heslin.postopia.exception.BadRequestException;
-import com.heslin.postopia.model.Credential;
-import com.heslin.postopia.model.Message;
 import com.heslin.postopia.model.response.ApiResponse;
 import com.heslin.postopia.model.response.ApiResponseEntity;
 import com.heslin.postopia.model.response.BasicApiResponseEntity;

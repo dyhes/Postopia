@@ -5,7 +5,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.heslin.postopia.model.Message;
+import com.heslin.postopia.dto.Message;
 import com.heslin.postopia.model.User;
 import com.heslin.postopia.repository.UserRepository;
 
