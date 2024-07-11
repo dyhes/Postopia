@@ -19,7 +19,10 @@ public class SignupServiceImpl implements SignupService {
     @Override
     public Message signup(String username, String password) {
         try {
-            userRepository.save(User.builder().username(username).password(passwordEncoder.encode(password)).build());
+            User user = new User();
+            user.setUsername(username);
+            user.setPassword(passwordEncoder.encode(password));
+            userRepository.save(user);
             return new Message("用户 @" + username + " 注册成功", true);
         } catch (DataIntegrityViolationException e) {
             System.out.println("DataIntegrityViolationException: " + e);
