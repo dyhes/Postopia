@@ -2,9 +2,14 @@ package com.heslin.postopia.model;
 
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.data.annotation.CreatedDate;
+
+import com.heslin.postopia.model.opinion.PostOpinion;
+import com.heslin.postopia.model.vote.PostVote;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -40,9 +45,19 @@ public class Post {
     @JoinColumn(name = "space_id")
     private Space space;
     
-    @OneToMany(mappedBy = "post")
+    @OneToMany(mappedBy = "post", orphanRemoval = true)
     private List<Comment> comments = new ArrayList<>();
 
     @CreatedDate
     private Instant createdAt;
+
+    @OneToMany(mappedBy = "post", orphanRemoval = true)
+    private Set<PostOpinion> opinions = new HashSet<>();
+
+    @OneToMany(mappedBy = "post", orphanRemoval = true)
+    private List<PostVote> votes = new ArrayList<>();
+
+    private Long positiveCount;
+
+    private Long negativeCount;
 }

@@ -8,6 +8,8 @@ import java.util.Set;
 
 import org.springframework.data.annotation.CreatedDate;
 
+import com.heslin.postopia.model.vote.SpaceVote;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -37,12 +39,19 @@ public class Space {
     @Column(nullable=false)
     private Long postCount;
 
+    @CreatedDate
+    private Instant createdAt;
+
+    private boolean isArchived;
+
+    private String avatar;
+
     @OneToMany(mappedBy="space")
     private Set<SpaceUserInfo> users = new HashSet<>();
 
     @OneToMany(mappedBy="space")
     private List<Post> posts = new ArrayList<>();
-    
-    @CreatedDate
-    private Instant createdAt;
+
+    @OneToMany(mappedBy="space")
+    private List<SpaceVote> votes = new ArrayList<>();
 }

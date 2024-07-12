@@ -2,11 +2,15 @@ package com.heslin.postopia.model;
 
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.data.annotation.CreatedDate;
 
-import jakarta.persistence.CascadeType;
+import com.heslin.postopia.model.opinion.CommentOpinion;
+import com.heslin.postopia.model.vote.CommentVote;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -42,9 +46,19 @@ public class Comment {
     @JoinColumn(name = "parent_id")
     private Comment parent;
 
-    @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "parent", orphanRemoval = true)
     private List<Comment> children = new ArrayList<>();
 
     @CreatedDate
     private Instant createdAt;
+
+    @OneToMany(mappedBy = "comment", orphanRemoval = true)
+    private Set<CommentOpinion> opinions = new HashSet<>();
+
+    @OneToMany(mappedBy = "comment", orphanRemoval = true)
+    private List<CommentVote> votes = new ArrayList<>();
+
+    private Long positiveCount;
+
+    private Long negativeCount;
 }
