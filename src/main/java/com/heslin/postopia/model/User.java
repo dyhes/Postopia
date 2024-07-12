@@ -8,6 +8,8 @@ import java.util.Set;
 
 import org.springframework.data.annotation.CreatedDate;
 
+import com.heslin.postopia.model.opinion.Opinion;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -25,6 +27,9 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @CreatedDate
+    private Instant createdAt;
+
     @Column(nullable = false, unique = true)
     private String username;
 
@@ -32,6 +37,8 @@ public class User {
 
     @Column(nullable = false)
     private String password;
+
+    private String avatar;
 
     private String bindedWeChat;
 
@@ -50,6 +57,6 @@ public class User {
     @OneToMany(mappedBy= "author")
     private List<Comment> comments = new ArrayList<>();
 
-    @CreatedDate
-    private Instant createdAt;
+    @OneToMany(mappedBy = "user")
+    private List<Opinion> opinions = new ArrayList<>();
 }
