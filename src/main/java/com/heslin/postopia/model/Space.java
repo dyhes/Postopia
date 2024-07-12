@@ -13,9 +13,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.Data;
@@ -40,12 +37,8 @@ public class Space {
     @Column(nullable=false)
     private Long postCount;
 
-    @ManyToMany
-    @JoinTable(
-        name="space_members",
-        joinColumns={@JoinColumn(name="space_id")},
-        inverseJoinColumns={@JoinColumn(name="user_id")})
-    private Set<User> members = new HashSet<>();
+    @OneToMany(mappedBy="space")
+    private Set<SpaceUserInfo> users = new HashSet<>();
 
     @OneToMany(mappedBy="space")
     private List<Post> posts = new ArrayList<>();
