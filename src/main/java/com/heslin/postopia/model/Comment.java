@@ -1,7 +1,10 @@
 package com.heslin.postopia.model;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.springframework.data.annotation.CreatedDate;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -41,4 +44,7 @@ public class Comment {
 
     @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comment> children = new ArrayList<>();
+
+    @CreatedDate
+    private Instant createdAt;
 }

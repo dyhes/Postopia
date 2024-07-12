@@ -1,9 +1,12 @@
 package com.heslin.postopia.model;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import org.springframework.data.annotation.CreatedDate;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -46,5 +49,7 @@ public class Space {
 
     @OneToMany(mappedBy="space")
     private List<Post> posts = new ArrayList<>();
-    // created date
+    
+    @CreatedDate
+    private Instant createdAt;
 }
