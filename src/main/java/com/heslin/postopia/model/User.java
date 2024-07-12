@@ -13,7 +13,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.Data;
@@ -42,8 +41,8 @@ public class User {
 
     private String bindedGithub;
 
-    @ManyToMany(mappedBy = "members")
-    private Set<Space> spaces = new HashSet<>();
+    @OneToMany(mappedBy = "user")
+    private Set<SpaceUserInfo> spaces = new HashSet<>();
 
     @OneToMany(mappedBy= "poster")
     private List<Post> posts = new ArrayList<>();
