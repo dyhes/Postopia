@@ -1,9 +1,12 @@
 package com.heslin.postopia.model;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import org.springframework.data.annotation.CreatedDate;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -47,4 +50,7 @@ public class User {
 
     @OneToMany(mappedBy= "author")
     private List<Comment> comments = new ArrayList<>();
+
+    @CreatedDate
+    private Instant createdAt;
 }
