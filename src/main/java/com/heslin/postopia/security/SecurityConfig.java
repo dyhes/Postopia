@@ -23,7 +23,7 @@ public class SecurityConfig {
         .csrf(c -> c.disable())
         .authorizeHttpRequests(
             authorize -> authorize
-            .requestMatchers( "/auth/**", "/open/**").permitAll()
+            .requestMatchers( "/auth/**").permitAll()
             .anyRequest().authenticated()
         )
         .addFilter(postopiaAuthenticationFilter)
