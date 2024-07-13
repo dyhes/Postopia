@@ -29,4 +29,8 @@ public class BasicApiResponseEntity extends ApiResponseEntity<EmptyData> {
     public static BasicApiResponseEntity badRequest(String message) {
         return new BasicApiResponseEntity(new ApiResponse<>(message, false , null), HttpStatus.BAD_REQUEST);
     }
+
+    public static BasicApiResponseEntity internalServerError(String message) {
+        return new BasicApiResponseEntity(new ApiResponse<>(message, false , null), HttpStatus.BAD_REQUEST);
+    }
 }

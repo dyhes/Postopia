@@ -33,12 +33,6 @@ public class Space {
     @Column(nullable=false)
     private String description;
 
-    @Column(nullable=false)
-    private Long memberCount;
-
-    @Column(nullable=false)
-    private Long postCount;
-
     @CreatedDate
     private Instant createdAt;
 

@@ -1,9 +1,11 @@
 package com.heslin.postopia.model;
 
 import java.time.Instant;
+import java.time.LocalDate;
 
 import org.springframework.data.annotation.CreatedDate;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -33,5 +35,5 @@ public class SpaceUserInfo {
     @CreatedDate
     private Instant createdAt;
 
-    private Instant lastActiveAt;
+    private LocalDate lastActiveAt;
 }
