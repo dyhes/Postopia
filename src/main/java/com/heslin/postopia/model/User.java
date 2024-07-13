@@ -59,4 +59,9 @@ public class User {
 
     @OneToMany(mappedBy = "user")
     private List<Opinion> opinions = new ArrayList<>();
+
+    @Override
+    public String toString() {
+        return "User" + " [id=" + id + "]";
+    }
 }
