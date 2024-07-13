@@ -42,8 +42,9 @@ public class PostopiaAuthenticationFilter extends BasicAuthenticationFilter {
                                     HttpServletResponse res,
                                     FilterChain chain) throws IOException, ServletException {
         boolean isOpenApi = openApis.contains(req.getRequestURI());
+        boolean isAuthApi = req.getRequestURI().startsWith("/auth");
         String header = req.getHeader("Authorization");
-        if ((header == null || !header.startsWith("Bearer ") ) && !isOpenApi) {
+        if ((header == null || !header.startsWith("Bearer ") ) && !isOpenApi || isAuthApi) {
             chain.doFilter(req, res);
             return;
         }
@@ -70,7 +71,7 @@ public class PostopiaAuthenticationFilter extends BasicAuthenticationFilter {
             return null;
         } catch (Exception e) {
             if (isOpenApi) {
-                return new UsernamePasswordAuthenticationToken(new User(), null, new ArrayList<>());
+                return new UsernamePasswordAuthenticationToken(null, null, new ArrayList<>());
             }
             System.err.println(e);
             return null;
