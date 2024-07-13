@@ -17,16 +17,16 @@ import io.jsonwebtoken.security.Keys;
 @Service
 public class JWTService {
 
-    @Value("${jwt.secret}")
+    @Value("${ postopia.jwt.secret}")
     private String secret;
 
-    @Value("${jwt.expiration}")
+    @Value("${ postopia.jwt.expiration}")
     private Long jwtExpiration;
 
-    @Value("${jwt.refresh-token.expiration}")
+    @Value("${ postopia.jwt.refresh-token.expiration}")
     private Long refreshExpiration;
 
-    @Value("${jwt.issuer}")
+    @Value("${ postopia.jwt.issuer}")
     private String issuer;
 
     private SecretKey getSigningKey() {
