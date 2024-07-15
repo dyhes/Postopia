@@ -21,5 +21,10 @@ public class SpaceUserInfoServiceImpl implements SpaceUserInfoService {
     public SpaceUserInfo joinSpace(SpaceUserInfo spaceUserInfo) {
         return spaceUserInfoRepository.save(spaceUserInfo);
     }
+
+    @Override
+    public boolean deleteBySpaceIdAndUserId(Long spaceId, Long userId) {
+        return spaceUserInfoRepository.deleteBySpaceIdAndUserId(spaceId, userId);
+    }
     
 }

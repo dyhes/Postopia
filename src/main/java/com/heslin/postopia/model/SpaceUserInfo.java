@@ -5,7 +5,6 @@ import java.time.LocalDate;
 
 import org.springframework.data.annotation.CreatedDate;
 
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
