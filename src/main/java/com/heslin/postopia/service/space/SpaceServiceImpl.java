@@ -3,9 +3,13 @@ package com.heslin.postopia.service.space;
 import java.time.LocalDate;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.heslin.postopia.dto.Message;
+import com.heslin.postopia.dto.SpaceInfo;
+import com.heslin.postopia.enums.PopularSpaceOrder;
 import com.heslin.postopia.model.Space;
 import com.heslin.postopia.model.SpaceUserInfo;
 import com.heslin.postopia.model.User;
@@ -46,9 +50,9 @@ public class SpaceServiceImpl implements SpaceService {
     }
 
     @Override
-    public Message leaveSpace(Long spaceId, Long userId) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'leaveSpace'");
+    public Message leaveSpace(Long spaceId, User user) {
+        boolean success = spaceUserInfoService.deleteBySpaceIdAndUserId(spaceId, user.getId());
+        return new Message(success ? "退出成功" : "退出失败, 尚未加入空间", success);
     }
 
     @Override
@@ -70,6 +74,23 @@ public class SpaceServiceImpl implements SpaceService {
         }
 
         return new Message("创建成功", true);
+    }
+
+    @Override
+    public Page<SpaceInfo> getSpacesByUserId(Long userId, Pageable pageable) {
+        return spaceRepository.findSpaceInfosByUserId(userId, pageable);
+    }
+
+    @Override
+    public Page<SpaceInfo> getPopularSpaces(PopularSpaceOrder order, Pageable pageable) {
+        switch (order) {
+            case MEMBERCOUNT:
+                return spaceRepository.findPopularSpacesByMemberCount(pageable);
+            case POSTCOUNT:
+                return spaceRepository.findPopularSpacesByPostCount(pageable);
+            default:
+                throw new UnsupportedOperationException("Unimplemented order " + order);
+        }
     }
     
 }

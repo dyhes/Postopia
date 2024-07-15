@@ -41,7 +41,7 @@ public class Space {
     private String avatar;
 
     @OneToMany(mappedBy="space")
-    private Set<SpaceUserInfo> users = new HashSet<>();
+    private Set<SpaceUserInfo> userInfos = new HashSet<>();
 
     @OneToMany(mappedBy="space")
     private List<Post> posts = new ArrayList<>();
