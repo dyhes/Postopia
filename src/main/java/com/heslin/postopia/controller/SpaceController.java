@@ -25,8 +25,10 @@ import com.heslin.postopia.dto.response.ApiResponseEntity;
 import com.heslin.postopia.dto.response.BasicApiResponseEntity;
 import com.heslin.postopia.enums.JoinedSpaceOrder;
 import com.heslin.postopia.enums.PopularSpaceOrder;
+import com.heslin.postopia.exception.BadRequestException;
 import com.heslin.postopia.model.User;
 import com.heslin.postopia.service.space.SpaceService;
+import com.heslin.postopia.util.Pair;
 
 
 @RestController
@@ -38,18 +40,19 @@ public class SpaceController {
     public record SpaceDto(String name, String description) {}
 
     @PostMapping("create")
-    public BasicApiResponseEntity createSpace(@AuthenticationPrincipal User user, @RequestPart("info") SpaceDto info, @RequestPart(name = "avatar", required = false) MultipartFile avatar) {
+    public ApiResponseEntity<Long> createSpace(@AuthenticationPrincipal User user, @RequestPart("info") SpaceDto info, @RequestPart(name = "avatar", required = false) MultipartFile avatar) {
         String avatarUrl = null;
         if (info.name == null || info.description == null) {
-            return BasicApiResponseEntity.badRequest("space name and description are required");
+            throw new BadRequestException("space name and description are required");
         }
 
         if (avatar != null) {
             // object storage
         }
 
-        Message message = spaceService.createSpace(user, info.name, info.description, avatarUrl);
-        return BasicApiResponseEntity.ok(message);
+        Pair<Message, Long> pair = spaceService.createSpace(user, info.name, info.description, avatarUrl);
+
+        return ApiResponseEntity.ok(new ApiResponse<Long>(pair.second(), pair.first()));
     }
     
     public record SpaceIdDto(Long id){};

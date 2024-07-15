@@ -15,6 +15,7 @@ import com.heslin.postopia.model.SpaceUserInfo;
 import com.heslin.postopia.model.User;
 import com.heslin.postopia.repository.SpaceRepository;
 import com.heslin.postopia.service.space_user_info.SpaceUserInfoService;
+import com.heslin.postopia.util.Pair;
 
 import jakarta.transaction.Transactional;
 
@@ -57,10 +58,10 @@ public class SpaceServiceImpl implements SpaceService {
 
     @Override
     @Transactional
-    public Message createSpace(User user, String name, String description, String avatar) {
+    public Pair<Message, Long> createSpace(User user, String name, String description, String avatar) {
         Space existingSpace = spaceRepository.findByName(name);
         if (existingSpace != null) {
-            return new Message("空间已存在", false);
+            return new Pair<>(new Message("空间名已存在", false), existingSpace.getId());
         }
 
         Space space = new Space();
@@ -70,10 +71,10 @@ public class SpaceServiceImpl implements SpaceService {
         space = spaceRepository.save(space);
         Message message = joinSpace(space, user);
         if (!message.success()) {
-            return new Message("加入空间失败, 请重试", false);
+            return new Pair<>(new Message("加入空间失败, 请重试", false), Long.MIN_VALUE);
         }
 
-        return new Message("创建成功", true);
+        return new Pair<>(new Message("创建成功", true), space.getId());
     }
 
     @Override

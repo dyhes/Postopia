@@ -1,12 +1,3 @@
 package com.heslin.postopia.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-
-@Data
-@AllArgsConstructor
-public class SpaceInfo {
-    private Long id;
-    private String name;
-    private String avatar;
-}
+public record SpaceInfo(Long id, String name, String avatar){}
