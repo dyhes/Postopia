@@ -4,8 +4,11 @@ import java.time.Instant;
 import java.time.LocalDate;
 
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -18,6 +21,7 @@ import lombok.Data;
 @Data
 @Entity
 @Table(name = "space_user_infos")
+@EntityListeners(AuditingEntityListener.class)
 public class SpaceUserInfo {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -32,6 +36,7 @@ public class SpaceUserInfo {
     private User user;
     
     @CreatedDate
+    @Column(nullable = false)
     private Instant createdAt;
 
     private LocalDate lastActiveAt;

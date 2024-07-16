@@ -7,12 +7,14 @@ import java.util.List;
 import java.util.Set;
 
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import com.heslin.postopia.model.opinion.PostOpinion;
 import com.heslin.postopia.model.vote.PostVote;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -26,6 +28,7 @@ import lombok.Data;
 @Data
 @Entity
 @Table(name = "posts")
+@EntityListeners(AuditingEntityListener.class)
 public class Post {
     @Id
     @GeneratedValue(strategy=GenerationType.IDENTITY)
