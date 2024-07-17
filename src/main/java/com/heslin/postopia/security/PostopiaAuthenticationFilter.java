@@ -16,7 +16,6 @@ import org.springframework.stereotype.Component;
 import com.heslin.postopia.model.User;
 import com.heslin.postopia.service.jwt.JWTService;
 
-import jakarta.persistence.EntityManager;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -27,8 +26,6 @@ public class PostopiaAuthenticationFilter extends BasicAuthenticationFilter {
 
     @Autowired
     private JWTService jwtService;
-    @Autowired
-    private EntityManager entityManager;
 
     @Value("#{'${postopia.open.apis}'.split(',')}")
     private List<String> openApis;
@@ -64,7 +61,8 @@ public class PostopiaAuthenticationFilter extends BasicAuthenticationFilter {
         try {
             if (jwtService.validateToken(token)) {
                 Long userId = jwtService.extractUserId(token);
-                User user = entityManager.getReference(User.class, userId);
+                User user = new User();
+                user.setId(userId);
                 return new UsernamePasswordAuthenticationToken(user, null, new ArrayList<>());
             }
             
