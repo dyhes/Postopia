@@ -20,4 +20,9 @@ public class GlobalExceptionHandler {
     public BasicApiResponseEntity noSuchElementException(NoSuchElementException e, WebRequest request) {
         return BasicApiResponseEntity.internalServerError(e.getMessage());
     }
+
+    @ExceptionHandler(value = ForbiddenException.class)
+    public BasicApiResponseEntity forbiddenException(ForbiddenException e, WebRequest request) {
+        return BasicApiResponseEntity.forbidden(e.getMessage());
+    }
 }

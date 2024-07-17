@@ -31,6 +31,10 @@ public class BasicApiResponseEntity extends ApiResponseEntity<EmptyData> {
     }
 
     public static BasicApiResponseEntity internalServerError(String message) {
-        return new BasicApiResponseEntity(new ApiResponse<>(message, false , null), HttpStatus.BAD_REQUEST);
+        return new BasicApiResponseEntity(new ApiResponse<>(message, false , null), HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    public static BasicApiResponseEntity forbidden(String message) {
+        return new BasicApiResponseEntity(new ApiResponse<>(message, false , null), HttpStatus.FORBIDDEN);
     }
 }
