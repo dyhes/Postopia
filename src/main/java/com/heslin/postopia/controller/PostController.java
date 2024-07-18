@@ -27,7 +27,10 @@ public class PostController {
     @Autowired
     private PostService postService;
     
-    public record CreatePostDto(Long spaceId, String subject, String content) {}
+    public record CreatePostDto(Long spaceId, String subject, String content, boolean isDraft) {}
+
+    public record PostIdDto(Long id) {}
+
     @PostMapping("create")
     public ApiResponseEntity<Long> createPost(@AuthenticationPrincipal User user, @RequestBody CreatePostDto request) {
         if (request.spaceId == null || request.subject == null || request.content == null) {
@@ -35,22 +38,47 @@ public class PostController {
         }
 
         Space space = entityManager.getReference(Space.class, request.spaceId);
-        var pair = postService.createPost(space, user, request.subject, request.content);
-        return ApiResponseEntity.ok(new ApiResponse<>(pair.second(), pair.first()));
+        var pair = postService.createPost(request.isDraft, space, user, request.subject, request.content);
+        return ApiResponseEntity.ok(new ApiResponse<>(pair.first(), pair.second()));
     }
-    
-    public record deletePostDto(Long postId) {}
-    
-    @PostMapping("delete")
-    public BasicApiResponseEntity deletePost(@AuthenticationPrincipal User user, @RequestBody deletePostDto request) {
-        if (request.postId == null) {
+
+    @PostMapping("archive")
+    public BasicApiResponseEntity archivePost(@AuthenticationPrincipal User user, @RequestBody PostIdDto request) {
+        if (request.id == null) {
             throw new BadRequestException("postId is required");
         }
 
-        var message = postService.deletePost(user, request.postId);
-        return BasicApiResponseEntity.ok(message);
+        postService.authorize(user, request.id);
+        postService.archivePost(request.id);
+        return BasicApiResponseEntity.ok("帖子归档成功");
+    }
+
+    @PostMapping("unArchive")
+    public BasicApiResponseEntity unArchivePost(@AuthenticationPrincipal User user, @RequestBody PostIdDto request) {
+        if (request.id == null) {
+            throw new BadRequestException("postId is required");
+        }
+
+        postService.authorize(user, request.id);
+        postService.unarchivePost(request.id);
+        return BasicApiResponseEntity.ok("帖子取消归档成功");
+    }
+    
+    @PostMapping("delete")
+    public BasicApiResponseEntity deletePost(@AuthenticationPrincipal User user, @RequestBody PostIdDto request) {
+        if (request.id == null) {
+            throw new BadRequestException("postId is required");
+        }
+
+        postService.authorize(user, request.id);
+        postService.deletePost(request.id);
+        return BasicApiResponseEntity.ok("帖子删除成功");
     }
 
     public record ReplyPostDto(Long postId, String content) {}
-        
+    
+    @PostMapping("reply")
+    public BasicApiResponseEntity replyPost(@AuthenticationPrincipal User user, @RequestBody ReplyPostDto request) {
+        return null;
+    }
 }

@@ -1,11 +1,11 @@
 package com.heslin.postopia.service.post;
 
-import java.util.Objects;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.heslin.postopia.dto.Message;
+import com.heslin.postopia.enums.PostStatus;
+import com.heslin.postopia.exception.ForbiddenException;
 import com.heslin.postopia.model.Post;
 import com.heslin.postopia.model.Space;
 import com.heslin.postopia.model.User;
@@ -18,32 +18,38 @@ public class PostServiceImpl implements PostService {
     private PostRepository postRepository;
 
     @Override
-    public Pair<Message, Long> createPost(Space space, User user, String subject, String content) {
+    public Pair<Long, Message> createPost(boolean isDraft, Space space, User user, String subject, String content) {
         var post = new Post();
         post.setSpace(space);
         post.setUser(user);
         post.setSubject(subject);
         post.setContent(content);
+        post.setStatus(isDraft ? PostStatus.DRAFT : PostStatus.PUBLISHED);
         post = postRepository.save(post);
-        return new Pair<>(new Message("Post created successfully", true), post.getId());
-    }
-
-    @Override
-    public Message deletePost(User user, Long id) {
-        var post = postRepository.findById(id).orElse(null);
-        if (post == null) {
-            return new Message("对应的帖子不存在", false);
-        }
-        if (!Objects.equals(post.getUser().getId(), user.getId())) {
-            return new Message("You are not the author of this post", false);
-        }
-        deletePost(id);
-        return new Message("删除成功", true);
+        return new Pair<>(post.getId(), new Message("Post created successfully", true));
     }
 
     @Override
     public void deletePost(Long id) {
         postRepository.deleteById(id);
+    }
+
+    @Override
+    public void authorize(User user, Long postId) {
+        if (!postRepository.findUserIdById(postId).orElse(null).equals(user.getId())) {
+            throw new ForbiddenException("Access Denied");
+        }
+        
+    }
+
+    @Override
+    public void archivePost(Long id) {
+        postRepository.updatePostStatus(id, PostStatus.ARCHIVED);
+    }
+
+    @Override
+    public void unarchivePost(Long id) {
+        postRepository.updatePostStatus(id, PostStatus.PUBLISHED);
     }
     
 }
