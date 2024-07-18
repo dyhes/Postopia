@@ -21,7 +21,7 @@ public class PostServiceImpl implements PostService {
     public Pair<Message, Long> createPost(Space space, User user, String subject, String content) {
         var post = new Post();
         post.setSpace(space);
-        post.setPoster(user);
+        post.setUser(user);
         post.setSubject(subject);
         post.setContent(content);
         post = postRepository.save(post);
@@ -34,7 +34,7 @@ public class PostServiceImpl implements PostService {
         if (post == null) {
             return new Message("对应的帖子不存在", false);
         }
-        if (!Objects.equals(post.getPoster().getId(), user.getId())) {
+        if (!Objects.equals(post.getUser().getId(), user.getId())) {
             return new Message("You are not the author of this post", false);
         }
         deletePost(id);

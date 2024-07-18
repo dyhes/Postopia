@@ -41,8 +41,8 @@ public class Post {
     private String content;
 
     @ManyToOne
-    @JoinColumn(name = "poster_id")
-    private User poster;
+    @JoinColumn(name = "user_id")
+    private User user;
 
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name = "space_id")
