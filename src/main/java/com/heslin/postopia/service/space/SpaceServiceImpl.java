@@ -44,7 +44,6 @@ public class SpaceServiceImpl implements SpaceService {
         SpaceUserInfo spaceUserInfo = new SpaceUserInfo();
         spaceUserInfo.setSpace(space);
         spaceUserInfo.setUser(user);
-        // tbc: add the spaceUserInfo on the other side of relationship?
         spaceUserInfo.setLastActiveAt(LocalDate.now());
         spaceUserInfoService.joinSpace(spaceUserInfo);
         return new Message("加入成功", true);

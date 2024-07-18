@@ -9,12 +9,15 @@ import java.util.Set;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import com.heslin.postopia.enums.PostStatus;
 import com.heslin.postopia.model.opinion.PostOpinion;
 import com.heslin.postopia.model.vote.PostVote;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -32,6 +35,7 @@ import lombok.Data;
 public class Post {
     @Id
     @GeneratedValue(strategy=GenerationType.IDENTITY)
+    @Column(updatable=false)
     private Long id;
     
     @Column(nullable=false)
@@ -41,11 +45,11 @@ public class Post {
     private String content;
 
     @ManyToOne
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "user_id", nullable=false, updatable=false)
     private User user;
 
     @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name = "space_id")
+    @JoinColumn(name = "space_id", nullable=false, updatable=false)
     private Space space;
     
     @OneToMany(mappedBy = "post", orphanRemoval = true)
@@ -60,7 +64,11 @@ public class Post {
     @OneToMany(mappedBy = "post", orphanRemoval = true)
     private List<PostVote> votes = new ArrayList<>();
 
-    private Long positiveCount;
+    @Enumerated(EnumType.ORDINAL)
+    @Column(nullable=false)
+    private PostStatus status;
 
-    private Long negativeCount;
+    private long positiveCount;
+
+    private long negativeCount;
 }

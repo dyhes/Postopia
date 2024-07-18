@@ -6,7 +6,9 @@ import com.heslin.postopia.model.User;
 import com.heslin.postopia.util.Pair;
 
 public interface PostService {
-    Pair<Message, Long> createPost(Space space, User user, String subject, String content);
-    Message deletePost(User user, Long id);
+    Pair<Long, Message> createPost(boolean isDraft, Space space, User user, String subject, String content);
+    void authorize(User user, Long postId);
     void deletePost(Long id);
+    void archivePost(Long id);
+    void unarchivePost(Long id);
 }
