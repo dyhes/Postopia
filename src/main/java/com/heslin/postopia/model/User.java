@@ -54,7 +54,7 @@ public class User {
     @OneToMany(mappedBy = "user")
     private Set<SpaceUserInfo> spaces = new HashSet<>();
 
-    @OneToMany(mappedBy= "poster")
+    @OneToMany(mappedBy= "user")
     private List<Post> posts = new ArrayList<>();
 
     @OneToMany(mappedBy= "author")
