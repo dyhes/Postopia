@@ -84,12 +84,13 @@ public class SpaceServiceImpl implements SpaceService {
     @Override
     public Page<SpaceInfo> getPopularSpaces(PopularSpaceOrder order, Pageable pageable) {
         switch (order) {
-            case MEMBERCOUNT:
+            case MEMBERCOUNT -> {
                 return spaceRepository.findPopularSpacesByMemberCount(pageable);
-            case POSTCOUNT:
+            }
+            case POSTCOUNT -> {
                 return spaceRepository.findPopularSpacesByPostCount(pageable);
-            default:
-                throw new UnsupportedOperationException("Unimplemented order " + order);
+            }
+            default -> throw new UnsupportedOperationException("Unimplemented order " + order);
         }
     }
     
