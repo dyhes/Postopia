@@ -25,4 +25,9 @@ public class GlobalExceptionHandler {
     public BasicApiResponseEntity forbiddenException(ForbiddenException e, WebRequest request) {
         return BasicApiResponseEntity.forbidden(e.getMessage());
     }
+
+    @ExceptionHandler(value = ResourceNotFoundException.class)
+    public BasicApiResponseEntity ResourceNotFoundException(ResourceNotFoundException e, WebRequest request) {
+        return BasicApiResponseEntity.notFound(e.getMessage());
+    }
 }

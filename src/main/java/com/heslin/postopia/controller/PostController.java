@@ -31,6 +31,19 @@ public class PostController {
 
     public record PostIdDto(Long id) {}
 
+    public record UpdatePostDto(Long id, String subject, String content) {}
+
+    @PostMapping("update")
+    public BasicApiResponseEntity updatePost(@AuthenticationPrincipal User user, @RequestBody UpdatePostDto request) {
+        if (request.id == null || request.subject == null || request.content == null) {
+            throw new BadRequestException("postId, subject and content are required");
+        }
+
+        postService.authorize(user, request.id);
+        postService.updatePost(request.id, request.subject, request.content);
+        return BasicApiResponseEntity.ok("帖子更新成功");
+    }
+
     @PostMapping("create")
     public ApiResponseEntity<Long> createPost(@AuthenticationPrincipal User user, @RequestBody CreatePostDto request) {
         if (request.spaceId == null || request.subject == null || request.content == null) {
@@ -75,10 +88,16 @@ public class PostController {
         return BasicApiResponseEntity.ok("帖子删除成功");
     }
 
-    public record ReplyPostDto(Long postId, String content) {}
+    public record ReplyPostDto(Long id, String content) {}
     
     @PostMapping("reply")
     public BasicApiResponseEntity replyPost(@AuthenticationPrincipal User user, @RequestBody ReplyPostDto request) {
+        if (request.id == null || request.content == null) {
+            throw new BadRequestException("postId and content are required");
+        }
+        
+        postService.checkPostStatus(request.id);
+        postService.replyPost(request.id, request.content);
         return null;
     }
 }
