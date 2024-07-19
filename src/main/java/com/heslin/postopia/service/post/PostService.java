@@ -11,4 +11,7 @@ public interface PostService {
     void deletePost(Long id);
     void archivePost(Long id);
     void unarchivePost(Long id);
+    void updatePost(Long id, String subject, String content);
+    void replyPost(Long id, String content);
+    void checkPostStatus(Long id);
 }

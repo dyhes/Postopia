@@ -32,7 +32,7 @@ public abstract class Vote {
     @OneToMany(mappedBy = "vote", orphanRemoval = true)
     private Set<VoteOpinion> opinions = new HashSet<>();
 
-    private Long positiveCount;
+    private long positiveCount;
 
-    private Long negativeCount;
+    private long negativeCount;
 }

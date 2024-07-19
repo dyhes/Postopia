@@ -37,4 +37,8 @@ public class BasicApiResponseEntity extends ApiResponseEntity<EmptyData> {
     public static BasicApiResponseEntity forbidden(String message) {
         return new BasicApiResponseEntity(new ApiResponse<>(message, false , null), HttpStatus.FORBIDDEN);
     }
+
+    public static BasicApiResponseEntity notFound(String message) {
+        return new BasicApiResponseEntity(new ApiResponse<>(message, false , null), HttpStatus.NOT_FOUND);
+    }
 }

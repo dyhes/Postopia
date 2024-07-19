@@ -20,5 +20,12 @@ public interface PostRepository extends CrudRepository<Post, Long>{
     @Modifying
     @Transactional
     @Query("update Post p set p.status = :status where p.id = :id")
-    void updatePostStatus(@Param("id")Long id, @Param("status")PostStatus status);
+    void updateStatus(@Param("id")Long id, @Param("status")PostStatus status);
+
+    @Modifying
+    @Transactional
+    @Query("update Post p set p.subject = :subject, p.content = :content where p.id = :id")
+    void updateSubjectAndContent(@Param("id")Long id, @Param("subject")String subject, @Param("content")String content);
+
+    Optional<PostStatus> findStatusById(Long id);
 }

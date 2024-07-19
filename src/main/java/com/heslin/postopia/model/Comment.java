@@ -38,8 +38,8 @@ public class Comment {
     private String content;
 
     @ManyToOne
-    @JoinColumn(name = "author_id")
-    private User author;
+    @JoinColumn(name = "user_id")
+    private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "post_id")
@@ -61,7 +61,7 @@ public class Comment {
     @OneToMany(mappedBy = "comment", orphanRemoval = true)
     private List<CommentVote> votes = new ArrayList<>();
 
-    private Long positiveCount;
+    private long positiveCount;
 
-    private Long negativeCount;
+    private long negativeCount;
 }
