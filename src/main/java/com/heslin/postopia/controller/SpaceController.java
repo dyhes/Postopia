@@ -52,7 +52,7 @@ public class SpaceController {
 
         Pair<Message, Long> pair = spaceService.createSpace(user, info.name, info.description, avatarUrl);
 
-        return ApiResponseEntity.ok(new ApiResponse<Long>(pair.second(), pair.first()));
+        return ApiResponseEntity.ok(new ApiResponse<>(pair.second(), pair.first()));
     }
     
     public record SpaceIdDto(Long id){};
