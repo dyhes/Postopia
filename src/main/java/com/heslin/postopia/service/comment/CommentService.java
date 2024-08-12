@@ -8,4 +8,10 @@ import com.heslin.postopia.model.User;
 
 public interface  CommentService {
     Comment replyToPost(Post post, String content, @AuthenticationPrincipal User user);
+
+    void reply(Post post, Comment comment, String content, @AuthenticationPrincipal User user);
+
+    void deleteComment(Long id);
+
+    void checkAuthority(Long id, @AuthenticationPrincipal User user);
 }
