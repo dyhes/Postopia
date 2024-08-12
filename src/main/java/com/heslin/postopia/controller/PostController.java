@@ -96,8 +96,8 @@ public class PostController {
             throw new BadRequestException("postId and content are required");
         }
         
-        postService.checkPostStatus(request.id);
+        //postService.checkPostStatus(request.id);
         postService.replyPost(request.id, request.content);
-        return null;
+        return BasicApiResponseEntity.ok("回复成功");
     }
 }
