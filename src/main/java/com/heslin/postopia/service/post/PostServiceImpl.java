@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.heslin.postopia.dto.Message;
+import com.heslin.postopia.dto.post.PostInfo;
 import com.heslin.postopia.enums.PostStatus;
 import com.heslin.postopia.exception.ForbiddenException;
 import com.heslin.postopia.exception.ResourceNotFoundException;
@@ -76,6 +77,11 @@ public class PostServiceImpl implements PostService {
         var post = new Post();
         post.setId(id);
         commentService.replyToPost(post, content, null);
+    }
+
+    @Override
+    public PostInfo getPostInfo(Long id) {
+        return postRepository.findPostInfoById(id).orElseThrow(() -> new ResourceNotFoundException("Post not found"));
     }
     
 }
