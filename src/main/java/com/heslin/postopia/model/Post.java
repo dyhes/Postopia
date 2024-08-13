@@ -44,7 +44,7 @@ public class Post {
     @Column(nullable=false)
     private String content;
 
-    @ManyToOne
+    @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable=false, updatable=false)
     private User user;
 
@@ -71,4 +71,6 @@ public class Post {
     private long positiveCount;
 
     private long negativeCount;
+
+    private long commentCount;
 }

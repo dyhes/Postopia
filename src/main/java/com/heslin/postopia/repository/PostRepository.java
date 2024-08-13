@@ -8,6 +8,7 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import com.heslin.postopia.dto.post.PostInfo;
 import com.heslin.postopia.enums.PostStatus;
 import com.heslin.postopia.model.Post;
 
@@ -27,5 +28,13 @@ public interface PostRepository extends CrudRepository<Post, Long>{
     @Query("update Post p set p.subject = :subject, p.content = :content where p.id = :id")
     void updateSubjectAndContent(@Param("id")Long id, @Param("subject")String subject, @Param("content")String content);
 
+    @Modifying
+    @Transactional
+    @Query("update Post p set p.comment_count = p.comment_count + 1 where p.id = :id")
+    void addComment(@Param("id")Long id);
+
     Optional<PostStatus> findStatusById(Long id);
+
+    @Query("select new com.heslin.postopia.dto.post.PostInfo(p.subject, p.content, p.positive_count, p.negative_count, p.comment_count, u.username, u.nickname, u.avatar) from Post p JOIN p.user u where p.id = :id")
+    Optional<PostInfo> findPostInfoById(@Param("id")Long id);
 }

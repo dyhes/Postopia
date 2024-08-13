@@ -1,6 +1,7 @@
 package com.heslin.postopia.service.post;
 
 import com.heslin.postopia.dto.Message;
+import com.heslin.postopia.dto.post.PostInfo;
 import com.heslin.postopia.model.Space;
 import com.heslin.postopia.model.User;
 import com.heslin.postopia.util.Pair;
@@ -14,4 +15,5 @@ public interface PostService {
     void updatePost(Long id, String subject, String content);
     void replyPost(Long id, String content);
     void checkPostStatus(Long id);
+    PostInfo getPostInfo(Long id);
 }

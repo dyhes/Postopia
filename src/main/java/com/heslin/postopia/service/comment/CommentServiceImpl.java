@@ -11,17 +11,21 @@ import com.heslin.postopia.model.Comment;
 import com.heslin.postopia.model.Post;
 import com.heslin.postopia.model.User;
 import com.heslin.postopia.repository.CommentRepository;
+import com.heslin.postopia.repository.PostRepository;
 
 @Service
 public class CommentServiceImpl implements CommentService {
     @Autowired
     private CommentRepository commentRepository;
+    @Autowired
+    private PostRepository postRepository;
 
     @Override
     public Comment replyToPost(Post post, String content,@AuthenticationPrincipal User user) {
         Comment comment = new Comment();
         comment.setUser(user);
         comment.setPost(post);
+        postRepository.addComment(post.getId());
         comment.setContent(content);
         comment = commentRepository.save(comment);
         return comment;
@@ -32,6 +36,7 @@ public class CommentServiceImpl implements CommentService {
         Comment comment = new Comment();
         comment.setUser(user);
         comment.setPost(post);
+        postRepository.addComment(post.getId());
         comment.setContent(content);
         comment.setParent(parent);
         commentRepository.save(comment);

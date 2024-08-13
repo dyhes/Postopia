@@ -2,11 +2,13 @@ package com.heslin.postopia.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.heslin.postopia.dto.post.PostInfo;
 import com.heslin.postopia.dto.response.ApiResponse;
 import com.heslin.postopia.dto.response.ApiResponseEntity;
 import com.heslin.postopia.dto.response.BasicApiResponseEntity;
@@ -99,5 +101,13 @@ public class PostController {
         //postService.checkPostStatus(request.id);
         postService.replyPost(request.id, request.content);
         return BasicApiResponseEntity.ok("回复成功");
+    }
+
+    @GetMapping("info")
+    public ApiResponseEntity<PostInfo> getPostInfo(@RequestBody PostIdDto request) {
+        if (request.id == null) {
+            throw new BadRequestException("postId is required");
+        }
+        return ApiResponseEntity.ok(new ApiResponse<>("获取帖子信息成功", postService.getPostInfo(request.id)));
     }
 }
