@@ -70,7 +70,7 @@ public class SpaceController {
     @GetMapping("list")
     public ApiResponseEntity<PageResult<SpaceInfo>> getSpaces(@AuthenticationPrincipal User user, 
     @RequestParam int page, 
-    @RequestParam(required = false, defaultValue = "10") int size, 
+    @RequestParam(required = false, defaultValue = "250") int size, 
     @RequestParam(defaultValue = "LASTACTIVE")JoinedSpaceOrder order,
     @RequestParam(defaultValue = "DESC") Direction direction) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction, order.getField()));
@@ -87,7 +87,7 @@ public class SpaceController {
     @GetMapping("popular")
     public ApiResponseEntity<PageResult<SpaceInfo>> getPopularSpaces(@AuthenticationPrincipal User user, 
     @RequestParam int page, 
-    @RequestParam(required = false, defaultValue = "10") int size, 
+    @RequestParam(required = false, defaultValue = "250") int size, 
     @RequestParam(defaultValue = "MEMBERCOUNT")PopularSpaceOrder order) {
         Pageable pageable = PageRequest.of(page, size);
         Page<SpaceInfo> spaces = spaceService.getPopularSpaces(order, pageable);
