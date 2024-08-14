@@ -1,14 +1,20 @@
 package com.heslin.postopia.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.heslin.postopia.dto.pageresult.PageResult;
 import com.heslin.postopia.dto.post.PostInfo;
+import com.heslin.postopia.dto.post.PostSummary;
 import com.heslin.postopia.dto.response.ApiResponse;
 import com.heslin.postopia.dto.response.ApiResponseEntity;
 import com.heslin.postopia.dto.response.BasicApiResponseEntity;
@@ -18,7 +24,6 @@ import com.heslin.postopia.model.User;
 import com.heslin.postopia.service.post.PostService;
 
 import jakarta.persistence.EntityManager;
-
 
 
 @RestController
@@ -104,10 +109,25 @@ public class PostController {
     }
 
     @GetMapping("info")
-    public ApiResponseEntity<PostInfo> getPostInfo(@RequestBody PostIdDto request) {
-        if (request.id == null) {
+    public ApiResponseEntity<PostInfo> getPostInfo(@RequestParam Long id) {
+        if (id == null) {
             throw new BadRequestException("postId is required");
         }
-        return ApiResponseEntity.ok(new ApiResponse<>("获取帖子信息成功", postService.getPostInfo(request.id)));
+        return ApiResponseEntity.ok(new ApiResponse<>("获取帖子信息成功", postService.getPostInfo(id)));
+    }
+
+    public record SpaceIdDto(Long id) {}
+
+    @GetMapping("list")
+    public ApiResponseEntity<PageResult<PostSummary>> getPosts(
+        @RequestParam Long id,
+        @RequestParam int page,
+        @RequestParam(required = false, defaultValue = "50") int size, 
+        @RequestParam(defaultValue = "desc") String direction) {
+        if (id == null) {
+            throw new BadRequestException("spaceId is required");
+        }
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, "p.createdAt"));
+        return ApiResponseEntity.ok(new ApiResponse<>("获取帖子列表成功", new PageResult<>(postService.getPosts(id, pageable))));
     }
 }

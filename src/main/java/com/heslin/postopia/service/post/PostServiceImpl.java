@@ -1,10 +1,13 @@
 package com.heslin.postopia.service.post;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.heslin.postopia.dto.Message;
 import com.heslin.postopia.dto.post.PostInfo;
+import com.heslin.postopia.dto.post.PostSummary;
 import com.heslin.postopia.enums.PostStatus;
 import com.heslin.postopia.exception.ForbiddenException;
 import com.heslin.postopia.exception.ResourceNotFoundException;
@@ -82,6 +85,11 @@ public class PostServiceImpl implements PostService {
     @Override
     public PostInfo getPostInfo(Long id) {
         return postRepository.findPostInfoById(id).orElseThrow(() -> new ResourceNotFoundException("Post not found"));
+    }
+
+    @Override
+    public Page<PostSummary> getPosts(Long id, Pageable pageable) {
+        return postRepository.findPostSummariesBySpaceId(id, pageable);
     }
     
 }
