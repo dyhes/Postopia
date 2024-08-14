@@ -4,7 +4,7 @@ public enum JoinedSpaceOrder {
     JOINTIME("sui.createdAt"),
     LASTACTIVE("sui.lastActiveAt");
 
-    private String field;
+    private final String field;
     JoinedSpaceOrder(String field) {
         this.field = field;
     }
