@@ -13,6 +13,8 @@ import com.heslin.postopia.model.User;
 import com.heslin.postopia.repository.CommentRepository;
 import com.heslin.postopia.repository.PostRepository;
 
+import jakarta.transaction.Transactional;
+
 @Service
 public class CommentServiceImpl implements CommentService {
     @Autowired
@@ -21,6 +23,7 @@ public class CommentServiceImpl implements CommentService {
     private PostRepository postRepository;
 
     @Override
+    @Transactional
     public Comment replyToPost(Post post, String content,@AuthenticationPrincipal User user) {
         Comment comment = new Comment();
         comment.setUser(user);
@@ -32,6 +35,7 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
+    @Transactional
     public void reply(Post post, Comment parent, String content,@AuthenticationPrincipal User user) {
         Comment comment = new Comment();
         comment.setUser(user);
