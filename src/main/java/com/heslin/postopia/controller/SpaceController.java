@@ -1,7 +1,5 @@
 package com.heslin.postopia.controller;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -20,6 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.heslin.postopia.dto.Message;
 import com.heslin.postopia.dto.SpaceInfo;
+import com.heslin.postopia.dto.pageresult.PageResult;
 import com.heslin.postopia.dto.response.ApiResponse;
 import com.heslin.postopia.dto.response.ApiResponseEntity;
 import com.heslin.postopia.dto.response.BasicApiResponseEntity;
@@ -67,11 +66,9 @@ public class SpaceController {
         return BasicApiResponseEntity.ok(message);
     }
 
-    public record SpaceListDto(List<SpaceInfo> infos, int count, int totalPages, long totalCount) {}
-
 
     @GetMapping("list")
-    public ApiResponseEntity<SpaceListDto> getSpaces(@AuthenticationPrincipal User user, 
+    public ApiResponseEntity<PageResult<SpaceInfo>> getSpaces(@AuthenticationPrincipal User user, 
     @RequestParam(name = "page") int page, 
     @RequestParam(name = "size", required = false, defaultValue = "10") int size, 
     @RequestParam(name = "order", defaultValue = "LASTACTIVE")JoinedSpaceOrder order,
@@ -80,16 +77,15 @@ public class SpaceController {
         Page<SpaceInfo> spaces = spaceService.getSpacesByUserId(user.getId(), pageable);
         return ApiResponseEntity.ok(
             new ApiResponse<>(null, 
-                                        new SpaceListDto(spaces.getContent(), 
-                                                    spaces.getNumberOfElements(),
-                                                    spaces.getTotalPages(),
-                                                    spaces.getTotalElements())
+                                        new PageResult<>(spaces.getContent(),
+                                                    spaces.getNumber() + 1,
+                                                    spaces.getTotalPages())
                 )
             );
     }
     
     @GetMapping("popular")
-    public ApiResponseEntity<SpaceListDto> getPopularSpaces(@AuthenticationPrincipal User user, 
+    public ApiResponseEntity<PageResult<SpaceInfo>> getPopularSpaces(@AuthenticationPrincipal User user, 
     @RequestParam(name = "page") int page, 
     @RequestParam(name = "size", required = false, defaultValue = "10") int size, 
     @RequestParam(name = "order", defaultValue = "MEMBERCOUNT")PopularSpaceOrder order) {
@@ -97,10 +93,9 @@ public class SpaceController {
         Page<SpaceInfo> spaces = spaceService.getPopularSpaces(order, pageable);
         return ApiResponseEntity.ok(
             new ApiResponse<>(null, 
-                                        new SpaceListDto(spaces.getContent(), 
-                                                    spaces.getNumberOfElements(),
-                                                    spaces.getTotalPages(),
-                                                    spaces.getTotalElements())
+                                        new PageResult<>(spaces.getContent(),
+                                                    spaces.getNumber() + 1,
+                                                    spaces.getTotalPages())
                 )
             );
     }
