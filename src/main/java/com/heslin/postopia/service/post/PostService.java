@@ -1,7 +1,11 @@
 package com.heslin.postopia.service.post;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 import com.heslin.postopia.dto.Message;
 import com.heslin.postopia.dto.post.PostInfo;
+import com.heslin.postopia.dto.post.PostSummary;
 import com.heslin.postopia.model.Space;
 import com.heslin.postopia.model.User;
 import com.heslin.postopia.util.Pair;
@@ -16,4 +20,5 @@ public interface PostService {
     void replyPost(Long id, String content);
     void checkPostStatus(Long id);
     PostInfo getPostInfo(Long id);
+    Page<PostSummary> getPosts(Long id, Pageable pageable);
 }

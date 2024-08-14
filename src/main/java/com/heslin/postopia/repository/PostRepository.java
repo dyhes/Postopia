@@ -2,6 +2,8 @@ package com.heslin.postopia.repository;
 
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -9,6 +11,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.heslin.postopia.dto.post.PostInfo;
+import com.heslin.postopia.dto.post.PostSummary;
 import com.heslin.postopia.enums.PostStatus;
 import com.heslin.postopia.model.Post;
 
@@ -37,4 +40,7 @@ public interface PostRepository extends CrudRepository<Post, Long>{
 
     @Query("select new com.heslin.postopia.dto.post.PostInfo(p.subject, p.content, p.positive_count, p.negative_count, p.comment_count, u.username, u.nickname, u.avatar) from Post p JOIN p.user u where p.id = :id")
     Optional<PostInfo> findPostInfoById(@Param("id")Long id);
+
+    @Query("select new com.heslin.postopia.dto.post.PostSummary(p.subject, p.positive_count, p.negative_count, p.comment_count, u.username, u.nickname, u.avatar) from Post p JOIN p.user u where p.space_id = :id")
+    Page<PostSummary> findPostSummariesBySpaceId(@Param("id") Long id, Pageable pageable);
 }
