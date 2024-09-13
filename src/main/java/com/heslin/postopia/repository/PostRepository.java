@@ -33,14 +33,14 @@ public interface PostRepository extends CrudRepository<Post, Long>{
 
     @Modifying
     @Transactional
-    @Query("update Post p set p.comment_count = p.comment_count + 1 where p.id = :id")
+    @Query("update Post p set p.commentCount = p.commentCount + 1 where p.id = :id")
     void addComment(@Param("id")Long id);
 
     Optional<PostStatus> findStatusById(Long id);
 
-    @Query("select new com.heslin.postopia.dto.post.PostInfo(p.subject, p.content, p.positive_count, p.negative_count, p.comment_count, u.username, u.nickname, u.avatar) from Post p JOIN p.user u where p.id = :id")
+    @Query("select new com.heslin.postopia.dto.post.PostInfo(p.subject, p.content, p.positiveCount, p.negativeCount, p.commentCount, u.username, u.nickname, u.avatar) from Post p JOIN p.user u where p.id = :id")
     Optional<PostInfo> findPostInfoById(@Param("id")Long id);
 
-    @Query("select new com.heslin.postopia.dto.post.PostSummary(p.subject, p.positive_count, p.negative_count, p.comment_count, u.username, u.nickname, u.avatar) from Post p JOIN p.user u where p.space_id = :id and p.status != com.heslin.postopia.enums.PostStatus.DRAFT")
+    @Query("select new com.heslin.postopia.dto.post.PostSummary(p.subject, p.positiveCount, p.negativeCount, p.commentCount, u.username, u.nickname, u.avatar) from Post p JOIN p.user u where p.space.id = :id and p.status != com.heslin.postopia.enums.PostStatus.DRAFT")
     Page<PostSummary> findPostSummariesBySpaceId(@Param("id") Long id, Pageable pageable);
 }
