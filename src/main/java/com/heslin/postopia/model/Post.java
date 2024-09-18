@@ -33,6 +33,15 @@ import lombok.Data;
 @Table(name = "posts")
 @EntityListeners(AuditingEntityListener.class)
 public class Post {
+
+    public Post() {
+
+    }
+
+    public Post(Long id) {
+        this.id = id;
+    }
+
     @Id
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     @Column(updatable=false)

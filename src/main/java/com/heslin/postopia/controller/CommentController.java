@@ -37,5 +37,25 @@ public class CommentController {
         commentService.checkAuthority(dto.id(), null);
         commentService.deleteComment(dto.id());
         return BasicApiResponseEntity.ok("删除成功");
-    }   
+    }
+
+    public record CommentIdDto(Long id){};
+
+    @PostMapping("like")
+    public BasicApiResponseEntity likePost(@RequestBody CommentIdDto dto) {
+        if (dto.id == null) {
+            throw new BadRequestException("commentId is required");
+        }
+        commentService.likeComment(dto.id);
+        return BasicApiResponseEntity.ok("comment liked!");
+    }
+
+    @PostMapping("dislike")
+    public BasicApiResponseEntity disLikePost(@RequestBody CommentIdDto dto) {
+        if (dto.id == null) {
+            throw new BadRequestException("commentId is required");
+        }
+        commentService.disLikeComment(dto.id);
+        return BasicApiResponseEntity.ok("comment disliked!");
+    }
 }

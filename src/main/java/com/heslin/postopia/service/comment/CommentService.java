@@ -14,4 +14,8 @@ public interface  CommentService {
     void deleteComment(Long id);
 
     void checkAuthority(Long id, @AuthenticationPrincipal User user);
+
+    void likeComment(Long id);
+
+    void disLikeComment(Long id);
 }
