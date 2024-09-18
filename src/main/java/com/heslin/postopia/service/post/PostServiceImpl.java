@@ -1,8 +1,12 @@
 package com.heslin.postopia.service.post;
 
+import com.heslin.postopia.model.opinion.PostOpinion;
+import com.heslin.postopia.service.opinion.OpinionService;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Service;
 
 import com.heslin.postopia.dto.Message;
@@ -24,6 +28,8 @@ public class PostServiceImpl implements PostService {
     private PostRepository postRepository;
     @Autowired
     private CommentService commentService;
+    @Autowired
+    private OpinionService opinionService;
 
     @Override
     public Pair<Long, Message> createPost(boolean isDraft, Space space, User user, String subject, String content) {
@@ -73,6 +79,30 @@ public class PostServiceImpl implements PostService {
             throw new ForbiddenException();
         }
 
+    }
+
+    @Override
+    public void likePost(Long id,@AuthenticationPrincipal User user) {
+        addPostOpinion(id, user, true);
+    }
+
+    @Override
+    public void disLikePost(Long id,@AuthenticationPrincipal  User user) {
+        addPostOpinion(id, user, false);
+    }
+
+    @Transactional
+    private void addPostOpinion(Long id, User user, boolean opinion) {
+        if (opinion) {
+            postRepository.likePost(id);
+        } else {
+            postRepository.disLikePost(id);
+        }
+        PostOpinion postOpinion = new PostOpinion();
+        postOpinion.setUser(user);
+        postOpinion.setPost(new Post(id));
+        postOpinion.setPositive(opinion);
+        opinionService.saveOpinion(postOpinion);
     }
 
     @Override

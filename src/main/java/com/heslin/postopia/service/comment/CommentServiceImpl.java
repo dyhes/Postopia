@@ -2,6 +2,9 @@ package com.heslin.postopia.service.comment;
 
 import java.util.Objects;
 
+import com.heslin.postopia.model.opinion.CommentOpinion;
+import com.heslin.postopia.model.opinion.Opinion;
+import com.heslin.postopia.service.opinion.OpinionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Service;
@@ -21,6 +24,8 @@ public class CommentServiceImpl implements CommentService {
     private CommentRepository commentRepository;
     @Autowired
     private PostRepository postRepository;
+    @Autowired
+    private OpinionService opinionService;
 
     @Override
     @Transactional
@@ -57,6 +62,29 @@ public class CommentServiceImpl implements CommentService {
             throw new ForbiddenException("You are not the owner of this comment");
         }
     }
- 
-    
+
+    @Override
+    public void likeComment(Long id) {
+        addCommentOpinion(id, true, null);
+    }
+
+    @Override
+    public void disLikeComment(Long id) {
+        addCommentOpinion(id, false, null);
+    }
+
+    private void addCommentOpinion(Long id, boolean opinion, @AuthenticationPrincipal User user) {
+        if (opinion) {
+            commentRepository.likeComment(id);
+        } else {
+            commentRepository.disLikeComment(id);
+        }
+        CommentOpinion postOpinion = new CommentOpinion();
+        postOpinion.setUser(user);
+        postOpinion.setComment(new Comment(id));
+        postOpinion.setPositive(opinion);
+        opinionService.saveOpinion(postOpinion);
+    }
+
+
 }

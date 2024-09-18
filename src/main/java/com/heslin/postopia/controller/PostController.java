@@ -130,4 +130,22 @@ public class PostController {
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction, "p.createdAt"));
         return ApiResponseEntity.ok(new ApiResponse<>("获取帖子列表成功", new PageResult<>(postService.getPosts(id, pageable))));
     }
+
+    @PostMapping("like")
+    public BasicApiResponseEntity likePost(@RequestBody PostIdDto dto) {
+        if (dto.id == null) {
+            throw new BadRequestException("postId is required");
+        }
+        postService.likePost(dto.id, null);
+        return BasicApiResponseEntity.ok("post liked!");
+    }
+
+    @PostMapping("dislike")
+    public BasicApiResponseEntity disLikePost(@RequestBody PostIdDto dto) {
+        if (dto.id == null) {
+            throw new BadRequestException("postId is required");
+        }
+        postService.disLikePost(dto.id, null);
+        return BasicApiResponseEntity.ok("post disliked!");
+    }
 }

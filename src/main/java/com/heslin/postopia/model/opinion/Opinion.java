@@ -15,6 +15,7 @@ import jakarta.persistence.InheritanceType;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.Data;
+import org.springframework.data.annotation.CreatedDate;
 
 @Data
 @Entity
@@ -26,6 +27,7 @@ public class Opinion {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @CreatedDate
     private Instant createdAt;
 
     private boolean isPositive;

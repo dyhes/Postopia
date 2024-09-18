@@ -30,6 +30,15 @@ import lombok.Data;
 @Table(name = "comments")
 @EntityListeners(AuditingEntityListener.class)
 public class Comment {
+
+    public Comment() {
+
+    }
+
+    public Comment(Long id) {
+        this.id = id;
+    }
+
     @Id
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     private Long id;
