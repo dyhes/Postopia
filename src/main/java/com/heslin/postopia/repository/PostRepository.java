@@ -48,9 +48,33 @@ public interface PostRepository extends CrudRepository<Post, Long>{
 
     Optional<PostStatus> findStatusById(Long id);
 
-    @Query("select new com.heslin.postopia.dto.post.PostInfo(p.subject, p.content, p.positiveCount, p.negativeCount, p.commentCount, u.username, u.nickname, u.avatar) from Post p JOIN p.user u where p.id = :id")
-    Optional<PostInfo> findPostInfoById(@Param("id")Long id);
+    @Query("""
+            select
+                new com.heslin.postopia.dto.post.PostInfo(p.subject, p.content, p.positiveCount, p.negativeCount, p.commentCount, u.username, u.nickname, u.avatar,
+                    CASE
+                        WHEN o.id IS NULL THEN com.heslin.postopia.enums.OpinionStatus.NULL
+                        WHEN o.isPositive = true THEN com.heslin.postopia.enums.OpinionStatus.POSITIVE
+                        ELSE com.heslin.postopia.enums.OpinionStatus.NEGATIVE
+                    END)
+           from Post p 
+           JOIN p.user u 
+           LEFT JOIN PostOpinion o on o.post.id = :id and o.user.id = :uid 
+           where p.id = :id
+            """)
+    Optional<PostInfo> findPostInfoById(@Param("id")Long id, @Param("uid") Long userId);
 
-    @Query("select new com.heslin.postopia.dto.post.PostSummary(p.subject, p.positiveCount, p.negativeCount, p.commentCount, u.username, u.nickname, u.avatar) from Post p JOIN p.user u where p.space.id = :id and p.status != com.heslin.postopia.enums.PostStatus.DRAFT")
-    Page<PostSummary> findPostSummariesBySpaceId(@Param("id") Long id, Pageable pageable);
+    @Query("""
+            select
+            new com.heslin.postopia.dto.post.PostSummary(p.subject, p.positiveCount, p.negativeCount, p.commentCount, u.username, u.nickname, u.avatar,
+                    CASE
+                        WHEN o.id IS NULL THEN com.heslin.postopia.enums.OpinionStatus.NULL
+                        WHEN o.isPositive = true THEN com.heslin.postopia.enums.OpinionStatus.POSITIVE
+                        ELSE com.heslin.postopia.enums.OpinionStatus.NEGATIVE
+                    END)
+                    from Post p
+                    JOIN p.user u
+                    LEFT JOIN PostOpinion o on o.post.id = p.id and o.user.id = :uid
+                    where p.space.id = :id and p.status != com.heslin.postopia.enums.PostStatus.DRAFT
+            """)
+    Page<PostSummary> findPostSummariesBySpaceId(@Param("id") Long id, @Param("uid") Long userId, Pageable pageable);
 }

@@ -113,13 +113,13 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public PostInfo getPostInfo(Long id) {
-        return postRepository.findPostInfoById(id).orElseThrow(() -> new ResourceNotFoundException("Post not found"));
+    public PostInfo getPostInfo(Long id, @AuthenticationPrincipal User user) {
+        return postRepository.findPostInfoById(id, user.getId()).orElseThrow(() -> new ResourceNotFoundException("Post not found"));
     }
 
     @Override
-    public Page<PostSummary> getPosts(Long id, Pageable pageable) {
-        return postRepository.findPostSummariesBySpaceId(id, pageable);
+    public Page<PostSummary> getPosts(Long id, Pageable pageable, @AuthenticationPrincipal User user) {
+        return postRepository.findPostSummariesBySpaceId(id, user.getId(), pageable);
     }
     
 }
