@@ -22,6 +22,6 @@ public interface PostService {
     void checkPostStatus(Long id);
     void likePost(Long id, @AuthenticationPrincipal User user);
     void disLikePost(Long id, @AuthenticationPrincipal User user);
-    PostInfo getPostInfo(Long id);
-    Page<PostSummary> getPosts(Long id, Pageable pageable);
+    PostInfo getPostInfo(Long id, @AuthenticationPrincipal User user);
+    Page<PostSummary> getPosts(Long id, Pageable pageable, @AuthenticationPrincipal User user);
 }
