@@ -1,13 +1,12 @@
 package com.heslin.postopia.service.signup;
 
+import com.heslin.postopia.dto.Message;
+import com.heslin.postopia.model.User;
+import com.heslin.postopia.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import com.heslin.postopia.dto.Message;
-import com.heslin.postopia.model.User;
-import com.heslin.postopia.repository.UserRepository;
 
 @Service
 public class SignupServiceImpl implements SignupService {
@@ -21,6 +20,7 @@ public class SignupServiceImpl implements SignupService {
         try {
             User user = new User();
             user.setUsername(username);
+            user.setNickname(username);
             user.setPassword(passwordEncoder.encode(password));
             userRepository.save(user);
             return new Message("用户 @" + username + " 注册成功", true);

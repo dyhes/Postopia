@@ -1,15 +1,15 @@
 package com.heslin.postopia.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
-
 import com.heslin.postopia.dto.response.BasicApiResponseEntity;
 import com.heslin.postopia.exception.BadRequestException;
 import com.heslin.postopia.model.Comment;
 import com.heslin.postopia.model.Post;
 import com.heslin.postopia.service.comment.CommentService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController("comment")
 public class CommentController {
@@ -31,18 +31,20 @@ public class CommentController {
         return BasicApiResponseEntity.ok("回复成功");
     }
 
-    public record CommentDeleteDto(Long id) {}
+    public record CommentIdDto(Long id) {
+    }
+
+    ;
+
     @PostMapping("delete")
-    public BasicApiResponseEntity delete(@RequestBody CommentDeleteDto dto) {
+    public BasicApiResponseEntity delete(@RequestBody CommentIdDto dto) {
         commentService.checkAuthority(dto.id(), null);
         commentService.deleteComment(dto.id());
         return BasicApiResponseEntity.ok("删除成功");
     }
 
-    public record CommentIdDto(Long id){};
-
     @PostMapping("like")
-    public BasicApiResponseEntity likePost(@RequestBody CommentIdDto dto) {
+    public BasicApiResponseEntity likeComment(@RequestBody CommentIdDto dto) {
         if (dto.id == null) {
             throw new BadRequestException("commentId is required");
         }
@@ -51,11 +53,16 @@ public class CommentController {
     }
 
     @PostMapping("dislike")
-    public BasicApiResponseEntity disLikePost(@RequestBody CommentIdDto dto) {
+    public BasicApiResponseEntity disLikeComment(@RequestBody CommentIdDto dto) {
         if (dto.id == null) {
             throw new BadRequestException("commentId is required");
         }
         commentService.disLikeComment(dto.id);
         return BasicApiResponseEntity.ok("comment disliked!");
+    }
+
+    @GetMapping("list")
+    public BasicApiResponseEntity getComments() {
+        return BasicApiResponseEntity.ok("not implemented");
     }
 }
