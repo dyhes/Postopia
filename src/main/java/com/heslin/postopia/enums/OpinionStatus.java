@@ -1,7 +1,7 @@
 package com.heslin.postopia.enums;
 
 public enum OpinionStatus {
-    NULL,
+    NIL,
     POSITIVE,
     NEGATIVE,
 }
