@@ -1,12 +1,5 @@
 package com.heslin.postopia.service.space;
 
-import java.time.LocalDate;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
-
 import com.heslin.postopia.dto.Message;
 import com.heslin.postopia.dto.SpaceInfo;
 import com.heslin.postopia.enums.PopularSpaceOrder;
@@ -14,17 +7,34 @@ import com.heslin.postopia.model.Space;
 import com.heslin.postopia.model.SpaceUserInfo;
 import com.heslin.postopia.model.User;
 import com.heslin.postopia.repository.SpaceRepository;
+import com.heslin.postopia.service.os.OSService;
 import com.heslin.postopia.service.space_user_info.SpaceUserInfoService;
 import com.heslin.postopia.util.Pair;
-
 import jakarta.transaction.Transactional;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.time.LocalDate;
 
 @Service
 public class SpaceServiceImpl implements SpaceService {
+    private final SpaceRepository spaceRepository;
+    private final SpaceUserInfoService spaceUserInfoService;
+    private final OSService osService;
+    private final String defaultSpaceAvatar;
+
     @Autowired
-    private SpaceRepository spaceRepository;
-    @Autowired
-    private SpaceUserInfoService spaceUserInfoService;
+    public SpaceServiceImpl(@Value("${postopia.avatar.space}") String defaultSpaceAvatar, OSService osService, SpaceRepository spaceRepository, SpaceUserInfoService spaceUserInfoService) {
+        this.osService = osService;
+        this.spaceRepository = spaceRepository;
+        this.spaceUserInfoService = spaceUserInfoService;
+        this.defaultSpaceAvatar = defaultSpaceAvatar;
+    }
 
     @Override
     public Message joinSpace(Long spaceId, User user) {
@@ -57,16 +67,26 @@ public class SpaceServiceImpl implements SpaceService {
 
     @Override
     @Transactional
-    public Pair<Message, Long> createSpace(User user, String name, String description, String avatar) {
+    public Pair<Message, Long> createSpace(User user, String name, String description, MultipartFile avatar) {
         Space existingSpace = spaceRepository.findByName(name);
         if (existingSpace != null) {
             return new Pair<>(new Message("空间名已存在", false), existingSpace.getId());
         }
 
+        String avatarUrl = defaultSpaceAvatar;
+
+        if (avatar != null) {
+            try {
+                avatarUrl = osService.updateSpaceAvatar(name, avatar);
+            } catch (IOException e) {
+                return new Pair<>(new Message(e.getMessage(), false), (long) -1);
+            }
+        }
+
         Space space = new Space();
         space.setName(name);
         space.setDescription(description);
-        space.setAvatar(avatar);
+        space.setAvatar(avatarUrl);
         space = spaceRepository.save(space);
         Message message = joinSpace(space, user);
         if (!message.success()) {

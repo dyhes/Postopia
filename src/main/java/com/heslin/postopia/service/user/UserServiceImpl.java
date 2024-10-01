@@ -4,22 +4,33 @@ import com.heslin.postopia.dto.Message;
 import com.heslin.postopia.model.User;
 import com.heslin.postopia.repository.UserRepository;
 import com.heslin.postopia.service.mail.MailService;
+import com.heslin.postopia.service.os.OSService;
 import com.heslin.postopia.service.redis.RedisService;
 import jakarta.mail.MessagingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 @Service
 public class UserServiceImpl implements UserService {
 
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
+
+    private final MailService mailService;
+
+    private final RedisService redisService;
+
+    private final OSService osService;
 
     @Autowired
-    private MailService mailService;
-
-    @Autowired
-    private RedisService redisService;
+    public UserServiceImpl(UserRepository userRepository, MailService mailService, RedisService redisService, OSService osService) {
+        this.userRepository = userRepository;
+        this.mailService = mailService;
+        this.redisService = redisService;
+        this.osService = osService;
+    }
 
     @Override
     public User findUserById(Long id) {
@@ -40,9 +51,7 @@ public class UserServiceImpl implements UserService {
     public Message verifyUserEmail(String email, String code, User user) {
         String credential = redisService.get(email);
         if (credential != null) {
-            System.out.println(credential);
             String[] credentials = credential.split("\\.");
-            System.out.println(credentials);
             if (user.getId().equals(Long.parseLong(credentials[0])) && code.equals(credentials[1])) {
                 redisService.delete(email);
                 userRepository.updateEmail(user.getId(), email);
@@ -51,6 +60,13 @@ public class UserServiceImpl implements UserService {
         }
         return new Message("doesn't exist or expired", false);
 
+    }
+
+    @Override
+    public String updateUserAvatar(Long id, MultipartFile avatar) throws IOException {
+        String url = osService.updateUserAvatar(id, avatar);
+        userRepository.updateAvatar(id, url);
+        return url;
     }
 
 }

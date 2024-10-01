@@ -1,21 +1,5 @@
 package com.heslin.postopia.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.domain.Sort.Direction;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
-
 import com.heslin.postopia.dto.Message;
 import com.heslin.postopia.dto.SpaceInfo;
 import com.heslin.postopia.dto.pageresult.PageResult;
@@ -26,17 +10,34 @@ import com.heslin.postopia.enums.JoinedSpaceOrder;
 import com.heslin.postopia.enums.PopularSpaceOrder;
 import com.heslin.postopia.exception.BadRequestException;
 import com.heslin.postopia.model.User;
+import com.heslin.postopia.service.os.OSService;
 import com.heslin.postopia.service.space.SpaceService;
 import com.heslin.postopia.util.Pair;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 
 @RestController
 @RequestMapping("/space")
 public class SpaceController {
-    @Autowired
-    private SpaceService spaceService;
+    private final SpaceService spaceService;
+    private final OSService osService;
 
-    public record SpaceDto(String name, String description) {}
+    @Autowired
+    public SpaceController(SpaceService spaceService, OSService osService) {
+        this.spaceService = spaceService;
+        this.osService = osService;
+    }
+
+    public record SpaceDto(String name, String description) {
+    }
 
     @PostMapping("create")
     public ApiResponseEntity<Long> createSpace(@AuthenticationPrincipal User user, @RequestPart("info") SpaceDto info, @RequestPart(name = "avatar", required = false) MultipartFile avatar) {
@@ -45,11 +46,7 @@ public class SpaceController {
             throw new BadRequestException("space name and description are required");
         }
 
-        if (avatar != null) {
-            // object storage
-        }
-
-        Pair<Message, Long> pair = spaceService.createSpace(user, info.name, info.description, avatarUrl);
+        Pair<Message, Long> pair = spaceService.createSpace(user, info.name, info.description, avatar);
 
         return ApiResponseEntity.ok(new ApiResponse<>(pair.second(), pair.first()));
     }

@@ -20,10 +20,10 @@ public class MailServiceImpl implements MailService {
     @Autowired
     private RedisService redisService;
 
-    @Value("postopia.mail.from")
+    @Value("${postopia.mail.from}")
     private String from;
 
-    @Value("postopia.mail.auth.subject")
+    @Value("${postopia.mail.auth.subject}")
     private String subject;
 
     int generateAuthCode(String address) {

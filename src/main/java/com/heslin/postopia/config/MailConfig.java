@@ -11,10 +11,10 @@ import java.util.Properties;
 @Configuration
 public class MailConfig {
 
-    @Value("${postopia.mail.username}")
+    @Value("${spring.mail.username}")
     private String username;
 
-    @Value("${postopia.mail.password}")
+    @Value("${spring.mail.password}")
     private String password;
 
     @Bean
