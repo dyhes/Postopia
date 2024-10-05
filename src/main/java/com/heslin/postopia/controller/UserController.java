@@ -4,12 +4,14 @@ import com.heslin.postopia.dto.Message;
 import com.heslin.postopia.dto.SpaceInfo;
 import com.heslin.postopia.dto.UserInfo;
 import com.heslin.postopia.dto.pageresult.PageResult;
+import com.heslin.postopia.dto.post.PostSummary;
 import com.heslin.postopia.dto.response.ApiResponse;
 import com.heslin.postopia.dto.response.ApiResponseEntity;
 import com.heslin.postopia.dto.response.BasicApiResponseEntity;
 import com.heslin.postopia.enums.JoinedSpaceOrder;
 import com.heslin.postopia.exception.BadRequestException;
 import com.heslin.postopia.model.User;
+import com.heslin.postopia.service.post.PostService;
 import com.heslin.postopia.service.space.SpaceService;
 import com.heslin.postopia.service.user.UserService;
 import jakarta.mail.MessagingException;
@@ -29,11 +31,13 @@ import java.io.IOException;
 public class UserController {
     private final UserService userService;
     private final SpaceService spaceService;
+    private final PostService postService;
 
     @Autowired
-    public UserController(UserService userService, SpaceService spaceService) {
+    public UserController(UserService userService, SpaceService spaceService, PostService postService) {
         this.userService = userService;
         this.spaceService = spaceService;
+        this.postService = postService;
     }
 
     public record NickNameDto(Long id, String nickname) {
@@ -108,5 +112,15 @@ public class UserController {
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction, order.getField()));
         Page<SpaceInfo> spaces = spaceService.getSpacesByUserId(user.getId(), pageable);
         return ApiResponseEntity.ok(new ApiResponse<>(null, new PageResult<>(spaces)));
+    }
+
+    @GetMapping("posts")
+    public ApiResponseEntity<PageResult<PostSummary>> getPosts(
+            @AuthenticationPrincipal User user,
+            @RequestParam int page,
+            @RequestParam(required = false, defaultValue = "50") int size,
+            @RequestParam(defaultValue = "desc") String direction) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, "p.createdAt"));
+        return ApiResponseEntity.ok(new ApiResponse<>("获取帖子列表成功", new PageResult<>(postService.getPostsByUser(user.getId(), pageable))));
     }
 }

@@ -1,14 +1,5 @@
 package com.heslin.postopia.service.post;
 
-import com.heslin.postopia.model.opinion.PostOpinion;
-import com.heslin.postopia.service.opinion.OpinionService;
-import jakarta.transaction.Transactional;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.stereotype.Service;
-
 import com.heslin.postopia.dto.Message;
 import com.heslin.postopia.dto.post.PostInfo;
 import com.heslin.postopia.dto.post.PostSummary;
@@ -18,9 +9,17 @@ import com.heslin.postopia.exception.ResourceNotFoundException;
 import com.heslin.postopia.model.Post;
 import com.heslin.postopia.model.Space;
 import com.heslin.postopia.model.User;
+import com.heslin.postopia.model.opinion.PostOpinion;
 import com.heslin.postopia.repository.PostRepository;
 import com.heslin.postopia.service.comment.CommentService;
+import com.heslin.postopia.service.opinion.OpinionService;
 import com.heslin.postopia.util.Pair;
+import jakarta.transaction.Transactional;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.stereotype.Service;
 
 @Service
 public class PostServiceImpl implements PostService {
@@ -121,5 +120,10 @@ public class PostServiceImpl implements PostService {
     public Page<PostSummary> getPosts(Long id, Pageable pageable, @AuthenticationPrincipal User user) {
         return postRepository.findPostSummariesBySpaceId(id, user.getId(), pageable);
     }
-    
+
+    @Override
+    public Page<PostSummary> getPostsByUser(Long id, Pageable pageable) {
+        return postRepository.findPostSummariesByUserId(id, pageable);
+    }
+
 }

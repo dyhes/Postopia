@@ -113,15 +113,16 @@ public class PostController {
 
     @GetMapping("list")
     public ApiResponseEntity<PageResult<PostSummary>> getPosts(
-        @RequestParam Long id,
-        @RequestParam int page,
-        @RequestParam(required = false, defaultValue = "50") int size, 
-        @RequestParam(defaultValue = "desc") String direction) {
+            @AuthenticationPrincipal User user,
+            @RequestParam Long id,
+            @RequestParam int page,
+            @RequestParam(required = false, defaultValue = "50") int size,
+            @RequestParam(defaultValue = "desc") String direction) {
         if (id == null) {
             throw new BadRequestException("spaceId is required");
         }
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction, "p.createdAt"));
-        return ApiResponseEntity.ok(new ApiResponse<>("获取帖子列表成功", new PageResult<>(postService.getPosts(id, pageable, null))));
+        return ApiResponseEntity.ok(new ApiResponse<>("获取帖子列表成功", new PageResult<>(postService.getPosts(id, pageable, user))));
     }
 
     @PostMapping("like")

@@ -75,4 +75,6 @@ public interface PostRepository extends CrudRepository<Post, Long>{
                     where p.space.id = :id and p.status != com.heslin.postopia.enums.PostStatus.DRAFT
             """)
     Page<PostSummary> findPostSummariesBySpaceId(@Param("id") Long id, @Param("uid") Long userId, Pageable pageable);
+
+    Page<PostSummary> findPostSummariesByUserId(Long id, Pageable pageable);
 }
