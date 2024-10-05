@@ -6,7 +6,6 @@ import com.heslin.postopia.dto.pageresult.PageResult;
 import com.heslin.postopia.dto.response.ApiResponse;
 import com.heslin.postopia.dto.response.ApiResponseEntity;
 import com.heslin.postopia.dto.response.BasicApiResponseEntity;
-import com.heslin.postopia.enums.JoinedSpaceOrder;
 import com.heslin.postopia.enums.PopularSpaceOrder;
 import com.heslin.postopia.exception.BadRequestException;
 import com.heslin.postopia.model.User;
@@ -17,8 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.domain.Sort.Direction;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -63,19 +60,7 @@ public class SpaceController {
         return BasicApiResponseEntity.ok(message);
     }
 
-
     @GetMapping("list")
-    public ApiResponseEntity<PageResult<SpaceInfo>> getSpaces(@AuthenticationPrincipal User user, 
-    @RequestParam int page, 
-    @RequestParam(required = false, defaultValue = "250") int size, 
-    @RequestParam(defaultValue = "LASTACTIVE")JoinedSpaceOrder order,
-    @RequestParam(defaultValue = "DESC") Direction direction) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, order.getField()));
-        Page<SpaceInfo> spaces = spaceService.getSpacesByUserId(user.getId(), pageable);
-        return ApiResponseEntity.ok(new ApiResponse<>(null, new PageResult<>(spaces)));
-    }
-    
-    @GetMapping("popular")
     public ApiResponseEntity<PageResult<SpaceInfo>> getPopularSpaces(@AuthenticationPrincipal User user, 
     @RequestParam int page, 
     @RequestParam(required = false, defaultValue = "250") int size, 
