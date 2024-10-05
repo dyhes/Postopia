@@ -1,6 +1,7 @@
 package com.heslin.postopia.controller;
 
 import com.heslin.postopia.dto.Message;
+import com.heslin.postopia.dto.UserInfo;
 import com.heslin.postopia.dto.response.ApiResponse;
 import com.heslin.postopia.dto.response.ApiResponseEntity;
 import com.heslin.postopia.dto.response.BasicApiResponseEntity;
@@ -56,6 +57,17 @@ public class UserController {
         return BasicApiResponseEntity.ok("mail succeed!");
     }
 
+    public record ShowDto(boolean show) {
+    }
+
+    ;
+
+    @PostMapping("email/show")
+    public BasicApiResponseEntity switchEmailShowingState(@RequestBody ShowDto showDto, @AuthenticationPrincipal User user) {
+        userService.updateShowEmail(showDto.show, user.getId());
+        return BasicApiResponseEntity.ok("success");
+    }
+
     @PostMapping("email/verify/{email}/{code}")
     public BasicApiResponseEntity verifyEmail(@PathVariable String email, @PathVariable String code, @AuthenticationPrincipal User user) {
         Message verify = userService.verifyUserEmail(email, code, user);
@@ -72,4 +84,8 @@ public class UserController {
         }
     }
 
+    @GetMapping("info/{maskedId}")
+    public ApiResponseEntity<UserInfo> getUserInfo(@PathVariable Long maskedId) {
+        return ApiResponseEntity.ok(userService.getUserInfo(User.maskId(maskedId)), "success");
+    }
 }

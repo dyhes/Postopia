@@ -1,6 +1,7 @@
 package com.heslin.postopia.service.user;
 
 import com.heslin.postopia.dto.Message;
+import com.heslin.postopia.dto.UserInfo;
 import com.heslin.postopia.model.User;
 import com.heslin.postopia.repository.UserRepository;
 import com.heslin.postopia.service.mail.MailService;
@@ -69,4 +70,13 @@ public class UserServiceImpl implements UserService {
         return url;
     }
 
+    @Override
+    public UserInfo getUserInfo(Long id) {
+        return userRepository.findUserInfoById(id);
+    }
+
+    @Override
+    public void updateShowEmail(boolean show, Long id) {
+        userRepository.updateShowStatusById(show, id);
+    }
 }
