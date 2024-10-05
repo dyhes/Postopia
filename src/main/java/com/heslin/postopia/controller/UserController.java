@@ -1,15 +1,23 @@
 package com.heslin.postopia.controller;
 
 import com.heslin.postopia.dto.Message;
+import com.heslin.postopia.dto.SpaceInfo;
 import com.heslin.postopia.dto.UserInfo;
+import com.heslin.postopia.dto.pageresult.PageResult;
 import com.heslin.postopia.dto.response.ApiResponse;
 import com.heslin.postopia.dto.response.ApiResponseEntity;
 import com.heslin.postopia.dto.response.BasicApiResponseEntity;
+import com.heslin.postopia.enums.JoinedSpaceOrder;
 import com.heslin.postopia.exception.BadRequestException;
 import com.heslin.postopia.model.User;
+import com.heslin.postopia.service.space.SpaceService;
 import com.heslin.postopia.service.user.UserService;
 import jakarta.mail.MessagingException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -20,10 +28,12 @@ import java.io.IOException;
 @RequestMapping("user")
 public class UserController {
     private final UserService userService;
+    private final SpaceService spaceService;
 
     @Autowired
-    public UserController(UserService userService) {
+    public UserController(UserService userService, SpaceService spaceService) {
         this.userService = userService;
+        this.spaceService = spaceService;
     }
 
     public record NickNameDto(Long id, String nickname) {
@@ -87,5 +97,16 @@ public class UserController {
     @GetMapping("info/{maskedId}")
     public ApiResponseEntity<UserInfo> getUserInfo(@PathVariable Long maskedId) {
         return ApiResponseEntity.ok(userService.getUserInfo(User.maskId(maskedId)), "success");
+    }
+
+    @GetMapping("spaces")
+    public ApiResponseEntity<PageResult<SpaceInfo>> getSpaces(@AuthenticationPrincipal User user,
+                                                              @RequestParam int page,
+                                                              @RequestParam(required = false, defaultValue = "250") int size,
+                                                              @RequestParam(defaultValue = "LASTACTIVE") JoinedSpaceOrder order,
+                                                              @RequestParam(defaultValue = "DESC") Sort.Direction direction) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, order.getField()));
+        Page<SpaceInfo> spaces = spaceService.getSpacesByUserId(user.getId(), pageable);
+        return ApiResponseEntity.ok(new ApiResponse<>(null, new PageResult<>(spaces)));
     }
 }
