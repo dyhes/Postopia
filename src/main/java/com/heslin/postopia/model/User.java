@@ -34,6 +34,8 @@ public class User {
 
     private String email;
 
+    private boolean showEmail;
+
     private String avatar;
 
     private String bindedWeChat;
@@ -50,7 +52,7 @@ public class User {
     @OneToMany(mappedBy= "user")
     private List<Post> posts = new ArrayList<>();
 
-    @OneToMany(mappedBy= "user")
+    @OneToMany(mappedBy = "user")
     private List<Comment> comments = new ArrayList<>();
 
     @OneToMany(mappedBy = "user")
@@ -59,5 +61,9 @@ public class User {
     @Override
     public String toString() {
         return "User" + " [id=" + id + "]";
+    }
+
+    public static Long maskId(Long id) {
+        return id ^ 0x5A5A5A5A5A5A5A5AL;
     }
 }

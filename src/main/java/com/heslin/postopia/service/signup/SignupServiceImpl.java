@@ -29,6 +29,7 @@ public class SignupServiceImpl implements SignupService {
             user.setUsername(username);
             user.setNickname(username);
             user.setAvatar(defaultUserAvatar);
+            user.setShowEmail(false);
             user.setPassword(passwordEncoder.encode(password));
             userRepository.save(user);
             return new Message("用户 @" + username + " 注册成功", true);

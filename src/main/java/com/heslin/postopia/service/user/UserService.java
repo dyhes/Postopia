@@ -1,6 +1,7 @@
 package com.heslin.postopia.service.user;
 
 import com.heslin.postopia.dto.Message;
+import com.heslin.postopia.dto.UserInfo;
 import com.heslin.postopia.model.User;
 import jakarta.mail.MessagingException;
 import org.springframework.web.multipart.MultipartFile;
@@ -17,4 +18,8 @@ public interface UserService {
     public Message verifyUserEmail(String email, String code, User user);
 
     String updateUserAvatar(Long id, MultipartFile avatar) throws IOException;
+
+    UserInfo getUserInfo(Long maskId);
+
+    void updateShowEmail(boolean show, Long id);
 }
