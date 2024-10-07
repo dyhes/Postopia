@@ -1,10 +1,12 @@
 package com.heslin.postopia.service.comment;
 
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-
+import com.heslin.postopia.dto.UserCommentInfo;
 import com.heslin.postopia.model.Comment;
 import com.heslin.postopia.model.Post;
 import com.heslin.postopia.model.User;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 
 public interface  CommentService {
     Comment replyToPost(Post post, String content, @AuthenticationPrincipal User user);
@@ -18,4 +20,6 @@ public interface  CommentService {
     void likeComment(Long id);
 
     void disLikeComment(Long id);
+
+    Page<UserCommentInfo> getCommentsByUser(Long id, Pageable pageable);
 }

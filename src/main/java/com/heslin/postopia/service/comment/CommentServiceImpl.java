@@ -1,22 +1,22 @@
 package com.heslin.postopia.service.comment;
 
-import java.util.Objects;
-
-import com.heslin.postopia.model.opinion.CommentOpinion;
-import com.heslin.postopia.model.opinion.Opinion;
-import com.heslin.postopia.service.opinion.OpinionService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.stereotype.Service;
-
+import com.heslin.postopia.dto.UserCommentInfo;
 import com.heslin.postopia.exception.ForbiddenException;
 import com.heslin.postopia.model.Comment;
 import com.heslin.postopia.model.Post;
 import com.heslin.postopia.model.User;
+import com.heslin.postopia.model.opinion.CommentOpinion;
 import com.heslin.postopia.repository.CommentRepository;
 import com.heslin.postopia.repository.PostRepository;
-
+import com.heslin.postopia.service.opinion.OpinionService;
 import jakarta.transaction.Transactional;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.stereotype.Service;
+
+import java.util.Objects;
 
 @Service
 public class CommentServiceImpl implements CommentService {
@@ -71,6 +71,11 @@ public class CommentServiceImpl implements CommentService {
     @Override
     public void disLikeComment(Long id) {
         addCommentOpinion(id, false, null);
+    }
+
+    @Override
+    public Page<UserCommentInfo> getCommentsByUser(Long id, Pageable pageable) {
+        return commentRepository.findCommentsByUserId(id, pageable);
     }
 
     private void addCommentOpinion(Long id, boolean opinion, @AuthenticationPrincipal User user) {
