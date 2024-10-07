@@ -2,6 +2,7 @@ package com.heslin.postopia.controller;
 
 import com.heslin.postopia.dto.Message;
 import com.heslin.postopia.dto.SpaceInfo;
+import com.heslin.postopia.dto.UserCommentInfo;
 import com.heslin.postopia.dto.UserInfo;
 import com.heslin.postopia.dto.pageresult.PageResult;
 import com.heslin.postopia.dto.post.PostSummary;
@@ -11,6 +12,7 @@ import com.heslin.postopia.dto.response.BasicApiResponseEntity;
 import com.heslin.postopia.enums.JoinedSpaceOrder;
 import com.heslin.postopia.exception.BadRequestException;
 import com.heslin.postopia.model.User;
+import com.heslin.postopia.service.comment.CommentService;
 import com.heslin.postopia.service.post.PostService;
 import com.heslin.postopia.service.space.SpaceService;
 import com.heslin.postopia.service.user.UserService;
@@ -32,12 +34,14 @@ public class UserController {
     private final UserService userService;
     private final SpaceService spaceService;
     private final PostService postService;
+    private final CommentService commentService;
 
     @Autowired
-    public UserController(UserService userService, SpaceService spaceService, PostService postService) {
+    public UserController(UserService userService, SpaceService spaceService, PostService postService, CommentService commentService) {
         this.userService = userService;
         this.spaceService = spaceService;
         this.postService = postService;
+        this.commentService = commentService;
     }
 
     public record NickNameDto(Long id, String nickname) {
@@ -122,5 +126,15 @@ public class UserController {
             @RequestParam(defaultValue = "desc") String direction) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction, "p.createdAt"));
         return ApiResponseEntity.ok(new ApiResponse<>("获取帖子列表成功", new PageResult<>(postService.getPostsByUser(user.getId(), pageable))));
+    }
+
+    @GetMapping("comments")
+    public ApiResponseEntity<PageResult<UserCommentInfo>> getComments(
+            @AuthenticationPrincipal User user,
+            @RequestParam int page,
+            @RequestParam(required = false, defaultValue = "50") int size,
+            @RequestParam(defaultValue = "desc") String direction) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, "c.createdAt"));
+        return ApiResponseEntity.ok(new ApiResponse<>("获取帖子列表成功", new PageResult<>(commentService.getCommentsByUser(user.getId(), pageable))));
     }
 }
