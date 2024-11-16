@@ -1,8 +1,8 @@
 package com.heslin.postopia.controller;
 
+import com.heslin.postopia.dto.CommentInfo;
 import com.heslin.postopia.dto.Message;
 import com.heslin.postopia.dto.SpaceInfo;
-import com.heslin.postopia.dto.UserCommentInfo;
 import com.heslin.postopia.dto.UserInfo;
 import com.heslin.postopia.dto.pageresult.PageResult;
 import com.heslin.postopia.dto.post.PostSummary;
@@ -123,18 +123,18 @@ public class UserController {
             @AuthenticationPrincipal User user,
             @RequestParam int page,
             @RequestParam(required = false, defaultValue = "50") int size,
-            @RequestParam(defaultValue = "desc") String direction) {
+            @RequestParam(defaultValue = "DESC") Sort.Direction direction) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction, "p.createdAt"));
         return ApiResponseEntity.ok(new ApiResponse<>("获取帖子列表成功", new PageResult<>(postService.getPostsByUser(user.getId(), pageable))));
     }
 
     @GetMapping("comments")
-    public ApiResponseEntity<PageResult<UserCommentInfo>> getComments(
+    public ApiResponseEntity<PageResult<CommentInfo>> getComments(
             @AuthenticationPrincipal User user,
             @RequestParam int page,
             @RequestParam(required = false, defaultValue = "50") int size,
-            @RequestParam(defaultValue = "desc") String direction) {
+            @RequestParam(defaultValue = "DESC") Sort.Direction direction) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction, "c.createdAt"));
-        return ApiResponseEntity.ok(new ApiResponse<>("获取帖子列表成功", new PageResult<>(commentService.getCommentsByUser(user.getId(), pageable))));
+        return ApiResponseEntity.ok(new ApiResponse<>("获取评论列表成功", new PageResult<>(commentService.getCommentsByUser(user.getId(), pageable))));
     }
 }

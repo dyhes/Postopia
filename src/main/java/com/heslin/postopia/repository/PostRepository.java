@@ -17,7 +17,8 @@ import java.util.Optional;
 
 @Repository
 public interface PostRepository extends CrudRepository<Post, Long>{
-    Optional<Long> findUserIdById(Long id);
+    @Query("select p.user.id from Post p where p.id =:id")
+    Optional<Long> findUserIdById(@Param("id") Long id);
 
     @Modifying
     @Transactional
