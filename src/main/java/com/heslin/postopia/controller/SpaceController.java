@@ -47,16 +47,22 @@ public class SpaceController {
 
         return ApiResponseEntity.ok(new ApiResponse<>(pair.second(), pair.first()));
     }
-    
-    public record SpaceIdDto(Long id){};
+
+    public record SpaceIdDto(Long spaceId) {
+    }
+
+    ;
 
     @PostMapping("join")
     public BasicApiResponseEntity joinSpace(@AuthenticationPrincipal User user, @RequestBody SpaceIdDto space) {
-        if (space.id == null) {
+        System.out.println("here1");
+        System.out.println(space);
+        if (space.spaceId == null) {
+            System.out.println("here2");
             return BasicApiResponseEntity.badRequest("spaceId is required");
         }
-        
-        Message message = spaceService.joinSpace(space.id, user);
+
+        Message message = spaceService.joinSpace(space.spaceId, user);
         return BasicApiResponseEntity.ok(message);
     }
 
@@ -72,11 +78,14 @@ public class SpaceController {
 
     @PostMapping("leave")
         public BasicApiResponseEntity leaveSpace(@AuthenticationPrincipal User user, @RequestBody SpaceIdDto space) {
-            if (space.id == null) {
+        System.out.println("here1");
+        if (space.spaceId == null) {
+            System.out.println("here2");
                 return BasicApiResponseEntity.badRequest("spaceId is required");
             }
-            
-            Message message = spaceService.leaveSpace(space.id, user);
+
+        System.out.println("here3");
+        Message message = spaceService.leaveSpace(space.spaceId, user);
             return BasicApiResponseEntity.ok(message);
         }
         
