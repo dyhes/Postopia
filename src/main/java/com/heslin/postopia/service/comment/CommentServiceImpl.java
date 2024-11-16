@@ -1,6 +1,6 @@
 package com.heslin.postopia.service.comment;
 
-import com.heslin.postopia.dto.UserCommentInfo;
+import com.heslin.postopia.dto.CommentInfo;
 import com.heslin.postopia.exception.ForbiddenException;
 import com.heslin.postopia.model.Comment;
 import com.heslin.postopia.model.Post;
@@ -16,6 +16,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Objects;
 
 @Service
@@ -74,8 +75,14 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    public Page<UserCommentInfo> getCommentsByUser(Long id, Pageable pageable) {
+    public Page<CommentInfo> getCommentsByUser(Long id, Pageable pageable) {
         return commentRepository.findCommentsByUserId(id, pageable);
+    }
+
+    @Override
+    @Transactional
+    public List<Comment> getCommentsByPost(Long postId) {
+        return commentRepository.findAllByPostId(postId);
     }
 
     private void addCommentOpinion(Long id, boolean opinion, @AuthenticationPrincipal User user) {

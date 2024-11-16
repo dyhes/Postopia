@@ -4,7 +4,7 @@ import com.heslin.postopia.model.User;
 
 import java.time.Instant;
 
-public record UserCommentInfo(
+public record CommentInfo(
         Long id,
         String content,
         Instant time,
@@ -16,7 +16,7 @@ public record UserCommentInfo(
         String avatar) {
 
     // Compact constructor for validation/modification
-    public UserCommentInfo {
+    public CommentInfo {
         userId = User.maskId(userId);
     }
 }
