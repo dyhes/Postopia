@@ -76,5 +76,12 @@ public interface PostRepository extends CrudRepository<Post, Long>{
             """)
     Page<PostSummary> findPostSummariesBySpaceId(@Param("id") Long id, @Param("uid") Long userId, Pageable pageable);
 
-    Page<PostSummary> findPostSummariesByUserId(Long id, Pageable pageable);
+
+    @Query("""
+            select new com.heslin.postopia.dto.post.PostSummary(p.subject, p.positiveCount, p.negativeCount, p.commentCount, u.username, u.nickname, u.avatar, null)
+            from Post p
+            JOIN p.user u
+            where u.id = :uid
+            """)
+    Page<PostSummary> findPostSummariesByUserId(@Param("uid") Long id, Pageable pageable);
 }

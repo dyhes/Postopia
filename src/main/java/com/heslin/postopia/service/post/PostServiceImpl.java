@@ -123,7 +123,12 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public Page<PostSummary> getPostsByUser(Long id, Pageable pageable) {
-        return postRepository.findPostSummariesByUserId(id, pageable);
+        try {
+            return postRepository.findPostSummariesByUserId(id, pageable);
+        } catch (Exception e) {
+            System.out.println(e);
+            return null;
+        }
     }
 
 }
