@@ -1,10 +1,9 @@
 package com.heslin.postopia.service.space_user_info;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import com.heslin.postopia.model.SpaceUserInfo;
 import com.heslin.postopia.repository.SpaceUserInfoRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 @Service
 public class SpaceUserInfoServiceImpl implements SpaceUserInfoService {
@@ -24,7 +23,7 @@ public class SpaceUserInfoServiceImpl implements SpaceUserInfoService {
 
     @Override
     public boolean deleteBySpaceIdAndUserId(Long spaceId, Long userId) {
-        return spaceUserInfoRepository.deleteBySpaceIdAndUserId(spaceId, userId);
+        return spaceUserInfoRepository.deleteBySpaceIdAndUserId(spaceId, userId) == 1;
     }
     
 }
