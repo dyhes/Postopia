@@ -1,6 +1,7 @@
 package com.heslin.postopia.service.comment;
 
-import com.heslin.postopia.dto.CommentInfo;
+import com.heslin.postopia.dto.comment.CommentInfo;
+import com.heslin.postopia.dto.comment.CommentSummary;
 import com.heslin.postopia.model.Comment;
 import com.heslin.postopia.model.Post;
 import com.heslin.postopia.model.User;
@@ -23,7 +24,7 @@ public interface  CommentService {
 
     void disLikeComment(Long id);
 
-    Page<CommentInfo> getCommentsByUser(Long id, Pageable pageable);
+    Page<CommentSummary> getCommentsByUser(Long id, Pageable pageable);
 
-    List<Comment> getCommentsByPost(Long postId);
+    List<CommentInfo> getCommentsByPost(Long postId);
 }

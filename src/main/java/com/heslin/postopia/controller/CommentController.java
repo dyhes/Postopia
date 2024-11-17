@@ -1,16 +1,21 @@
 package com.heslin.postopia.controller;
 
+import com.heslin.postopia.dto.comment.CommentInfo;
+import com.heslin.postopia.dto.response.ApiResponseEntity;
 import com.heslin.postopia.dto.response.BasicApiResponseEntity;
 import com.heslin.postopia.exception.BadRequestException;
 import com.heslin.postopia.model.Comment;
 import com.heslin.postopia.model.Post;
+import com.heslin.postopia.model.User;
 import com.heslin.postopia.service.comment.CommentService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@RestController("comment")
+@RestController
+@RequestMapping("comment")
 public class CommentController {
 
     @Autowired
@@ -19,14 +24,14 @@ public class CommentController {
     public record CommentReplyDto(String content, Long commentId, Long postId) {}
 
     @PostMapping("reply")
-    public BasicApiResponseEntity reply(@RequestBody CommentReplyDto dto) {
+    public BasicApiResponseEntity reply(@RequestBody CommentReplyDto dto, @AuthenticationPrincipal User user) {
         if (dto.commentId() == null || dto.postId() == null || dto.content() == null)
             throw new BadRequestException("parameters content, commentId and postId are required");
         Post post = new Post();
         post.setId(dto.postId());
         Comment comment = new Comment();
         comment.setId(dto.commentId());
-        commentService.reply(post, comment, dto.content(), null);
+        commentService.reply(post, comment, dto.content(), user);
         return BasicApiResponseEntity.ok("回复成功");
     }
 
@@ -36,8 +41,8 @@ public class CommentController {
     ;
 
     @PostMapping("delete")
-    public BasicApiResponseEntity delete(@RequestBody CommentIdDto dto) {
-        commentService.checkAuthority(dto.id(), null);
+    public BasicApiResponseEntity delete(@RequestBody CommentIdDto dto, @AuthenticationPrincipal User user) {
+        commentService.checkAuthority(dto.id(), user);
         commentService.deleteComment(dto.id());
         return BasicApiResponseEntity.ok("删除成功");
     }
@@ -61,7 +66,7 @@ public class CommentController {
     }
 
     @GetMapping("list")
-    public List<Comment> getComments(@RequestParam Long postId) {
-        return commentService.getCommentsByPost(postId);
+    public ApiResponseEntity<List<CommentInfo>> getComments(@RequestParam(name = "postId") Long postId) {
+        return ApiResponseEntity.ok(commentService.getCommentsByPost(postId), "success", true);
     }
 }

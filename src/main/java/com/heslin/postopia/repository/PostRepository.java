@@ -55,12 +55,12 @@ public interface PostRepository extends CrudRepository<Post, Long>{
                          WHEN o.isPositive = true THEN com.heslin.postopia.enums.OpinionStatus.POSITIVE
                          ELSE com.heslin.postopia.enums.OpinionStatus.NEGATIVE
                      END)
-            from Post p 
-            JOIN p.user u 
-            LEFT JOIN PostOpinion o on o.post.id = :id and o.user.id = :uid 
+            from Post p
+            JOIN p.user u
+            LEFT JOIN PostOpinion o on o.user.id = :uid and o.post.id = :id
             where p.id = :id
-             """)
-    Optional<PostInfo> findPostInfoById(@Param("id")Long id, @Param("uid") Long userId);
+            """)
+    Optional<PostInfo> findPostInfoById(@Param("id") Long id, @Param("uid") Long userId);
 
     @Query("""
             select

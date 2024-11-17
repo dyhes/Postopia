@@ -1,7 +1,9 @@
 package com.heslin.postopia.service.comment;
 
-import com.heslin.postopia.dto.CommentInfo;
+import com.heslin.postopia.dto.comment.CommentInfo;
+import com.heslin.postopia.dto.comment.CommentSummary;
 import com.heslin.postopia.exception.ForbiddenException;
+import com.heslin.postopia.exception.ResourceNotFoundException;
 import com.heslin.postopia.model.Comment;
 import com.heslin.postopia.model.Post;
 import com.heslin.postopia.model.User;
@@ -59,7 +61,7 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     public void checkAuthority(Long id, User user) {
-        if (!Objects.equals(commentRepository.findUserIdById(id), user.getId())) {
+        if (!Objects.equals(commentRepository.findUserIdById(id).orElseThrow(() -> new ResourceNotFoundException("Comment not found")), user.getId())) {
             throw new ForbiddenException("You are not the owner of this comment");
         }
     }
@@ -75,14 +77,18 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    public Page<CommentInfo> getCommentsByUser(Long id, Pageable pageable) {
+    public Page<CommentSummary> getCommentsByUser(Long id, Pageable pageable) {
         return commentRepository.findCommentsByUserId(id, pageable);
     }
 
     @Override
     @Transactional
-    public List<Comment> getCommentsByPost(Long postId) {
-        return commentRepository.findAllByPostId(postId);
+    public List<CommentInfo> getCommentsByPost(Long postId) {
+        var top = commentRepository.findAllByPostId(postId);
+        top.forEach(c -> {
+            c.setChildren(commentRepository.findChildrenByCommentId(c.getId()));
+        });
+        return top;
     }
 
     private void addCommentOpinion(Long id, boolean opinion, @AuthenticationPrincipal User user) {

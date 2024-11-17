@@ -1,9 +1,9 @@
 package com.heslin.postopia.controller;
 
-import com.heslin.postopia.dto.CommentInfo;
 import com.heslin.postopia.dto.Message;
 import com.heslin.postopia.dto.SpaceInfo;
 import com.heslin.postopia.dto.UserInfo;
+import com.heslin.postopia.dto.comment.CommentSummary;
 import com.heslin.postopia.dto.pageresult.PageResult;
 import com.heslin.postopia.dto.post.PostSummary;
 import com.heslin.postopia.dto.response.ApiResponse;
@@ -129,7 +129,7 @@ public class UserController {
     }
 
     @GetMapping("comments")
-    public ApiResponseEntity<PageResult<CommentInfo>> getComments(
+    public ApiResponseEntity<PageResult<CommentSummary>> getComments(
             @AuthenticationPrincipal User user,
             @RequestParam int page,
             @RequestParam(required = false, defaultValue = "50") int size,
