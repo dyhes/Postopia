@@ -7,6 +7,7 @@ import com.heslin.postopia.dto.response.ApiResponse;
 import com.heslin.postopia.dto.response.ApiResponseEntity;
 import com.heslin.postopia.dto.response.BasicApiResponseEntity;
 import com.heslin.postopia.exception.BadRequestException;
+import com.heslin.postopia.model.Comment;
 import com.heslin.postopia.model.Space;
 import com.heslin.postopia.model.User;
 import com.heslin.postopia.service.post.PostService;
@@ -91,22 +92,22 @@ public class PostController {
     public record ReplyPostDto(Long id, String content) {}
     
     @PostMapping("reply")
-    public BasicApiResponseEntity replyPost(@AuthenticationPrincipal User user, @RequestBody ReplyPostDto request) {
+    public ApiResponseEntity<Long> replyPost(@AuthenticationPrincipal User user, @RequestBody ReplyPostDto request) {
         if (request.id == null || request.content == null) {
             throw new BadRequestException("postId and content are required");
         }
         
         //postService.checkPostStatus(request.id);
-        postService.replyPost(request.id, request.content);
-        return BasicApiResponseEntity.ok("回复成功");
+        Comment comment = postService.replyPost(request.id, request.content, user);
+        return BasicApiResponseEntity.ok(comment.getId(), "回复成功", true);
     }
 
     @GetMapping("info")
-    public ApiResponseEntity<PostInfo> getPostInfo(@RequestParam Long id) {
+    public ApiResponseEntity<PostInfo> getPostInfo(@RequestParam Long id, @AuthenticationPrincipal User user) {
         if (id == null) {
             throw new BadRequestException("postId is required");
         }
-        return ApiResponseEntity.ok(new ApiResponse<>("获取帖子信息成功", postService.getPostInfo(id, null)));
+        return ApiResponseEntity.ok(new ApiResponse<>("获取帖子信息成功", postService.getPostInfo(id, user)));
     }
 
 
@@ -116,7 +117,7 @@ public class PostController {
             @RequestParam Long spaceId,
             @RequestParam int page,
             @RequestParam(required = false, defaultValue = "50") int size,
-            @RequestParam(defaultValue = "desc") String direction) {
+            @RequestParam(defaultValue = "DESC") Sort.Direction direction) {
         if (spaceId == null) {
             throw new BadRequestException("spaceId is required");
         }

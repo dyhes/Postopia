@@ -1,13 +1,13 @@
-package com.heslin.postopia.dto;
+package com.heslin.postopia.dto.comment;
 
 import com.heslin.postopia.model.User;
 
 import java.time.Instant;
 
-public record CommentInfo(
+public record CommentSummary(
         Long id,
         String content,
-        Instant time,
+        Instant createdAt,
         Long spaceId,
         Long postId,
         String subject,
@@ -16,7 +16,7 @@ public record CommentInfo(
         String avatar) {
 
     // Compact constructor for validation/modification
-    public CommentInfo {
+    public CommentSummary {
         userId = User.maskId(userId);
     }
 }

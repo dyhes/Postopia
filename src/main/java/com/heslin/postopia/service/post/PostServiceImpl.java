@@ -6,6 +6,7 @@ import com.heslin.postopia.dto.post.PostSummary;
 import com.heslin.postopia.enums.PostStatus;
 import com.heslin.postopia.exception.ForbiddenException;
 import com.heslin.postopia.exception.ResourceNotFoundException;
+import com.heslin.postopia.model.Comment;
 import com.heslin.postopia.model.Post;
 import com.heslin.postopia.model.Space;
 import com.heslin.postopia.model.User;
@@ -105,14 +106,14 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public void replyPost(Long id, String content) {
+    public Comment replyPost(Long id, String content, User user) {
         var post = new Post();
         post.setId(id);
-        commentService.replyToPost(post, content, null);
+        return commentService.replyToPost(post, content, user);
     }
 
     @Override
-    public PostInfo getPostInfo(Long id, @AuthenticationPrincipal User user) {
+    public PostInfo getPostInfo(Long id, User user) {
         return postRepository.findPostInfoById(id, user.getId()).orElseThrow(() -> new ResourceNotFoundException("Post not found"));
     }
 
