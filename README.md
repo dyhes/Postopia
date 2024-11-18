@@ -2,10 +2,11 @@
 
 ## 简介
 
-论坛系统的后端服务
+基于OceanBase分布式数据库的论坛系统
 
 # 运行环境
 
+* OceanBase 4.3.4
 * Java 17
 * Spring Boot 3.3.1
 * Gradle 8.8
