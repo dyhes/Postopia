@@ -20,9 +20,9 @@ public interface  CommentService {
 
     void checkAuthority(Long id, @AuthenticationPrincipal User user);
 
-    void likeComment(Long id);
+    void likeComment(Long id, @AuthenticationPrincipal User user);
 
-    void disLikeComment(Long id);
+    void disLikeComment(Long id, @AuthenticationPrincipal User user);
 
     Page<CommentSummary> getCommentsByUser(Long id, Pageable pageable);
 

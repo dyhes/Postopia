@@ -48,20 +48,20 @@ public class CommentController {
     }
 
     @PostMapping("like")
-    public BasicApiResponseEntity likeComment(@RequestBody CommentIdDto dto) {
+    public BasicApiResponseEntity likeComment(@RequestBody CommentIdDto dto, @AuthenticationPrincipal User user) {
         if (dto.id == null) {
             throw new BadRequestException("commentId is required");
         }
-        commentService.likeComment(dto.id);
+        commentService.likeComment(dto.id, user);
         return BasicApiResponseEntity.ok("comment liked!");
     }
 
     @PostMapping("dislike")
-    public BasicApiResponseEntity disLikeComment(@RequestBody CommentIdDto dto) {
+    public BasicApiResponseEntity disLikeComment(@RequestBody CommentIdDto dto, @AuthenticationPrincipal User user) {
         if (dto.id == null) {
             throw new BadRequestException("commentId is required");
         }
-        commentService.disLikeComment(dto.id);
+        commentService.disLikeComment(dto.id, user);
         return BasicApiResponseEntity.ok("comment disliked!");
     }
 

@@ -74,7 +74,7 @@ public class PostController {
         }
 
         postService.authorize(user, request.id);
-        postService.unarchivePost(request.id);
+        postService.unarchivedPost(request.id);
         return BasicApiResponseEntity.ok("帖子取消归档成功");
     }
     
@@ -126,20 +126,20 @@ public class PostController {
     }
 
     @PostMapping("like")
-    public BasicApiResponseEntity likePost(@RequestBody PostIdDto dto) {
+    public BasicApiResponseEntity likePost(@RequestBody PostIdDto dto, @AuthenticationPrincipal User user) {
         if (dto.id == null) {
             throw new BadRequestException("postId is required");
         }
-        postService.likePost(dto.id, null);
+        postService.likePost(dto.id, user);
         return BasicApiResponseEntity.ok("post liked!");
     }
 
     @PostMapping("dislike")
-    public BasicApiResponseEntity disLikePost(@RequestBody PostIdDto dto) {
+    public BasicApiResponseEntity disLikePost(@RequestBody PostIdDto dto, @AuthenticationPrincipal User user) {
         if (dto.id == null) {
             throw new BadRequestException("postId is required");
         }
-        postService.disLikePost(dto.id, null);
+        postService.disLikePost(dto.id, user);
         return BasicApiResponseEntity.ok("post disliked!");
     }
 }

@@ -16,7 +16,7 @@ public interface PostService {
     void authorize(User user, Long postId);
     void deletePost(Long id);
     void archivePost(Long id);
-    void unarchivePost(Long id);
+    void unarchivedPost(Long id);
     void updatePost(Long id, String subject, String content);
 
     Comment replyPost(Long id, String content, User user);

@@ -63,7 +63,7 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public void unarchivePost(Long id) {
+    public void unarchivedPost(Long id) {
         postRepository.updateStatus(id, PostStatus.PUBLISHED);
     }
 

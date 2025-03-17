@@ -67,13 +67,13 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    public void likeComment(Long id) {
-        addCommentOpinion(id, true, null);
+    public void likeComment(Long id, User user) {
+        addCommentOpinion(id, true, user);
     }
 
     @Override
-    public void disLikeComment(Long id) {
-        addCommentOpinion(id, false, null);
+    public void disLikeComment(Long id, User user) {
+        addCommentOpinion(id, false, user);
     }
 
     @Override
