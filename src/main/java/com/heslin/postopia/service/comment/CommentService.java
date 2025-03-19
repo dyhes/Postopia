@@ -26,5 +26,5 @@ public interface  CommentService {
 
     Page<CommentSummary> getCommentsByUser(Long id, Pageable pageable);
 
-    List<CommentInfo> getCommentsByPost(Long postId);
+    Page<CommentInfo> getCommentsByPost(Long postId, Pageable pageable);
 }

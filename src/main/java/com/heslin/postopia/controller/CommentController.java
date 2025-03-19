@@ -9,6 +9,10 @@ import com.heslin.postopia.model.Post;
 import com.heslin.postopia.model.User;
 import com.heslin.postopia.service.comment.CommentService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -66,7 +70,11 @@ public class CommentController {
     }
 
     @GetMapping("list")
-    public ApiResponseEntity<List<CommentInfo>> getComments(@RequestParam(name = "postId") Long postId) {
-        return ApiResponseEntity.ok(commentService.getCommentsByPost(postId), "success", true);
+    public ApiResponseEntity<Page<CommentInfo>> getComments(@RequestParam(name = "postId") Long postId,
+                                                            @RequestParam int page,
+                                                            @RequestParam(required = false, defaultValue = "50") int size,
+                                                            @RequestParam(defaultValue = "ASC") Sort.Direction direction) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, "c.createdAt"));
+        return ApiResponseEntity.ok(commentService.getCommentsByPost(postId, pageable), "success", true);
     }
 }

@@ -6,6 +6,7 @@ import com.heslin.postopia.model.Comment;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -37,11 +38,11 @@ public interface CommentRepository extends CrudRepository<Comment, Long>{
             """)
     Page<CommentSummary> findCommentsByUserId(@Param("uid") Long id, Pageable pageable);
 
-
+    @EntityGraph(attributePaths = {"children"})
     @Query("""
                 select new com.heslin.postopia.dto.comment.CommentInfo(c.id,c.content, c.createdAt, u.id, u.nickname, u.avatar) from Comment c JOIN c.user u where c.post.id = :pid and c.parent IS NULL
             """)
-    List<CommentInfo> findAllByPostId(@Param("pid") Long postId);
+    Page<CommentInfo> findByPostId(@Param("pid") Long postId, Pageable pageable);
 
     @Query("""
                 select new com.heslin.postopia.dto.comment.CommentInfo(c.id,c.content, c.createdAt, u.id, u.nickname, u.avatar) from Comment c JOIN c.user u where c.parent.id = :cid

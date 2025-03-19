@@ -83,12 +83,8 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     @Transactional
-    public List<CommentInfo> getCommentsByPost(Long postId) {
-        var top = commentRepository.findAllByPostId(postId);
-        top.forEach(c -> {
-            c.setChildren(commentRepository.findChildrenByCommentId(c.getId()));
-        });
-        return top;
+    public Page<CommentInfo> getCommentsByPost(Long postId, Pageable pageable) {
+        return commentRepository.findByPostId(postId, pageable);
     }
 
     private void addCommentOpinion(Long id, boolean opinion, @AuthenticationPrincipal User user) {

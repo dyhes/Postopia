@@ -91,7 +91,7 @@ public class PostServiceImpl implements PostService {
         addPostOpinion(id, user, false);
     }
 
-    @Transactional
+
     private void addPostOpinion(Long id, User user, boolean opinion) {
         if (opinion) {
             postRepository.likePost(id);
