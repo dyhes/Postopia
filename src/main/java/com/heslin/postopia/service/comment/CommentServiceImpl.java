@@ -18,7 +18,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Objects;
 
 @Service
@@ -97,7 +96,7 @@ public class CommentServiceImpl implements CommentService {
         postOpinion.setUser(user);
         postOpinion.setComment(new Comment(id));
         postOpinion.setPositive(opinion);
-        opinionService.saveOpinion(postOpinion);
+        opinionService.upsertOpinion(postOpinion);
     }
 
 

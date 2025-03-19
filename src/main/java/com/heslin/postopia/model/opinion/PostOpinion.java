@@ -9,6 +9,8 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.apache.commons.lang3.tuple.ImmutableTriple;
+import org.apache.commons.lang3.tuple.Triple;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -18,4 +20,14 @@ public class PostOpinion extends Opinion {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "post_id")
     private Post post;
+
+    @Override
+    public Triple<Long, Long, Long> getFields() {
+        return new ImmutableTriple<>(null, post.getId(), null);
+    }
+
+    @Override
+    public String getDiscriminator() {
+        return "POST";
+    }
 }

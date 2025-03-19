@@ -15,7 +15,6 @@ import com.heslin.postopia.repository.PostRepository;
 import com.heslin.postopia.service.comment.CommentService;
 import com.heslin.postopia.service.opinion.OpinionService;
 import com.heslin.postopia.util.Pair;
-import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -102,7 +101,7 @@ public class PostServiceImpl implements PostService {
         postOpinion.setUser(user);
         postOpinion.setPost(new Post(id));
         postOpinion.setPositive(opinion);
-        opinionService.saveOpinion(postOpinion);
+        opinionService.upsertOpinion(postOpinion);
     }
 
     @Override
