@@ -46,7 +46,7 @@ public class Comment {
     @JoinColumn(name = "parent_id")
     private Comment parent;
 
-    @OneToMany(mappedBy = "parent", orphanRemoval = true, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "parent", orphanRemoval = true)
     private List<Comment> children = new ArrayList<>();
 
     @CreatedDate

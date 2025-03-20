@@ -1,6 +1,7 @@
 package com.heslin.postopia.controller;
 
 import com.heslin.postopia.dto.comment.CommentInfo;
+import com.heslin.postopia.dto.pageresult.PageResult;
 import com.heslin.postopia.dto.response.ApiResponseEntity;
 import com.heslin.postopia.dto.response.BasicApiResponseEntity;
 import com.heslin.postopia.exception.BadRequestException;
@@ -70,11 +71,13 @@ public class CommentController {
     }
 
     @GetMapping("list")
-    public ApiResponseEntity<Page<CommentInfo>> getComments(@RequestParam(name = "postId") Long postId,
-                                                            @RequestParam int page,
-                                                            @RequestParam(required = false, defaultValue = "50") int size,
-                                                            @RequestParam(defaultValue = "ASC") Sort.Direction direction) {
+    public ApiResponseEntity<PageResult<CommentInfo>> getComments(@RequestParam(name = "postId") Long postId,
+                                                                  @RequestParam int page,
+                                                                  @RequestParam(defaultValue = "50") int size,
+                                                                  @RequestParam(defaultValue = "ASC") Sort.Direction direction,
+                                                                  @AuthenticationPrincipal User user
+    ) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction, "c.createdAt"));
-        return ApiResponseEntity.ok(commentService.getCommentsByPost(postId, pageable), "success", true);
+        return ApiResponseEntity.ok(new PageResult<>(commentService.getCommentsByPost(postId,user.getId(), pageable)), "success", true);
     }
 }

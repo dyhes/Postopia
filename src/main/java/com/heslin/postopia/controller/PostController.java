@@ -116,7 +116,7 @@ public class PostController {
             @AuthenticationPrincipal User user,
             @RequestParam Long spaceId,
             @RequestParam int page,
-            @RequestParam(required = false, defaultValue = "50") int size,
+            @RequestParam(defaultValue = "50") int size,
             @RequestParam(defaultValue = "DESC") Sort.Direction direction) {
         if (spaceId == null) {
             throw new BadRequestException("spaceId is required");
