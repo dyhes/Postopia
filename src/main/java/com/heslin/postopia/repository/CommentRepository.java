@@ -75,7 +75,7 @@ public interface CommentRepository extends CrudRepository<Comment, Long>{
                    JOIN
                        users u ON c.user_id = u.id
                    LEFT JOIN
-                       opinions o ON o.comment_id = c.id AND o.user_id = :uid
+                       comment_opinions o ON o.comment_id = c.id AND o.user_id = :uid
                    WHERE
                        c.parent_id IN (:cids)
         
@@ -102,7 +102,7 @@ public interface CommentRepository extends CrudRepository<Comment, Long>{
                    JOIN
                        users u_child ON child.user_id = u_child.id
                    LEFT JOIN
-                       opinions o_child ON o_child.comment_id = child.id AND o_child.user_id = :uid
+                       comment_opinions o_child ON o_child.comment_id = child.id AND o_child.user_id = :uid
                )
                SELECT
                    id,

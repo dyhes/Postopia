@@ -11,7 +11,9 @@ import org.apache.commons.lang3.tuple.Triple;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @Entity
-@DiscriminatorValue("COMMENT")
+@Table(name = "comment_opinions", uniqueConstraints = {
+        @UniqueConstraint(name = "comment_opinion_unique", columnNames = {"user_id", "comment_id"}),
+})
 public class CommentOpinion extends Opinion {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "comment_id")
@@ -27,6 +29,4 @@ public class CommentOpinion extends Opinion {
     public String getDiscriminator() {
         return "COMMENT";
     }
-
-
 }

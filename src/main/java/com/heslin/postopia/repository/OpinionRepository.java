@@ -16,9 +16,9 @@ public interface OpinionRepository extends CrudRepository<Opinion, Long> {
     @Modifying
     @Transactional
     @Query(
-            value = "INSERT INTO opinions(opinion_type, updated_at, is_positive, user_id, post_id) " +
-                    "VALUES ('POST', :ua, :ip, :uid, :pid) " +
-                    "ON CONFLICT (user_id, post_id) WHERE opinion_type = 'POST' " +
+            value = "INSERT INTO post_opinions(updated_at, is_positive, user_id, post_id) " +
+                    "VALUES (:ua, :ip, :uid, :pid) " +
+                    "ON CONFLICT (user_id, post_id)" +
                     "DO UPDATE SET updated_at = EXCLUDED.updated_at, is_positive = EXCLUDED.is_positive",
             nativeQuery = true
     )
@@ -32,9 +32,9 @@ public interface OpinionRepository extends CrudRepository<Opinion, Long> {
     @Transactional
     @Modifying
     @Query(
-            value = "INSERT INTO opinions(opinion_type, updated_at, is_positive, user_id, vote_id) " +
-                    "VALUES ('VOTE', :ua, :ip, :uid, :vid) " +
-                    "ON CONFLICT (user_id, vote_id) WHERE opinion_type = 'VOTE' " +
+            value = "INSERT INTO vote_opinions(updated_at, is_positive, user_id, vote_id) " +
+                    "VALUES (:ua, :ip, :uid, :vid) " +
+                    "ON CONFLICT (user_id, vote_id) " +
                     "DO UPDATE SET updated_at = EXCLUDED.updated_at, is_positive = EXCLUDED.is_positive",
             nativeQuery = true
     )
@@ -48,9 +48,9 @@ public interface OpinionRepository extends CrudRepository<Opinion, Long> {
     @Transactional
     @Modifying
     @Query(
-            value = "INSERT INTO opinions(opinion_type, updated_at, is_positive, user_id, comment_id) " +
-                    "VALUES ('COMMENT', :ua, :ip, :uid, :cid) " +
-                    "ON CONFLICT (user_id, comment_id) WHERE opinion_type = 'COMMENT' " +
+            value = "INSERT INTO comment_opinions(updated_at, is_positive, user_id, comment_id) " +
+                    "VALUES (:ua, :ip, :uid, :cid) " +
+                    "ON CONFLICT (user_id, comment_id) " +
                     "DO UPDATE SET updated_at = EXCLUDED.updated_at, is_positive = EXCLUDED.is_positive",
             nativeQuery = true
     )

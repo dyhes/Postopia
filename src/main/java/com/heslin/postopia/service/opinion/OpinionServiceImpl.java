@@ -25,11 +25,11 @@ public class OpinionServiceImpl implements OpinionService {
         var tp = opinion.getFields();
         var updateAt = Instant.now();
         switch (opinion.getDiscriminator()) {
-            case "POST":
-                opinionRepository.upsertPostOpinion(updateAt, opinion.isPositive(), opinion.getUser().getId(), tp.getMiddle());
-                break;
             case "COMMENT":
                 opinionRepository.upsertCommentOpinion(updateAt, opinion.isPositive(), opinion.getUser().getId(), tp.getLeft());
+                break;
+            case "POST":
+                opinionRepository.upsertPostOpinion(updateAt, opinion.isPositive(), opinion.getUser().getId(), tp.getMiddle());
                 break;
             case "VOTE":
                 opinionRepository.upsertVoteOpinion(updateAt, opinion.isPositive(), opinion.getUser().getId(), tp.getRight());
@@ -37,6 +37,5 @@ public class OpinionServiceImpl implements OpinionService {
             default:
                 throw new IllegalArgumentException("Unknown opinion type: " + opinion.getDiscriminator());
         }
-        //opinionRepository.upsert(opinion.getDiscriminator(), opinion.getId(), opinion.getUpdatedAt(), opinion.isPositive(), opinion.getUser().getId(), tp.getLeft(), tp.getMiddle(), tp.getRight());
     }
 }

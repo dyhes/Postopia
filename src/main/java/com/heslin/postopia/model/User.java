@@ -1,6 +1,9 @@
 package com.heslin.postopia.model;
 
+import com.heslin.postopia.model.opinion.CommentOpinion;
 import com.heslin.postopia.model.opinion.Opinion;
+import com.heslin.postopia.model.opinion.PostOpinion;
+import com.heslin.postopia.model.opinion.VoteOpinion;
 import jakarta.persistence.*;
 import lombok.Data;
 import org.springframework.data.annotation.CreatedDate;
@@ -56,7 +59,14 @@ public class User {
     private List<Comment> comments = new ArrayList<>();
 
     @OneToMany(mappedBy = "user")
-    private List<Opinion> opinions = new ArrayList<>();
+    private List<PostOpinion> postOpinions = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user")
+    private List<CommentOpinion> commentOpinions = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user")
+    private List<VoteOpinion> voteOpinions = new ArrayList<>();
+
 
     @Override
     public String toString() {
