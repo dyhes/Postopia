@@ -2,6 +2,7 @@ package com.heslin.postopia.service.os;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
+import com.heslin.postopia.dto.UserId;
 import com.heslin.postopia.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,8 +21,8 @@ public class OSService {
         this.cloudinary = cloudinary;
     }
 
-    public String updateUserAvatar(Long id, MultipartFile img) throws IOException {
-        return uploadAvatar(User.maskId(id).toString(), "user_avatar", img);
+    public String updateUserAvatar(UserId id, MultipartFile img) throws IOException {
+        return uploadAvatar(id.toString(), "user_avatar", img);
     }
 
     public String updateSpaceAvatar(String name, MultipartFile img) throws IOException {

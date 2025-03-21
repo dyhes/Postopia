@@ -64,7 +64,7 @@ public interface PostRepository extends CrudRepository<Post, Long>{
 
     @Query("""
             select
-            new com.heslin.postopia.dto.post.PostSummary(p.subject, p.positiveCount, p.negativeCount, p.commentCount, u.username, u.nickname, u.avatar,
+            new com.heslin.postopia.dto.post.PostSummary(p.id, p.subject, p.positiveCount, p.negativeCount, p.commentCount, new com.heslin.postopia.dto.UserId(u.id), u.nickname, u.avatar,
                     CASE
                         WHEN o.id IS NULL THEN com.heslin.postopia.enums.OpinionStatus.NIL
                         WHEN o.isPositive = true THEN com.heslin.postopia.enums.OpinionStatus.POSITIVE
@@ -79,7 +79,7 @@ public interface PostRepository extends CrudRepository<Post, Long>{
 
 
     @Query("""
-            select new com.heslin.postopia.dto.post.PostSummary(p.subject, p.positiveCount, p.negativeCount, p.commentCount, u.username, u.nickname, u.avatar, null)
+            select new com.heslin.postopia.dto.post.PostSummary(p.id, p.subject, p.positiveCount, p.negativeCount, p.commentCount, new com.heslin.postopia.dto.UserId(u.id), u.nickname, u.avatar, null)
             from Post p
             JOIN p.user u
             where u.id = :uid

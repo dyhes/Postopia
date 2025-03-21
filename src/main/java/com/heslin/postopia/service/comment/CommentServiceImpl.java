@@ -1,5 +1,6 @@
 package com.heslin.postopia.service.comment;
 
+import com.heslin.postopia.dto.UserId;
 import com.heslin.postopia.dto.comment.CommentInfo;
 import com.heslin.postopia.dto.comment.CommentSummary;
 import com.heslin.postopia.enums.OpinionStatus;
@@ -96,7 +97,7 @@ public class CommentServiceImpl implements CommentService {
             return commentInfo.getId();
         }).toList(), userId).stream().map(arr -> new CommentInfo(
                 (Long) arr[0], (String) arr[1],
-                (Instant) arr[2], (Long) arr[3],
+                (Instant) arr[2], new UserId((Long) arr[3]),
                 (String) arr[4], (String) arr[5],
                 OpinionStatus.valueOf((String) arr[6]),
                 (Long) arr[7]

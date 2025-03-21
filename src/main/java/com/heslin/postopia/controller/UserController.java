@@ -2,6 +2,7 @@ package com.heslin.postopia.controller;
 
 import com.heslin.postopia.dto.Message;
 import com.heslin.postopia.dto.SpaceInfo;
+import com.heslin.postopia.dto.UserId;
 import com.heslin.postopia.dto.UserInfo;
 import com.heslin.postopia.dto.comment.CommentSummary;
 import com.heslin.postopia.dto.pageresult.PageResult;
@@ -10,6 +11,7 @@ import com.heslin.postopia.dto.response.ApiResponse;
 import com.heslin.postopia.dto.response.ApiResponseEntity;
 import com.heslin.postopia.dto.response.BasicApiResponseEntity;
 import com.heslin.postopia.enums.JoinedSpaceOrder;
+import com.heslin.postopia.enums.OpinionStatus;
 import com.heslin.postopia.exception.BadRequestException;
 import com.heslin.postopia.model.User;
 import com.heslin.postopia.service.comment.CommentService;
@@ -45,9 +47,7 @@ public class UserController {
     }
 
     public record NickNameDto(Long id, String nickname) {
-    }
-
-    ;
+    };
 
     @PostMapping("nickname")
     public BasicApiResponseEntity updateNickName(@RequestBody NickNameDto dto) {
@@ -95,16 +95,16 @@ public class UserController {
     @PostMapping("avatar")
     public ApiResponseEntity<String> updateAvatar(@RequestPart("avatar") MultipartFile avatar, @AuthenticationPrincipal User user) {
         try {
-            String url = userService.updateUserAvatar(user.getId(), avatar);
+            String url = userService.updateUserAvatar(new UserId(user.getId()), avatar);
             return ApiResponseEntity.ok(new ApiResponse<>("success", true, url));
         } catch (IOException e) {
             return ApiResponseEntity.ok(new ApiResponse<>(e.getMessage(), false, null));
         }
     }
 
-    @GetMapping("info/{maskedId}")
-    public ApiResponseEntity<UserInfo> getUserInfo(@PathVariable Long maskedId) {
-        return ApiResponseEntity.ok(userService.getUserInfo(User.maskId(maskedId)), "success");
+    @GetMapping("info/{userId}")
+    public ApiResponseEntity<UserInfo> getUserInfo(@PathVariable UserId userId) {
+        return ApiResponseEntity.ok(userService.getUserInfo(userId.getId()), "success");
     }
 
     @GetMapping("spaces")
@@ -122,7 +122,7 @@ public class UserController {
     public ApiResponseEntity<PageResult<PostSummary>> getPosts(
             @AuthenticationPrincipal User user,
             @RequestParam int page,
-            @RequestParam(required = false, defaultValue = "50") int size,
+            @RequestParam(defaultValue = "50") int size,
             @RequestParam(defaultValue = "DESC") Sort.Direction direction) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction, "p.createdAt"));
         return ApiResponseEntity.ok(new ApiResponse<>("获取帖子列表成功", new PageResult<>(postService.getPostsByUser(user.getId(), pageable))));
@@ -132,9 +132,20 @@ public class UserController {
     public ApiResponseEntity<PageResult<CommentSummary>> getComments(
             @AuthenticationPrincipal User user,
             @RequestParam int page,
-            @RequestParam(required = false, defaultValue = "50") int size,
+            @RequestParam(defaultValue = "50") int size,
             @RequestParam(defaultValue = "DESC") Sort.Direction direction) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction, "c.createdAt"));
         return ApiResponseEntity.ok(new ApiResponse<>("获取评论列表成功", new PageResult<>(commentService.getCommentsByUser(user.getId(), pageable))));
+    }
+
+    @GetMapping("comment_opinions")
+    public ApiResponseEntity<PageResult<CommentSummary>> getCommentOpinions(
+            @AuthenticationPrincipal User user,
+            @RequestParam int page,
+            @RequestParam(defaultValue = "NIL") OpinionStatus opinon,
+            @RequestParam(defaultValue = "50") int size,
+            @RequestParam(defaultValue = "DESC") Sort.Direction direction) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, "c.createdAt"));
+        return ApiResponseEntity.ok(new ApiResponse<>("获取评论态度列表成功", new PageResult<>(commentService.getCommentsByUser(user.getId(), pageable))));
     }
 }

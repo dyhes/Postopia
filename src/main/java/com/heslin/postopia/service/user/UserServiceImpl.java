@@ -1,6 +1,7 @@
 package com.heslin.postopia.service.user;
 
 import com.heslin.postopia.dto.Message;
+import com.heslin.postopia.dto.UserId;
 import com.heslin.postopia.dto.UserInfo;
 import com.heslin.postopia.model.User;
 import com.heslin.postopia.repository.UserRepository;
@@ -64,9 +65,9 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public String updateUserAvatar(Long id, MultipartFile avatar) throws IOException {
+    public String updateUserAvatar(UserId id, MultipartFile avatar) throws IOException {
         String url = osService.updateUserAvatar(id, avatar);
-        userRepository.updateAvatar(id, url);
+        userRepository.updateAvatar(id.getId(), url);
         return url;
     }
 

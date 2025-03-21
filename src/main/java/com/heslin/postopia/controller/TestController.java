@@ -1,5 +1,8 @@
 package com.heslin.postopia.controller;
 
+import com.heslin.postopia.dto.UserId;
+import com.heslin.postopia.dto.response.ApiResponse;
+import com.heslin.postopia.dto.response.ApiResponseEntity;
 import com.heslin.postopia.dto.response.BasicApiResponseEntity;
 import com.heslin.postopia.model.User;
 import com.heslin.postopia.service.test.TestService;
@@ -18,11 +21,12 @@ public class TestController {
 
     @GetMapping("/is_authenticated")
     public BasicApiResponseEntity test(@AuthenticationPrincipal User user) {
-        return BasicApiResponseEntity.ok(user + "is authenticated");
+        String s = "User " + new UserId(user.getId()) + " is authenticated";
+        return BasicApiResponseEntity.ok(s);
     }
 
-    @GetMapping("/deep")
-    public BasicApiResponseEntity testDeep(@AuthenticationPrincipal User user) {
-        return BasicApiResponseEntity.ok(testService.testDeep(user));
+    @GetMapping("/user_id")
+    public ApiResponseEntity<UserId> testUserId(@AuthenticationPrincipal User user) {
+        return BasicApiResponseEntity.ok(new ApiResponse<>("success", new UserId(user.getId())));
     }
 }

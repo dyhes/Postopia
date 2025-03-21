@@ -72,8 +72,4 @@ public class User {
     public String toString() {
         return "User" + " [id=" + id + "]";
     }
-
-    public static Long maskId(Long id) {
-        return id ^ 0x5A5A5A5A5A5A5A5AL;
-    }
 }
