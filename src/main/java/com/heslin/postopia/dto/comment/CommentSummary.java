@@ -1,7 +1,6 @@
 package com.heslin.postopia.dto.comment;
 
-import com.heslin.postopia.dto.UserId;
-import com.heslin.postopia.model.User;
+import com.heslin.postopia.dto.user.UserId;
 
 import java.time.Instant;
 

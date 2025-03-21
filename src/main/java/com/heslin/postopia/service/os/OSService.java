@@ -2,8 +2,7 @@ package com.heslin.postopia.service.os;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
-import com.heslin.postopia.dto.UserId;
-import com.heslin.postopia.model.User;
+import com.heslin.postopia.dto.user.UserId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;

@@ -3,6 +3,7 @@ package com.heslin.postopia.service.post;
 import com.heslin.postopia.dto.Message;
 import com.heslin.postopia.dto.post.PostInfo;
 import com.heslin.postopia.dto.post.PostSummary;
+import com.heslin.postopia.dto.post.SpacePostSummary;
 import com.heslin.postopia.enums.PostStatus;
 import com.heslin.postopia.exception.ForbiddenException;
 import com.heslin.postopia.exception.ResourceNotFoundException;
@@ -117,17 +118,16 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public Page<PostSummary> getPosts(Long id, Pageable pageable, @AuthenticationPrincipal User user) {
+    public Page<SpacePostSummary> getPosts(Long id, Pageable pageable, @AuthenticationPrincipal User user) {
         return postRepository.findPostSummariesBySpaceId(id, user.getId(), pageable);
     }
 
     @Override
-    public Page<PostSummary> getPostsByUser(Long id, Pageable pageable) {
-        try {
-            return postRepository.findPostSummariesByUserId(id, pageable);
-        } catch (Exception e) {
-            System.out.println(e);
-            return null;
+    public Page<PostSummary> getPostsByUser(boolean isSelf, Long queryId, Long selfId, Pageable pageable) {
+        if (isSelf) {
+            return postRepository.findPostSummariesBySelf(queryId, pageable);
+        } else {
+            return postRepository.findPostSummariesByUserId(queryId, selfId, pageable);
         }
     }
 

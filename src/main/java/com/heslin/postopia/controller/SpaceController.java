@@ -25,12 +25,10 @@ import org.springframework.web.multipart.MultipartFile;
 @RequestMapping("/space")
 public class SpaceController {
     private final SpaceService spaceService;
-    private final OSService osService;
 
     @Autowired
-    public SpaceController(SpaceService spaceService, OSService osService) {
+    public SpaceController(SpaceService spaceService) {
         this.spaceService = spaceService;
-        this.osService = osService;
     }
 
     public record SpaceDto(String name, String description) {

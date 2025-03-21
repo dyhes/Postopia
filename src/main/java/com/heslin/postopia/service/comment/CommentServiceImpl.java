@@ -1,6 +1,6 @@
 package com.heslin.postopia.service.comment;
 
-import com.heslin.postopia.dto.UserId;
+import com.heslin.postopia.dto.user.UserId;
 import com.heslin.postopia.dto.comment.CommentInfo;
 import com.heslin.postopia.dto.comment.CommentSummary;
 import com.heslin.postopia.enums.OpinionStatus;
@@ -21,7 +21,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;

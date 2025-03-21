@@ -20,14 +20,17 @@ import com.heslin.postopia.service.signup.SignupService;
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
+    private final SignupService signupService;
+    private final LoginService loginService;
+    private final JWTService jwtService;
 
     @Autowired
-    private SignupService signupService;
-    @Autowired
-    private LoginService loginService;
-    @Autowired
-    private JWTService jwtService;
-    
+    public AuthController(SignupService signupService, LoginService loginService, JWTService jwtService) {
+        this.signupService = signupService;
+        this.loginService = loginService;
+        this.jwtService = jwtService;
+    }
+
     public record SignupDto(String username, String password) {}
     @PostMapping("signup")
     public BasicApiResponseEntity signup(@RequestBody SignupDto signupDto) {

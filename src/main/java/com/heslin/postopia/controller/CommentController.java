@@ -23,8 +23,13 @@ import java.util.List;
 @RequestMapping("comment")
 public class CommentController {
 
+
+    private final CommentService commentService;
+
     @Autowired
-    private CommentService commentService;
+    public CommentController(CommentService commentService) {
+        this.commentService = commentService;
+    }
 
     public record CommentReplyDto(String content, Long commentId, Long postId) {}
 

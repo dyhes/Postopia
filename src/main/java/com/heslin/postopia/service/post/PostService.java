@@ -3,6 +3,7 @@ package com.heslin.postopia.service.post;
 import com.heslin.postopia.dto.Message;
 import com.heslin.postopia.dto.post.PostInfo;
 import com.heslin.postopia.dto.post.PostSummary;
+import com.heslin.postopia.dto.post.SpacePostSummary;
 import com.heslin.postopia.model.Comment;
 import com.heslin.postopia.model.Space;
 import com.heslin.postopia.model.User;
@@ -26,7 +27,7 @@ public interface PostService {
 
     PostInfo getPostInfo(Long id, User user);
 
-    Page<PostSummary> getPosts(Long id, Pageable pageable, @AuthenticationPrincipal User user);
+    Page<SpacePostSummary> getPosts(Long id, Pageable pageable, @AuthenticationPrincipal User user);
 
-    Page<PostSummary> getPostsByUser(Long id, Pageable pageable);
+    Page<PostSummary> getPostsByUser(boolean isSelf, Long queryId, Long selfId, Pageable pageable);
 }

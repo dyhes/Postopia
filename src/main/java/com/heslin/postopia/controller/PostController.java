@@ -3,6 +3,7 @@ package com.heslin.postopia.controller;
 import com.heslin.postopia.dto.pageresult.PageResult;
 import com.heslin.postopia.dto.post.PostInfo;
 import com.heslin.postopia.dto.post.PostSummary;
+import com.heslin.postopia.dto.post.SpacePostSummary;
 import com.heslin.postopia.dto.response.ApiResponse;
 import com.heslin.postopia.dto.response.ApiResponseEntity;
 import com.heslin.postopia.dto.response.BasicApiResponseEntity;
@@ -23,11 +24,17 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("post")
 public class PostController {
+
+    private final EntityManager entityManager;
+
+    private final PostService postService;
+
     @Autowired
-    private EntityManager entityManager;
-    @Autowired
-    private PostService postService;
-    
+    public PostController(EntityManager entityManager, PostService postService) {
+        this.entityManager = entityManager;
+        this.postService = postService;
+    }
+
     public record CreatePostDto(Long spaceId, String subject, String content, boolean isDraft) {}
 
     public record PostIdDto(Long id) {}
@@ -112,7 +119,7 @@ public class PostController {
 
 
     @GetMapping("list")
-    public ApiResponseEntity<PageResult<PostSummary>> getPosts(
+    public ApiResponseEntity<PageResult<SpacePostSummary>> getPosts(
             @AuthenticationPrincipal User user,
             @RequestParam Long spaceId,
             @RequestParam int page,
@@ -126,7 +133,7 @@ public class PostController {
     }
 
     @PostMapping("like")
-    public BasicApiResponseEntity likePost(@RequestBody PostIdDto dto, @AuthenticationPrincipal User user) {
+    public BasicApiResponseEntity likePost(@RequestBody PostIdDto dto, User user) {
         if (dto.id == null) {
             throw new BadRequestException("postId is required");
         }
@@ -135,7 +142,7 @@ public class PostController {
     }
 
     @PostMapping("dislike")
-    public BasicApiResponseEntity disLikePost(@RequestBody PostIdDto dto, @AuthenticationPrincipal User user) {
+    public BasicApiResponseEntity disLikePost(@RequestBody PostIdDto dto, User user) {
         if (dto.id == null) {
             throw new BadRequestException("postId is required");
         }

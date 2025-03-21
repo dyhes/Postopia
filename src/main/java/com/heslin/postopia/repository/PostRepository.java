@@ -2,6 +2,8 @@ package com.heslin.postopia.repository;
 
 import com.heslin.postopia.dto.post.PostInfo;
 import com.heslin.postopia.dto.post.PostSummary;
+import com.heslin.postopia.dto.post.SpacePostSummary;
+import com.heslin.postopia.dto.post.UserPostSummary;
 import com.heslin.postopia.enums.PostStatus;
 import com.heslin.postopia.model.Post;
 import jakarta.transaction.Transactional;
@@ -59,12 +61,13 @@ public interface PostRepository extends CrudRepository<Post, Long>{
             JOIN p.user u
             LEFT JOIN PostOpinion o on o.user.id = :uid and o.post.id = :id
             where p.id = :id
+            
             """)
     Optional<PostInfo> findPostInfoById(@Param("id") Long id, @Param("uid") Long userId);
 
     @Query("""
             select
-            new com.heslin.postopia.dto.post.PostSummary(p.id, p.subject, p.positiveCount, p.negativeCount, p.commentCount, new com.heslin.postopia.dto.UserId(u.id), u.nickname, u.avatar,
+            new com.heslin.postopia.dto.post.SpacePostSummary(p.id, p.subject, p.positiveCount, p.negativeCount, p.commentCount, new com.heslin.postopia.dto.user.UserId(u.id), u.nickname, u.avatar,
                     CASE
                         WHEN o.id IS NULL THEN com.heslin.postopia.enums.OpinionStatus.NIL
                         WHEN o.isPositive = true THEN com.heslin.postopia.enums.OpinionStatus.POSITIVE
@@ -75,14 +78,30 @@ public interface PostRepository extends CrudRepository<Post, Long>{
                     LEFT JOIN PostOpinion o on o.post.id = p.id and o.user.id = :uid
                     where p.space.id = :id and p.status != com.heslin.postopia.enums.PostStatus.DRAFT
             """)
-    Page<PostSummary> findPostSummariesBySpaceId(@Param("id") Long id, @Param("uid") Long userId, Pageable pageable);
+    Page<SpacePostSummary> findPostSummariesBySpaceId(@Param("id") Long id, @Param("uid") Long userId, Pageable pageable);
 
 
     @Query("""
-            select new com.heslin.postopia.dto.post.PostSummary(p.id, p.subject, p.positiveCount, p.negativeCount, p.commentCount, new com.heslin.postopia.dto.UserId(u.id), u.nickname, u.avatar, null)
-            from Post p
-            JOIN p.user u
-            where u.id = :uid
+            select new com.heslin.postopia.dto.post.PostSummary(p.space.id, p.id, p.subject, p.positiveCount, p.negativeCount, p.commentCount)
+                from Post p
+                join p.user u
+                where u.id = :uid
             """)
-    Page<PostSummary> findPostSummariesByUserId(@Param("uid") Long id, Pageable pageable);
+    Page<PostSummary> findPostSummariesBySelf(@Param("uid") Long id, Pageable pageable);
+
+
+
+    @Query("""
+            select new com.heslin.postopia.dto.post.UserPostSummary(p.space.id, p.id, p.subject, p.positiveCount, p.negativeCount, p.commentCount,
+                    CASE
+                        WHEN o.id IS NULL THEN com.heslin.postopia.enums.OpinionStatus.NIL
+                        WHEN o.isPositive = true THEN com.heslin.postopia.enums.OpinionStatus.POSITIVE
+                        ELSE com.heslin.postopia.enums.OpinionStatus.NEGATIVE
+                    END)
+                from Post p
+                join p.user u
+                left join PostOpinion o on o.post.id = p.id and o.user.id = :sid
+                where u.id = :qid
+            """)
+    Page<PostSummary> findPostSummariesByUserId(@Param("qid") Long qid, @Param("sid") Long sid, Pageable pageable);
 }

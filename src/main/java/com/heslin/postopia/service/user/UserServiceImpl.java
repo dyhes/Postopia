@@ -1,8 +1,8 @@
 package com.heslin.postopia.service.user;
 
 import com.heslin.postopia.dto.Message;
-import com.heslin.postopia.dto.UserId;
-import com.heslin.postopia.dto.UserInfo;
+import com.heslin.postopia.dto.user.UserId;
+import com.heslin.postopia.dto.user.UserInfo;
 import com.heslin.postopia.model.User;
 import com.heslin.postopia.repository.UserRepository;
 import com.heslin.postopia.service.mail.MailService;

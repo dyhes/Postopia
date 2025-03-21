@@ -1,11 +1,8 @@
 package com.heslin.postopia.dto.comment;
 
-import com.heslin.postopia.dto.UserId;
+import com.heslin.postopia.dto.user.UserId;
 import com.heslin.postopia.enums.OpinionStatus;
-import com.heslin.postopia.model.Comment;
-import com.heslin.postopia.model.User;
 import lombok.Getter;
-import lombok.Setter;
 
 import java.time.Instant;
 import java.util.ArrayList;

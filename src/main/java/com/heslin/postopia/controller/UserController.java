@@ -2,8 +2,8 @@ package com.heslin.postopia.controller;
 
 import com.heslin.postopia.dto.Message;
 import com.heslin.postopia.dto.SpaceInfo;
-import com.heslin.postopia.dto.UserId;
-import com.heslin.postopia.dto.UserInfo;
+import com.heslin.postopia.dto.user.UserId;
+import com.heslin.postopia.dto.user.UserInfo;
 import com.heslin.postopia.dto.comment.CommentSummary;
 import com.heslin.postopia.dto.pageresult.PageResult;
 import com.heslin.postopia.dto.post.PostSummary;
@@ -122,10 +122,14 @@ public class UserController {
     public ApiResponseEntity<PageResult<PostSummary>> getPosts(
             @AuthenticationPrincipal User user,
             @RequestParam int page,
+            @RequestParam(required = false) UserId userId,
             @RequestParam(defaultValue = "50") int size,
             @RequestParam(defaultValue = "DESC") Sort.Direction direction) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction, "p.createdAt"));
-        return ApiResponseEntity.ok(new ApiResponse<>("获取帖子列表成功", new PageResult<>(postService.getPostsByUser(user.getId(), pageable))));
+        boolean isSelf = userId == null || userId.getId().equals(user.getId());
+        Long queryId = userId == null ? user.getId() : userId.getId();
+        Long selfId = user.getId();
+        return ApiResponseEntity.ok(new ApiResponse<>("获取帖子列表成功", new PageResult<>(postService.getPostsByUser(isSelf, queryId, selfId, pageable))));
     }
 
     @GetMapping("comments")

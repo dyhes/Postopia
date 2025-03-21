@@ -1,6 +1,6 @@
 package com.heslin.postopia.repository;
 
-import com.heslin.postopia.dto.UserInfo;
+import com.heslin.postopia.dto.user.UserInfo;
 import com.heslin.postopia.model.User;
 import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.Modifying;

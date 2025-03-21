@@ -35,12 +35,12 @@ public interface CommentRepository extends CrudRepository<Comment, Long>{
     void disLikeComment(@Param("id") Long id);
 
     @Query("""
-                select new com.heslin.postopia.dto.comment.CommentSummary(c.id,c.content, c.createdAt, p.space.id, p.id, p.subject, new com.heslin.postopia.dto.UserId(u.id), u.nickname, u.avatar) from Comment c JOIN c.post p JOIN c.user u where u.id = :uid 
+                select new com.heslin.postopia.dto.comment.CommentSummary(c.id,c.content, c.createdAt, p.space.id, p.id, p.subject, new com.heslin.postopia.dto.user.UserId(u.id), u.nickname, u.avatar) from Comment c JOIN c.post p JOIN c.user u where u.id = :uid 
             """)
     Page<CommentSummary> findCommentsByUserId(@Param("uid") Long id, Pageable pageable);
 
     @Query("""
-                select new com.heslin.postopia.dto.comment.CommentInfo(c.id,c.content, c.createdAt, new com.heslin.postopia.dto.UserId(u.id), u.nickname, u.avatar,
+                select new com.heslin.postopia.dto.comment.CommentInfo(c.id,c.content, c.createdAt, new com.heslin.postopia.dto.user.UserId(u.id), u.nickname, u.avatar,
                         CASE
                             WHEN o.id IS NULL THEN com.heslin.postopia.enums.OpinionStatus.NIL
                             WHEN o.isPositive = true THEN com.heslin.postopia.enums.OpinionStatus.POSITIVE

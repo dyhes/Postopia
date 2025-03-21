@@ -2,7 +2,7 @@ package com.heslin.postopia.config;
 
 import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.heslin.postopia.dto.UserId;
+import com.heslin.postopia.dto.user.UserId;
 import com.heslin.postopia.serializer.UserIdSerializer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationPropertiesBinding;
