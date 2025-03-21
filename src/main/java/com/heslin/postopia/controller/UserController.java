@@ -110,11 +110,13 @@ public class UserController {
     @GetMapping("spaces")
     public ApiResponseEntity<PageResult<SpaceInfo>> getSpaces(@AuthenticationPrincipal User user,
                                                               @RequestParam int page,
+                                                              @RequestParam(required = false) UserId userId,
                                                               @RequestParam(required = false, defaultValue = "250") int size,
                                                               @RequestParam(defaultValue = "LASTACTIVE") JoinedSpaceOrder order,
                                                               @RequestParam(defaultValue = "DESC") Sort.Direction direction) {
+        Long queryId = userId == null ? user.getId() : userId.getId();
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction, order.getField()));
-        Page<SpaceInfo> spaces = spaceService.getSpacesByUserId(user.getId(), pageable);
+        Page<SpaceInfo> spaces = spaceService.getSpacesByUserId(queryId, pageable);
         return ApiResponseEntity.ok(new ApiResponse<>(null, new PageResult<>(spaces)));
     }
 
