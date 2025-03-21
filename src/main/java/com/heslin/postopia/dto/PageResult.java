@@ -1,4 +1,4 @@
-package com.heslin.postopia.dto.pageresult;
+package com.heslin.postopia.dto;
 import java.util.List;
 
 import org.springframework.data.domain.Page;

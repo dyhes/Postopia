@@ -1,8 +1,7 @@
 package com.heslin.postopia.controller;
 
-import com.heslin.postopia.dto.pageresult.PageResult;
+import com.heslin.postopia.dto.PageResult;
 import com.heslin.postopia.dto.post.PostInfo;
-import com.heslin.postopia.dto.post.PostSummary;
 import com.heslin.postopia.dto.post.SpacePostSummary;
 import com.heslin.postopia.dto.response.ApiResponse;
 import com.heslin.postopia.dto.response.ApiResponseEntity;

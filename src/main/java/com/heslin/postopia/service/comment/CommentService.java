@@ -9,8 +9,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 
-import java.util.List;
-
 public interface  CommentService {
     Comment replyToPost(Post post, String content, @AuthenticationPrincipal User user);
 
@@ -24,7 +22,7 @@ public interface  CommentService {
 
     void disLikeComment(Long id, @AuthenticationPrincipal User user);
 
-    Page<CommentSummary> getCommentsByUser(Long id, Pageable pageable);
+    Page<CommentSummary> getCommentsByUser(Long queryId, Long selfId, Pageable pageable);
 
     Page<CommentInfo> getCommentsByPost(Long postId, Long userId, Pageable pageable);
 }

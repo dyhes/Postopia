@@ -2,14 +2,13 @@ package com.heslin.postopia.controller;
 
 import com.heslin.postopia.dto.Message;
 import com.heslin.postopia.dto.SpaceInfo;
-import com.heslin.postopia.dto.pageresult.PageResult;
+import com.heslin.postopia.dto.PageResult;
 import com.heslin.postopia.dto.response.ApiResponse;
 import com.heslin.postopia.dto.response.ApiResponseEntity;
 import com.heslin.postopia.dto.response.BasicApiResponseEntity;
 import com.heslin.postopia.enums.PopularSpaceOrder;
 import com.heslin.postopia.exception.BadRequestException;
 import com.heslin.postopia.model.User;
-import com.heslin.postopia.service.os.OSService;
 import com.heslin.postopia.service.space.SpaceService;
 import com.heslin.postopia.util.Pair;
 import org.springframework.beans.factory.annotation.Autowired;

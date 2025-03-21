@@ -6,12 +6,10 @@ import com.heslin.postopia.model.Comment;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
-import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -35,17 +33,12 @@ public interface CommentRepository extends CrudRepository<Comment, Long>{
     void disLikeComment(@Param("id") Long id);
 
     @Query("""
-                select new com.heslin.postopia.dto.comment.CommentSummary(c.id,c.content, c.createdAt, p.space.id, p.id, p.subject, new com.heslin.postopia.dto.user.UserId(u.id), u.nickname, u.avatar) from Comment c JOIN c.post p JOIN c.user u where u.id = :uid 
-            """)
-    Page<CommentSummary> findCommentsByUserId(@Param("uid") Long id, Pageable pageable);
-
-    @Query("""
                 select new com.heslin.postopia.dto.comment.CommentInfo(c.id,c.content, c.createdAt, new com.heslin.postopia.dto.user.UserId(u.id), u.nickname, u.avatar,
                         CASE
                             WHEN o.id IS NULL THEN com.heslin.postopia.enums.OpinionStatus.NIL
                             WHEN o.isPositive = true THEN com.heslin.postopia.enums.OpinionStatus.POSITIVE
                             ELSE com.heslin.postopia.enums.OpinionStatus.NEGATIVE
-                            END) from Comment c
+                            END, c.positiveCount, c.negativeCount) from Comment c
                                    JOIN c.user u
                                    LEFT JOIN CommentOpinion o on o.user.id = :uid and o.comment.id = c.id
                                    where c.post.id = :pid and c.parent IS NULL
@@ -69,7 +62,9 @@ public interface CommentRepository extends CrudRepository<Comment, Long>{
                            WHEN o.is_positive = TRUE THEN 'POSITIVE'
                            ELSE 'NEGATIVE'
                        END AS opinion_status,
-                       c.parent_id AS parent_id  -- 用于递归连接
+                       c.parent_id AS parent_id,  -- 用于递归连接
+                       c.positive_count,
+                       c.negative_count,
                    FROM
                        comments c
                    JOIN
@@ -94,7 +89,9 @@ public interface CommentRepository extends CrudRepository<Comment, Long>{
                            WHEN o_child.is_positive = TRUE THEN 'POSITIVE'
                            ELSE 'NEGATIVE'
                        END AS opinion_status,
-                       child.parent_id AS parent_id
+                       child.parent_id AS parent_id,
+                       child.positive_count,
+                       child.negative_count,
                    FROM
                        comments child
                    JOIN
@@ -112,9 +109,30 @@ public interface CommentRepository extends CrudRepository<Comment, Long>{
                    nickname,
                    avatar,
                    opinion_status,
-                   parent_id
+                   parent_id,
+                   positive_count,
+                   negative_count,
                FROM comment_tree
                ORDER BY created_at ASC;
                                 """, nativeQuery = true)
     List<Object[]> findChildrenByCommentIds(@Param("cids") List<Long> commentIds, @Param("uid") Long userId);
+
+    @Query("""
+            select new com.heslin.postopia.dto.comment.UserCommentSummary(c.id, p.space.id, p.id, c.content, c.createdAt, c.positiveCount, c.negativeCount,
+                        CASE
+                           WHEN o.id IS NULL THEN com.heslin.postopia.enums.OpinionStatus.NIL
+                           WHEN o.isPositive = true THEN com.heslin.postopia.enums.OpinionStatus.POSITIVE
+                           ELSE com.heslin.postopia.enums.OpinionStatus.NEGATIVE
+                       END) from Comment c
+                        JOIN c.post p
+                        LEFT JOIN CommentOpinion o on o.user.id = :sid and o.comment.id = c.id
+                        where c.user.id = :qid
+            """)
+    Page<CommentSummary> findCommentsByUser(@Param("qid") Long queryId,@Param("sid") Long selfId, Pageable pageable);
+
+    @Query("""
+                select new com.heslin.postopia.dto.comment.CommentSummary(c.id, p.space.id, p.id, c.content, c.createdAt, c.positiveCount, c.negativeCount) from Comment c JOIN c.post p where c.user.id = :uid
+            """)
+    Page<CommentSummary> findCommentsBySelf(@Param("uid") Long id, Pageable pageable);
+
 }

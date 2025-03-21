@@ -1,7 +1,7 @@
 package com.heslin.postopia.controller;
 
 import com.heslin.postopia.dto.comment.CommentInfo;
-import com.heslin.postopia.dto.pageresult.PageResult;
+import com.heslin.postopia.dto.PageResult;
 import com.heslin.postopia.dto.response.ApiResponseEntity;
 import com.heslin.postopia.dto.response.BasicApiResponseEntity;
 import com.heslin.postopia.exception.BadRequestException;
@@ -10,14 +10,11 @@ import com.heslin.postopia.model.Post;
 import com.heslin.postopia.model.User;
 import com.heslin.postopia.service.comment.CommentService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("comment")

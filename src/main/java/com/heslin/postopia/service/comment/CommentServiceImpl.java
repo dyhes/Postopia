@@ -82,8 +82,12 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    public Page<CommentSummary> getCommentsByUser(Long id, Pageable pageable) {
-        return commentRepository.findCommentsByUserId(id, pageable);
+    public Page<CommentSummary> getCommentsByUser(Long queryId, Long selfId, Pageable pageable) {
+        if (Objects.equals(queryId, selfId)) {
+            return commentRepository.findCommentsBySelf(selfId, pageable);
+        } else {
+            return commentRepository.findCommentsByUser(queryId, selfId, pageable);
+        }
     }
 
     @Override
@@ -99,7 +103,7 @@ public class CommentServiceImpl implements CommentService {
                 (Instant) arr[2], new UserId((Long) arr[3]),
                 (String) arr[4], (String) arr[5],
                 OpinionStatus.valueOf((String) arr[6]),
-                (Long) arr[7]
+                (Long) arr[7], (long) arr[8], (long) arr[9]
         )).toList();
         for (CommentInfo commentInfo : flattenChildren) {
             mp.put(commentInfo.getId(), commentInfo);
