@@ -22,7 +22,10 @@ public class UserId implements Serializable {
     }
 
     public static Long masked(Long id) {
-        return id ^ MASK;
+        if (id != null) {
+            return id ^ MASK;
+        }
+        return -1L;
     }
 
     @Override

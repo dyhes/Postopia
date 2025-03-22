@@ -67,7 +67,7 @@ public interface PostRepository extends CrudRepository<Post, Long>{
 
     @Query("""
             select
-            new com.heslin.postopia.dto.post.SpacePostSummary(p.id, p.subject, p.positiveCount, p.negativeCount, p.commentCount, new com.heslin.postopia.dto.user.UserId(u.id), u.nickname, u.avatar,
+            new com.heslin.postopia.dto.post.SpacePostSummary(p.id, p.subject, SUBSTRING(p.content, 1, 100), p.positiveCount, p.negativeCount, p.commentCount, new com.heslin.postopia.dto.user.UserId(u.id), u.nickname, u.avatar,
                     CASE
                         WHEN o.id IS NULL THEN com.heslin.postopia.enums.OpinionStatus.NIL
                         WHEN o.isPositive = true THEN com.heslin.postopia.enums.OpinionStatus.POSITIVE
@@ -82,9 +82,10 @@ public interface PostRepository extends CrudRepository<Post, Long>{
 
 
     @Query("""
-            select new com.heslin.postopia.dto.post.PostSummary(p.space.id, p.id, p.subject, p.positiveCount, p.negativeCount, p.commentCount)
+            select new com.heslin.postopia.dto.post.PostSummary(s.id, s.name, p.id, p.subject, SUBSTRING(p.content, 1, 100), p.positiveCount, p.negativeCount, p.commentCount)
                 from Post p
                 join p.user u
+                join p.space s
                 where u.id = :uid
             """)
     Page<PostSummary> findPostSummariesBySelf(@Param("uid") Long id, Pageable pageable);
@@ -92,7 +93,7 @@ public interface PostRepository extends CrudRepository<Post, Long>{
 
 
     @Query("""
-            select new com.heslin.postopia.dto.post.UserPostSummary(p.space.id, p.id, p.subject, p.positiveCount, p.negativeCount, p.commentCount,
+            select new com.heslin.postopia.dto.post.UserPostSummary(s.id, s.name, p.id, p.subject, SUBSTRING(p.content, 1, 100), p.positiveCount, p.negativeCount, p.commentCount,
                     CASE
                         WHEN o.id IS NULL THEN com.heslin.postopia.enums.OpinionStatus.NIL
                         WHEN o.isPositive = true THEN com.heslin.postopia.enums.OpinionStatus.POSITIVE
@@ -100,6 +101,7 @@ public interface PostRepository extends CrudRepository<Post, Long>{
                     END)
                 from Post p
                 join p.user u
+                join p.space s
                 left join PostOpinion o on o.post.id = p.id and o.user.id = :sid
                 where u.id = :qid
             """)

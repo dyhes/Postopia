@@ -52,10 +52,7 @@ public class SpaceController {
 
     @PostMapping("join")
     public BasicApiResponseEntity joinSpace(@AuthenticationPrincipal User user, @RequestBody SpaceIdDto space) {
-        System.out.println("here1");
-        System.out.println(space);
         if (space.spaceId == null) {
-            System.out.println("here2");
             return BasicApiResponseEntity.badRequest("spaceId is required");
         }
 

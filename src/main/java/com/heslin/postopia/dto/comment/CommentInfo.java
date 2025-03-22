@@ -24,12 +24,12 @@ public class CommentInfo {
     private final long negativeCount;
     private final List<CommentInfo> children;
 
-    public CommentInfo(Long id, String content, Instant createdAt, UserId userId, String nickName, String avatar, OpinionStatus opinion, long positiveCount, long negativeCount) {
+    public CommentInfo(Long id, String content, Instant createdAt, Long userId, String nickName, String avatar, OpinionStatus opinion, long positiveCount, long negativeCount) {
         this.id = id;
         this.parentId = null;
         this.content = content;
         this.createdAt = createdAt;
-        this.userId = userId;
+        this.userId = new UserId(userId);
         this.nickName = nickName;
         this.avatar = avatar;
         this.opinion = opinion;
@@ -38,12 +38,12 @@ public class CommentInfo {
         this.negativeCount = negativeCount;
     }
 
-    public CommentInfo(Long id, String content, Instant createdAt, UserId userId, String nickName, String avatar, OpinionStatus opinion, Long parentId, long positiveCount, long negativeCount) {
+    public CommentInfo(Long id, String content, Instant createdAt, Long userId, String nickName, String avatar, OpinionStatus opinion, Long parentId, long positiveCount, long negativeCount) {
         this.id = id;
         this.parentId = parentId;
         this.content = content;
         this.createdAt = createdAt;
-        this.userId = userId;
+        this.userId = new UserId(userId);
         this.nickName = nickName;
         this.avatar = avatar;
         this.opinion = opinion;
