@@ -1,5 +1,6 @@
 package com.heslin.postopia.service.comment;
 
+import com.heslin.postopia.dto.comment.UserOpinionCommentSummary;
 import com.heslin.postopia.dto.user.UserId;
 import com.heslin.postopia.dto.comment.CommentInfo;
 import com.heslin.postopia.dto.comment.CommentSummary;
@@ -11,6 +12,7 @@ import com.heslin.postopia.model.Post;
 import com.heslin.postopia.model.User;
 import com.heslin.postopia.model.opinion.CommentOpinion;
 import com.heslin.postopia.repository.CommentRepository;
+import com.heslin.postopia.repository.OpinionRepository;
 import com.heslin.postopia.repository.PostRepository;
 import com.heslin.postopia.service.opinion.OpinionService;
 import jakarta.transaction.Transactional;
@@ -126,5 +128,9 @@ public class CommentServiceImpl implements CommentService {
         opinionService.upsertOpinion(postOpinion);
     }
 
-
+    @Override
+    public Page<UserOpinionCommentSummary> getCommentOpinionsByUser(Long id, OpinionStatus opinionStatus, Pageable pageable) {
+        List<Boolean> statuses = opinionStatus == OpinionStatus.NIL ? List.of(true, false) : opinionStatus == OpinionStatus.POSITIVE ? List.of(true) : List.of(false);
+        return opinionService.getCommentOpinionsByUser(id, statuses, pageable);
+    }
 }

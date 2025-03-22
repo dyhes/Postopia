@@ -1,7 +1,6 @@
 package com.heslin.postopia.dto.comment;
 
 import com.heslin.postopia.dto.user.UserId;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import java.time.Instant;
@@ -17,7 +16,7 @@ public class CommentSummary {
     private final String postSubject;
     private final String subContent;
     private final UserId replyTo;
-    private final String nickName;
+    private final String replyNickName;
     private final Instant createdAt;
     private final long positiveCount;
     private final long negativeCount;
@@ -30,7 +29,7 @@ public class CommentSummary {
         this.postSubject = postSubject;
         this.subContent = subContent;
         this.replyTo = new UserId(replyTo);
-        this.nickName = nickName;
+        this.replyNickName = nickName;
         this.createdAt = createdAt;
         this.positiveCount = positiveCount;
         this.negativeCount = negativeCount;

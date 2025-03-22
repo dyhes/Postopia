@@ -4,6 +4,8 @@ import com.heslin.postopia.dto.Message;
 import com.heslin.postopia.dto.post.PostInfo;
 import com.heslin.postopia.dto.post.PostSummary;
 import com.heslin.postopia.dto.post.SpacePostSummary;
+import com.heslin.postopia.dto.post.UserOpinionPostSummary;
+import com.heslin.postopia.enums.OpinionStatus;
 import com.heslin.postopia.enums.PostStatus;
 import com.heslin.postopia.exception.ForbiddenException;
 import com.heslin.postopia.exception.ResourceNotFoundException;
@@ -21,6 +23,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class PostServiceImpl implements PostService {
@@ -131,4 +135,9 @@ public class PostServiceImpl implements PostService {
         }
     }
 
+    @Override
+    public Page<UserOpinionPostSummary> getPostOpinionsByUser(Long id, OpinionStatus opinionStatus, Pageable pageable) {
+        List<Boolean> statuses = opinionStatus == OpinionStatus.NIL ? List.of(true, false) : opinionStatus == OpinionStatus.POSITIVE ? List.of(true) : List.of(false);
+        return opinionService.getPostOpinionsByUser(id, statuses, pageable);
+    }
 }

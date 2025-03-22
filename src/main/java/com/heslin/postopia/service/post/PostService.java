@@ -4,6 +4,8 @@ import com.heslin.postopia.dto.Message;
 import com.heslin.postopia.dto.post.PostInfo;
 import com.heslin.postopia.dto.post.PostSummary;
 import com.heslin.postopia.dto.post.SpacePostSummary;
+import com.heslin.postopia.dto.post.UserOpinionPostSummary;
+import com.heslin.postopia.enums.OpinionStatus;
 import com.heslin.postopia.model.Comment;
 import com.heslin.postopia.model.Space;
 import com.heslin.postopia.model.User;
@@ -30,4 +32,6 @@ public interface PostService {
     Page<SpacePostSummary> getPosts(Long id, Pageable pageable, @AuthenticationPrincipal User user);
 
     Page<PostSummary> getPostsByUser(boolean isSelf, Long queryId, Long selfId, Pageable pageable);
+
+    Page<UserOpinionPostSummary> getPostOpinionsByUser(Long queryId, OpinionStatus opinion, Pageable pageable);
 }

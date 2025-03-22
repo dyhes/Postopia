@@ -2,6 +2,8 @@ package com.heslin.postopia.service.comment;
 
 import com.heslin.postopia.dto.comment.CommentInfo;
 import com.heslin.postopia.dto.comment.CommentSummary;
+import com.heslin.postopia.dto.comment.UserOpinionCommentSummary;
+import com.heslin.postopia.enums.OpinionStatus;
 import com.heslin.postopia.model.Comment;
 import com.heslin.postopia.model.Post;
 import com.heslin.postopia.model.User;
@@ -25,4 +27,6 @@ public interface  CommentService {
     Page<CommentSummary> getCommentsByUser(Long queryId, Long selfId, Pageable pageable);
 
     Page<CommentInfo> getCommentsByPost(Long postId, Long userId, Pageable pageable);
+
+    Page<UserOpinionCommentSummary> getCommentOpinionsByUser(Long id, OpinionStatus opinionStatus, Pageable pageable);
 }

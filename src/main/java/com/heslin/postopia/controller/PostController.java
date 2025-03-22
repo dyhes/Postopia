@@ -132,7 +132,7 @@ public class PostController {
     }
 
     @PostMapping("like")
-    public BasicApiResponseEntity likePost(@RequestBody PostIdDto dto, User user) {
+    public BasicApiResponseEntity likePost(@RequestBody PostIdDto dto,@AuthenticationPrincipal User user) {
         if (dto.id == null) {
             throw new BadRequestException("postId is required");
         }
@@ -141,7 +141,7 @@ public class PostController {
     }
 
     @PostMapping("dislike")
-    public BasicApiResponseEntity disLikePost(@RequestBody PostIdDto dto, User user) {
+    public BasicApiResponseEntity disLikePost(@RequestBody PostIdDto dto,@AuthenticationPrincipal User user) {
         if (dto.id == null) {
             throw new BadRequestException("postId is required");
         }

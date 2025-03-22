@@ -2,6 +2,8 @@ package com.heslin.postopia.controller;
 
 import com.heslin.postopia.dto.Message;
 import com.heslin.postopia.dto.SpaceInfo;
+import com.heslin.postopia.dto.comment.UserOpinionCommentSummary;
+import com.heslin.postopia.dto.post.UserOpinionPostSummary;
 import com.heslin.postopia.dto.user.UserId;
 import com.heslin.postopia.dto.user.UserInfo;
 import com.heslin.postopia.dto.comment.CommentSummary;
@@ -148,14 +150,29 @@ public class UserController {
         return ApiResponseEntity.ok(new ApiResponse<>("获取评论列表成功", new PageResult<>(commentService.getCommentsByUser(queryId, selfId, pageable))));
     }
 
-//    @GetMapping("comment_opinions")
-//    public ApiResponseEntity<PageResult<CommentSummary>> getCommentOpinions(
-//            @AuthenticationPrincipal User user,
-//            @RequestParam int page,
-//            @RequestParam(defaultValue = "NIL") OpinionStatus opinon,
-//            @RequestParam(defaultValue = "50") int size,
-//            @RequestParam(defaultValue = "DESC") Sort.Direction direction) {
-//        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, "c.createdAt"));
-//        return ApiResponseEntity.ok(new ApiResponse<>("获取评论态度列表成功", new PageResult<>(commentService.getCommentsByUser(user.getId(), pageable))));
-//    }
+    @GetMapping("comment_opinions")
+    public ApiResponseEntity<PageResult<UserOpinionCommentSummary>> getCommentOpinions(
+            @AuthenticationPrincipal User user,
+            @RequestParam int page,
+            @RequestParam(required = false) UserId userId,
+            @RequestParam(defaultValue = "NIL") OpinionStatus opinion,
+            @RequestParam(defaultValue = "50") int size,
+            @RequestParam(defaultValue = "DESC") Sort.Direction direction) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, "o.updatedAt"));
+        Long queryId = userId == null? user.getId() : userId.getId();
+        return ApiResponseEntity.ok(new ApiResponse<>("获取评论态度列表成功", new PageResult<>(commentService.getCommentOpinionsByUser(queryId, opinion, pageable))));
+    }
+
+    @GetMapping("post_opinions")
+    public ApiResponseEntity<PageResult<UserOpinionPostSummary>> getPostOpinions(
+    @AuthenticationPrincipal User user,
+    @RequestParam int page,
+    @RequestParam(required = false) UserId userId,
+    @RequestParam(defaultValue = "NIL") OpinionStatus opinion,
+    @RequestParam(defaultValue = "50") int size,
+    @RequestParam(defaultValue = "DESC") Sort.Direction direction) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, "o.updatedAt"));
+        Long queryId = userId == null? user.getId() : userId.getId();
+        return ApiResponseEntity.ok(new ApiResponse<>("获取帖子态度列表成功", new PageResult<>(postService.getPostOpinionsByUser(queryId, opinion, pageable))));
+    }
 }
