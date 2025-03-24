@@ -23,4 +23,6 @@ public interface UserService {
     UserInfo getUserInfo(Long id);
 
     void updateShowEmail(boolean show, Long id);
+
+    String uploadFile(UserId userId, MultipartFile img, boolean isVideo) throws IOException;
 }

@@ -72,6 +72,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public String uploadFile(UserId userId, MultipartFile img, boolean isVideo) throws IOException {
+        return osService.uploadFile(userId.toString(), img.getOriginalFilename(), img, isVideo);
+    }
+
+    @Override
     public UserInfo getUserInfo(Long id) {
         return userRepository.findUserInfoById(id);
     }

@@ -104,6 +104,16 @@ public class UserController {
         }
     }
 
+    @PostMapping("upload")
+    public ApiResponseEntity<String> uploadImg(@RequestPart("file") MultipartFile file, @RequestParam(defaultValue = "false") boolean isVideo, @AuthenticationPrincipal User user) {
+        try {
+            String url = userService.uploadFile(new UserId(user.getId()), file, isVideo);
+            return ApiResponseEntity.ok(new ApiResponse<>("success", true, url));
+        } catch (IOException e) {
+            return ApiResponseEntity.ok(new ApiResponse<>(e.getMessage(), false, null));
+        }
+    }
+
     @GetMapping("info/{userId}")
     public ApiResponseEntity<UserInfo> getUserInfo(@PathVariable UserId userId) {
         return ApiResponseEntity.ok(userService.getUserInfo(userId.getId()), "success");
