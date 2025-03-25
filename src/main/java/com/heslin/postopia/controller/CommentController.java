@@ -43,14 +43,15 @@ public class CommentController {
     }
 
     public record CommentIdDto(Long id) {
+    };
+
+    public record DeleteDto(Long id, Long postId) {
     }
 
-    ;
-
     @PostMapping("delete")
-    public BasicApiResponseEntity delete(@RequestBody CommentIdDto dto, @AuthenticationPrincipal User user) {
-        commentService.checkAuthority(dto.id(), user);
-        commentService.deleteComment(dto.id());
+    public BasicApiResponseEntity delete(@RequestBody DeleteDto dto, @AuthenticationPrincipal User user) {
+        //commentService.checkAuthority(dto.id(), user);
+        commentService.deleteComment(dto.id(), dto.postId(), user.getId());
         return BasicApiResponseEntity.ok("删除成功");
     }
 

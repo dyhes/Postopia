@@ -72,13 +72,10 @@ public class SpaceController {
 
     @PostMapping("leave")
         public BasicApiResponseEntity leaveSpace(@AuthenticationPrincipal User user, @RequestBody SpaceIdDto space) {
-        System.out.println("here1");
         if (space.spaceId == null) {
-            System.out.println("here2");
                 return BasicApiResponseEntity.badRequest("spaceId is required");
             }
 
-        System.out.println("here3");
         Message message = spaceService.leaveSpace(space.spaceId, user);
             return BasicApiResponseEntity.ok(message);
         }

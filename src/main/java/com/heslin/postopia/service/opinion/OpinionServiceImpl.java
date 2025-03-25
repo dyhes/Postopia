@@ -26,22 +26,18 @@ public class OpinionServiceImpl implements OpinionService {
     }
 
     @Override
-    public void upsertOpinion(Opinion opinion) {
+    public boolean upsertOpinion(Opinion opinion) {
         var tp = opinion.getFields();
         var updateAt = Instant.now();
-        switch (opinion.getDiscriminator()) {
-            case "COMMENT":
-                opinionRepository.upsertCommentOpinion(updateAt, opinion.isPositive(), opinion.getUser().getId(), tp.getLeft());
-                break;
-            case "POST":
-                opinionRepository.upsertPostOpinion(updateAt, opinion.isPositive(), opinion.getUser().getId(), tp.getMiddle());
-                break;
-            case "VOTE":
-                opinionRepository.upsertVoteOpinion(updateAt, opinion.isPositive(), opinion.getUser().getId(), tp.getRight());
-                break;
-            default:
-                throw new IllegalArgumentException("Unknown opinion type: " + opinion.getDiscriminator());
-        }
+        return switch (opinion.getDiscriminator()) {
+            case "COMMENT" ->
+            opinionRepository.upsertCommentOpinion(updateAt, opinion.isPositive(), opinion.getUser().getId(), tp.getLeft());
+            case "POST" ->
+            opinionRepository.upsertPostOpinion(updateAt, opinion.isPositive(), opinion.getUser().getId(), tp.getMiddle());
+            case "VOTE" ->
+            opinionRepository.upsertVoteOpinion(updateAt, opinion.isPositive(), opinion.getUser().getId(), tp.getRight());
+            default -> throw new IllegalArgumentException("Unknown opinion type: " + opinion.getDiscriminator());
+        };
     }
 
     @Override

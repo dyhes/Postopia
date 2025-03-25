@@ -10,7 +10,7 @@ import org.springframework.data.domain.Pageable;
 import java.util.List;
 
 public interface OpinionService {
-    void upsertOpinion(Opinion opinion);
+    boolean upsertOpinion(Opinion opinion);
 
     Page<UserOpinionCommentSummary> getCommentOpinionsByUser(Long id, List<Boolean> statuses, Pageable pageable);
 

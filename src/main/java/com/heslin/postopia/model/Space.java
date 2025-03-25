@@ -51,4 +51,6 @@ public class Space {
 
     @OneToMany(mappedBy="space")
     private List<SpaceVote> votes = new ArrayList<>();
+
+    private long memberCount;
 }

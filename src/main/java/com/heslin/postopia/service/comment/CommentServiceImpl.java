@@ -5,6 +5,7 @@ import com.heslin.postopia.dto.user.UserId;
 import com.heslin.postopia.dto.comment.CommentInfo;
 import com.heslin.postopia.dto.comment.CommentSummary;
 import com.heslin.postopia.enums.OpinionStatus;
+import com.heslin.postopia.enums.kafka.PostOperation;
 import com.heslin.postopia.exception.ForbiddenException;
 import com.heslin.postopia.exception.ResourceNotFoundException;
 import com.heslin.postopia.model.Comment;
@@ -14,6 +15,7 @@ import com.heslin.postopia.model.opinion.CommentOpinion;
 import com.heslin.postopia.repository.CommentRepository;
 import com.heslin.postopia.repository.OpinionRepository;
 import com.heslin.postopia.repository.PostRepository;
+import com.heslin.postopia.service.kafka.KafkaService;
 import com.heslin.postopia.service.opinion.OpinionService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,12 +32,16 @@ import java.util.Objects;
 
 @Service
 public class CommentServiceImpl implements CommentService {
+    private final CommentRepository commentRepository;
+    private final OpinionService opinionService;
+    private final KafkaService kafkaService;
+
     @Autowired
-    private CommentRepository commentRepository;
-    @Autowired
-    private PostRepository postRepository;
-    @Autowired
-    private OpinionService opinionService;
+    public CommentServiceImpl(CommentRepository commentRepository, OpinionService opinionService, KafkaService kafkaService) {
+        this.commentRepository = commentRepository;
+        this.opinionService = opinionService;
+        this.kafkaService = kafkaService;
+    }
 
     @Override
     @Transactional
@@ -43,9 +49,9 @@ public class CommentServiceImpl implements CommentService {
         Comment comment = new Comment();
         comment.setUser(user);
         comment.setPost(post);
-        postRepository.addComment(post.getId());
         comment.setContent(content);
         comment = commentRepository.save(comment);
+        kafkaService.sendToPost(post.getId(), PostOperation.COMMENT_CREATED);
         return comment;
     }
 
@@ -55,15 +61,18 @@ public class CommentServiceImpl implements CommentService {
         Comment comment = new Comment();
         comment.setUser(user);
         comment.setPost(post);
-        postRepository.addComment(post.getId());
         comment.setContent(content);
         comment.setParent(parent);
         commentRepository.save(comment);
+        kafkaService.sendToPost(post.getId(), PostOperation.COMMENT_CREATED);
     }
 
     @Override
-    public void deleteComment(Long id) {
-        commentRepository.deleteById(id);
+    public void deleteComment(Long id, Long postId, Long userId) {
+        boolean succeed = commentRepository.deleteComment(id, postId, userId) == 1;
+        if (succeed) {
+            kafkaService.sendToPost(postId, PostOperation.COMMENT_DELETED);
+        }
     }
 
     @Override

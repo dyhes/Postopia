@@ -32,6 +32,12 @@ public interface CommentRepository extends CrudRepository<Comment, Long>{
     @Query("update Comment c set c.negativeCount = c.negativeCount + 1 where c.id = :id")
     void disLikeComment(@Param("id") Long id);
 
+
+    @Modifying
+    @Transactional
+    @Query("update Comment c set c.negativeCount = c.negativeCount + 1 where c.id = :id and c.post.id = :pid and c.user.id = :uid")
+    int deleteComment(@Param("id") Long id, @Param("pid") Long pid, @Param("uid") Long uid);
+
     @Query("""
                 select new com.heslin.postopia.dto.comment.CommentInfo(c.id,c.content, c.createdAt, u.id, u.nickname, u.avatar,
                         CASE

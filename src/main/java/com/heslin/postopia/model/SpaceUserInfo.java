@@ -3,6 +3,7 @@ package com.heslin.postopia.model;
 import java.time.Instant;
 import java.time.LocalDate;
 
+import com.heslin.postopia.enums.OpinionStatus;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
@@ -26,6 +27,7 @@ public class SpaceUserInfo {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
 
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name = "space_id")

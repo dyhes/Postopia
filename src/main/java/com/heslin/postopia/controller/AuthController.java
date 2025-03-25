@@ -1,5 +1,6 @@
 package com.heslin.postopia.controller;
 
+import com.heslin.postopia.enums.OpinionStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;

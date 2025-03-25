@@ -7,6 +7,7 @@ import com.heslin.postopia.dto.post.SpacePostSummary;
 import com.heslin.postopia.dto.post.UserOpinionPostSummary;
 import com.heslin.postopia.enums.OpinionStatus;
 import com.heslin.postopia.enums.PostStatus;
+import com.heslin.postopia.enums.kafka.PostOperation;
 import com.heslin.postopia.exception.ForbiddenException;
 import com.heslin.postopia.exception.ResourceNotFoundException;
 import com.heslin.postopia.model.Comment;
@@ -16,6 +17,7 @@ import com.heslin.postopia.model.User;
 import com.heslin.postopia.model.opinion.PostOpinion;
 import com.heslin.postopia.repository.PostRepository;
 import com.heslin.postopia.service.comment.CommentService;
+import com.heslin.postopia.service.kafka.KafkaService;
 import com.heslin.postopia.service.opinion.OpinionService;
 import com.heslin.postopia.util.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,12 +30,22 @@ import java.util.List;
 
 @Service
 public class PostServiceImpl implements PostService {
+
+    private final PostRepository postRepository;
+
+    private final CommentService commentService;
+
+    private final OpinionService opinionService;
+
+    private final KafkaService kafkaService;
+
     @Autowired
-    private PostRepository postRepository;
-    @Autowired
-    private CommentService commentService;
-    @Autowired
-    private OpinionService opinionService;
+    public PostServiceImpl(PostRepository postRepository, CommentService commentService, OpinionService opinionService, KafkaService kafkaService) {
+        this.postRepository = postRepository;
+        this.commentService = commentService;
+        this.opinionService = opinionService;
+        this.kafkaService = kafkaService;
+    }
 
     @Override
     public Pair<Long, Message> createPost(boolean isDraft, Space space, User user, String subject, String content) {
@@ -58,7 +70,6 @@ public class PostServiceImpl implements PostService {
         if (!uid.equals(user.getId())) {
             throw new ForbiddenException();
         }
-        
     }
 
     @Override
@@ -82,7 +93,6 @@ public class PostServiceImpl implements PostService {
         if (status != PostStatus.PUBLISHED) {
             throw new ForbiddenException();
         }
-
     }
 
     @Override
@@ -97,16 +107,16 @@ public class PostServiceImpl implements PostService {
 
 
     private void addPostOpinion(Long id, User user, boolean opinion) {
-        if (opinion) {
-            postRepository.likePost(id);
-        } else {
-            postRepository.disLikePost(id);
-        }
         PostOpinion postOpinion = new PostOpinion();
         postOpinion.setUser(user);
         postOpinion.setPost(new Post(id));
         postOpinion.setPositive(opinion);
-        opinionService.upsertOpinion(postOpinion);
+        boolean isInsert = opinionService.upsertOpinion(postOpinion);
+        if (isInsert) {
+            kafkaService.sendToPost(id, opinion? PostOperation.LIKED : PostOperation.DISLIKED);
+        } else {
+            kafkaService.sendToPost(id, opinion? PostOperation.SWITCH_TO_LIKE : PostOperation.SWITCH_TO_DISLIKE);
+        }
     }
 
     @Override

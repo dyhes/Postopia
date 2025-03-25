@@ -1,4 +1,22 @@
 spring:
+  kafka:
+    bootstrap-servers: localhost:9092  # Kafka 服务地址
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.LongSerializer
+      value-serializer: org.apache.kafka.common.serialization.IntegerSerializer
+      batch-size: 16384
+      compression-type: snappy
+      retries: 3
+      properties:
+        linger.ms: 1000
+    consumer:
+      group-id: consumer-group
+      key-deserializer: org.apache.kafka.common.serialization.LongDeserializer
+           # 消费者组 ID
+      value-deserializer: org.apache.kafka.common.serialization.IntegerDeserializer
+      max-poll-records: 1000
+      fetch-min-size: 10240
+      fetch-max-wait: 1000
   servlet:
     multipart:
       max-file-size: 100MB
@@ -18,6 +36,9 @@ spring:
   # JPA 配置
   jpa:
     hibernate:
+      jdbc.batch_size: 500       # 每批处理量
+      order_updates: true        # 按主键排序减少锁竞争
+      generate_statistics: true  # 开启统计（调试用）
       ddl-auto: update  # 测试环境设为 update，生产环境应为 none[1](@ref)
 
   # 邮件配置
@@ -69,10 +90,3 @@ postopia:
 
 server:
   port: 8081
-
-logging:
-  level:
-    org:
-      springframework:
-        core:
-          convert: DEBUG

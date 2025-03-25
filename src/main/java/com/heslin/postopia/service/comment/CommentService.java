@@ -16,7 +16,7 @@ public interface  CommentService {
 
     void reply(Post post, Comment comment, String content, @AuthenticationPrincipal User user);
 
-    void deleteComment(Long id);
+    void deleteComment(Long id, Long postId, Long userId);
 
     void checkAuthority(Long id, @AuthenticationPrincipal User user);
 

@@ -87,6 +87,7 @@ public class SpaceServiceImpl implements SpaceService {
         space.setName(name);
         space.setDescription(description);
         space.setAvatar(avatarUrl);
+        space.setMemberCount(0);
         space = spaceRepository.save(space);
         Message message = joinSpace(space, user);
         if (!message.success()) {

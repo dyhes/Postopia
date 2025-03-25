@@ -32,20 +32,6 @@ public interface PostRepository extends CrudRepository<Post, Long>{
     @Query("update Post p set p.subject = :subject, p.content = :content where p.id = :id")
     void updateSubjectAndContent(@Param("id")Long id, @Param("subject")String subject, @Param("content")String content);
 
-    @Modifying
-    @Transactional
-    @Query("update Post p set p.commentCount = p.commentCount + 1 where p.id = :id")
-    void addComment(@Param("id")Long id);
-
-    @Modifying
-    @Transactional
-    @Query("update Post p set p.positiveCount = p.positiveCount + 1 where p.id = :id")
-    void likePost(@Param("id")Long id);
-
-    @Modifying
-    @Transactional
-    @Query("update Post p set p.negativeCount = p.negativeCount + 1 where p.id = :id")
-    void disLikePost(@Param("id")Long id);
 
     Optional<PostStatus> findStatusById(Long id);
 
