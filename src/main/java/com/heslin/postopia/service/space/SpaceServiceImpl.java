@@ -3,10 +3,12 @@ package com.heslin.postopia.service.space;
 import com.heslin.postopia.dto.Message;
 import com.heslin.postopia.dto.SpaceInfo;
 import com.heslin.postopia.enums.PopularSpaceOrder;
+import com.heslin.postopia.enums.kafka.SpaceOperation;
 import com.heslin.postopia.model.Space;
 import com.heslin.postopia.model.SpaceUserInfo;
 import com.heslin.postopia.model.User;
 import com.heslin.postopia.repository.SpaceRepository;
+import com.heslin.postopia.service.kafka.KafkaService;
 import com.heslin.postopia.service.os.OSService;
 import com.heslin.postopia.service.space_user_info.SpaceUserInfoService;
 import com.heslin.postopia.util.Pair;
@@ -27,16 +29,19 @@ public class SpaceServiceImpl implements SpaceService {
     private final SpaceUserInfoService spaceUserInfoService;
     private final OSService osService;
     private final String defaultSpaceAvatar;
+    private final KafkaService kafkaService;
 
     @Autowired
-    public SpaceServiceImpl(@Value("${postopia.avatar.space}") String defaultSpaceAvatar, OSService osService, SpaceRepository spaceRepository, SpaceUserInfoService spaceUserInfoService) {
+    public SpaceServiceImpl(@Value("${postopia.avatar.space}") String defaultSpaceAvatar, OSService osService, SpaceRepository spaceRepository, SpaceUserInfoService spaceUserInfoService, KafkaService kafkaService) {
         this.osService = osService;
         this.spaceRepository = spaceRepository;
         this.spaceUserInfoService = spaceUserInfoService;
         this.defaultSpaceAvatar = defaultSpaceAvatar;
+        this.kafkaService = kafkaService;
     }
 
     @Override
+    @Transactional
     public Message joinSpace(Long spaceId, User user) {
         Space space = spaceRepository.findById(spaceId).orElse(null);
         if (space == null) {
@@ -46,6 +51,7 @@ public class SpaceServiceImpl implements SpaceService {
         return joinSpace(space, user);
     }
 
+    @Transactional
     public Message joinSpace(Space space, User user) {
         if (spaceUserInfoService.isSpaceMember(space.getId(), user.getId())) {
             return new Message("已经加入过该空间", false);
@@ -56,12 +62,14 @@ public class SpaceServiceImpl implements SpaceService {
         spaceUserInfo.setUser(user);
         spaceUserInfo.setLastActiveAt(LocalDate.now());
         spaceUserInfoService.joinSpace(spaceUserInfo);
+        kafkaService.sendToSpace(space.getId(), SpaceOperation.MEMBER_JOINED);
         return new Message("加入成功", true);
     }
 
     @Override
     public Message leaveSpace(Long spaceId, User user) {
         boolean success = spaceUserInfoService.deleteBySpaceIdAndUserId(spaceId, user.getId());
+        kafkaService.sendToSpace(spaceId, SpaceOperation.MEMBER_LEFT);
         return new Message(success ? "退出成功" : "退出失败, 尚未加入空间", success);
     }
 

@@ -5,6 +5,7 @@ import com.heslin.postopia.dto.user.UserId;
 import com.heslin.postopia.dto.comment.CommentInfo;
 import com.heslin.postopia.dto.comment.CommentSummary;
 import com.heslin.postopia.enums.OpinionStatus;
+import com.heslin.postopia.enums.kafka.CommentOperation;
 import com.heslin.postopia.enums.kafka.PostOperation;
 import com.heslin.postopia.exception.ForbiddenException;
 import com.heslin.postopia.exception.ResourceNotFoundException;
@@ -125,16 +126,16 @@ public class CommentServiceImpl implements CommentService {
     }
 
     private void addCommentOpinion(Long id, boolean opinion, @AuthenticationPrincipal User user) {
-        if (opinion) {
-            commentRepository.likeComment(id);
-        } else {
-            commentRepository.disLikeComment(id);
-        }
         CommentOpinion postOpinion = new CommentOpinion();
         postOpinion.setUser(user);
         postOpinion.setComment(new Comment(id));
         postOpinion.setPositive(opinion);
-        opinionService.upsertOpinion(postOpinion);
+        boolean isInsert = opinionService.upsertOpinion(postOpinion);
+        if (isInsert) {
+            kafkaService.sendToComment(id, opinion? CommentOperation.LIKED : CommentOperation.DISLIKED );
+        } else {
+            kafkaService.sendToComment(id, opinion? CommentOperation.SWITCH_TO_LIKE : CommentOperation.SWITCH_TO_DISLIKE );
+        }
     }
 
     @Override

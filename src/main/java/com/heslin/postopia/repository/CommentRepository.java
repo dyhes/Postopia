@@ -24,17 +24,6 @@ public interface CommentRepository extends CrudRepository<Comment, Long>{
 
     @Modifying
     @Transactional
-    @Query("update Comment c set c.positiveCount = c.positiveCount + 1 where c.id = :id")
-    void likeComment(@Param("id") Long id);
-
-    @Modifying
-    @Transactional
-    @Query("update Comment c set c.negativeCount = c.negativeCount + 1 where c.id = :id")
-    void disLikeComment(@Param("id") Long id);
-
-
-    @Modifying
-    @Transactional
     @Query("update Comment c set c.negativeCount = c.negativeCount + 1 where c.id = :id and c.post.id = :pid and c.user.id = :uid")
     int deleteComment(@Param("id") Long id, @Param("pid") Long pid, @Param("uid") Long uid);
 

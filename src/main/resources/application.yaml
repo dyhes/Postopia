@@ -34,12 +34,14 @@ spring:
     password: postopia_dev
 
   # JPA 配置
+
   jpa:
     hibernate:
-      jdbc.batch_size: 500       # 每批处理量
-      order_updates: true        # 按主键排序减少锁竞争
-      generate_statistics: true  # 开启统计（调试用）
       ddl-auto: update  # 测试环境设为 update，生产环境应为 none[1](@ref)
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
 
   # 邮件配置
   mail:

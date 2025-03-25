@@ -18,58 +18,6 @@ import java.util.List;
 
 @Repository
 public interface OpinionRepository extends CrudRepository<Opinion, Long> {
-
-    @Modifying
-    @Transactional
-    @Query(
-            value = "INSERT INTO post_opinions(updated_at, is_positive, user_id, post_id) " +
-                    "VALUES (:ua, :ip, :uid, :pid) " +
-                    "ON CONFLICT (user_id, post_id)" +
-                    "DO UPDATE SET updated_at = EXCLUDED.updated_at, is_positive = EXCLUDED.is_positive " +
-            "RETURNING xmax = 0 AS is_insert",
-            nativeQuery = true
-    )
-    boolean upsertPostOpinion(
-            @Param("ua") Instant updatedAt,
-            @Param("ip") Boolean isPositive,
-            @Param("uid") Long userId,
-            @Param("pid") Long postId
-    );
-
-    @Transactional
-    @Modifying
-    @Query(
-            value = "INSERT INTO vote_opinions(updated_at, is_positive, user_id, vote_id) " +
-                    "VALUES (:ua, :ip, :uid, :vid) " +
-                    "ON CONFLICT (user_id, vote_id) " +
-                    "DO UPDATE SET updated_at = EXCLUDED.updated_at, is_positive = EXCLUDED.is_positive " +
-            "RETURNING xmax = 0 AS is_insert",
-            nativeQuery = true
-    )
-    boolean upsertVoteOpinion(
-            @Param("ua") Instant updatedAt,
-            @Param("ip") Boolean isPositive,
-            @Param("uid") Long userId,
-            @Param("vid") Long voteId
-    );
-
-    @Transactional
-    @Modifying
-    @Query(
-            value = "INSERT INTO comment_opinions(updated_at, is_positive, user_id, comment_id) " +
-                    "VALUES (:ua, :ip, :uid, :cid) " +
-                    "ON CONFLICT (user_id, comment_id) " +
-                    "DO UPDATE SET updated_at = EXCLUDED.updated_at, is_positive = EXCLUDED.is_positive " +
-                    "RETURNING xmax = 0 AS is_insert",
-            nativeQuery = true
-    )
-    boolean upsertCommentOpinion(
-            @Param("ua") Instant updatedAt,
-            @Param("ip") Boolean isPositive,
-            @Param("uid") Long userId,
-            @Param("cid") Long commentId
-    );
-
     @Query(
     """
     select new com.heslin.postopia.dto.comment.UserOpinionCommentSummary(

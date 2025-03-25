@@ -50,7 +50,9 @@ public class CommentController {
 
     @PostMapping("delete")
     public BasicApiResponseEntity delete(@RequestBody DeleteDto dto, @AuthenticationPrincipal User user) {
-        //commentService.checkAuthority(dto.id(), user);
+        if (dto.id == null || dto.postId == null) {
+            throw new BadRequestException("id and postId cannot be null");
+        }
         commentService.deleteComment(dto.id(), dto.postId(), user.getId());
         return BasicApiResponseEntity.ok("删除成功");
     }
