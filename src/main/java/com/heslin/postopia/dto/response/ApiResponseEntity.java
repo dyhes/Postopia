@@ -5,8 +5,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 public class ApiResponseEntity<T> extends ResponseEntity<ApiResponse<T>> {
-    public ApiResponseEntity(ApiResponse<T> body, HttpStatus status) {
+    protected ApiResponseEntity(ApiResponse<T> body, HttpStatus status) {
         super(body, status);
+    }
+
+    protected ApiResponseEntity(T data) {
+        super(new ApiResponse<>(data), HttpStatus.OK);
     }
 
     public static <T> ApiResponseEntity<T> ok(ApiResponse<T> body) {

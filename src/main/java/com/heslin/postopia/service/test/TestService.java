@@ -1,6 +1,6 @@
 package com.heslin.postopia.service.test;
 
-import com.heslin.postopia.model.User;
+import com.heslin.postopia.jpa.model.User;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Service;

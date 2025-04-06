@@ -15,7 +15,7 @@ import com.heslin.postopia.dto.response.BasicApiResponseEntity;
 import com.heslin.postopia.enums.JoinedSpaceOrder;
 import com.heslin.postopia.enums.OpinionStatus;
 import com.heslin.postopia.exception.BadRequestException;
-import com.heslin.postopia.model.User;
+import com.heslin.postopia.jpa.model.User;
 import com.heslin.postopia.service.comment.CommentService;
 import com.heslin.postopia.service.post.PostService;
 import com.heslin.postopia.service.space.SpaceService;

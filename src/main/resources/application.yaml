@@ -1,26 +1,26 @@
 spring:
   kafka:
-    bootstrap-servers: localhost:9092  # Kafka 服务地址
     producer:
       key-serializer: org.apache.kafka.common.serialization.LongSerializer
-      value-serializer: org.apache.kafka.common.serialization.IntegerSerializer
       batch-size: 16384
       compression-type: snappy
       retries: 3
+      bootstrap-servers: localhost:9092
       properties:
         linger.ms: 1000
     consumer:
       group-id: consumer-group
       key-deserializer: org.apache.kafka.common.serialization.LongDeserializer
-           # 消费者组 ID
-      value-deserializer: org.apache.kafka.common.serialization.IntegerDeserializer
       max-poll-records: 1000
       fetch-min-size: 10240
       fetch-max-wait: 1000
+      bootstrap-servers: localhost:9092
+
   servlet:
     multipart:
       max-file-size: 100MB
       max-request-size: 100MB
+
   application:
     name: postopia
 

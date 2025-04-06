@@ -5,8 +5,6 @@ import org.springframework.data.domain.Page;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-
-@AllArgsConstructor
 @Data
 public class PageResult<T> {
     private List<T> data;

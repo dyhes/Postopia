@@ -3,7 +3,7 @@ package com.heslin.postopia.service.space;
 import com.heslin.postopia.dto.Message;
 import com.heslin.postopia.dto.SpaceInfo;
 import com.heslin.postopia.enums.PopularSpaceOrder;
-import com.heslin.postopia.model.User;
+import com.heslin.postopia.jpa.model.User;
 import com.heslin.postopia.util.Pair;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

@@ -1,6 +1,6 @@
 package com.heslin.postopia.service.mail;
 
-import com.heslin.postopia.model.User;
+import com.heslin.postopia.jpa.model.User;
 import jakarta.mail.MessagingException;
 
 public interface MailService {

@@ -3,8 +3,12 @@ package com.heslin.postopia;
 import io.github.cdimascio.dotenv.Dotenv;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.data.elasticsearch.repository.config.EnableElasticsearchRepositories;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 @SpringBootApplication
+@EnableJpaRepositories(basePackages = "com.heslin.postopia.jpa.repository")
+@EnableElasticsearchRepositories(basePackages = "com.heslin.postopia.elasticsearch.repository")
 public class PostopiaApplication {
 
 	public static void main(String[] args) {

@@ -1,20 +1,24 @@
 package com.heslin.postopia.service.space;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.heslin.postopia.elasticsearch.model.SpaceDoc;
 import com.heslin.postopia.dto.Message;
 import com.heslin.postopia.dto.SpaceInfo;
 import com.heslin.postopia.enums.PopularSpaceOrder;
 import com.heslin.postopia.enums.kafka.SpaceOperation;
-import com.heslin.postopia.model.Space;
-import com.heslin.postopia.model.SpaceUserInfo;
-import com.heslin.postopia.model.User;
-import com.heslin.postopia.repository.SpaceRepository;
-import com.heslin.postopia.service.kafka.KafkaService;
+import com.heslin.postopia.jpa.model.Space;
+import com.heslin.postopia.jpa.model.SpaceUserInfo;
+import com.heslin.postopia.jpa.model.User;
+import com.heslin.postopia.jpa.repository.SpaceRepository;
+import com.heslin.postopia.kafka.KafkaService;
 import com.heslin.postopia.service.os.OSService;
 import com.heslin.postopia.service.space_user_info.SpaceUserInfoService;
 import com.heslin.postopia.util.Pair;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -30,14 +34,16 @@ public class SpaceServiceImpl implements SpaceService {
     private final OSService osService;
     private final String defaultSpaceAvatar;
     private final KafkaService kafkaService;
+    private final ObjectMapper objectMapper;
 
     @Autowired
-    public SpaceServiceImpl(@Value("${postopia.avatar.space}") String defaultSpaceAvatar, OSService osService, SpaceRepository spaceRepository, SpaceUserInfoService spaceUserInfoService, KafkaService kafkaService) {
+    public SpaceServiceImpl(@Value("${postopia.avatar.space}") String defaultSpaceAvatar, OSService osService, SpaceRepository spaceRepository, SpaceUserInfoService spaceUserInfoService, KafkaService kafkaService, ObjectMapper objectMapper) {
         this.osService = osService;
         this.spaceRepository = spaceRepository;
         this.spaceUserInfoService = spaceUserInfoService;
         this.defaultSpaceAvatar = defaultSpaceAvatar;
         this.kafkaService = kafkaService;
+        this.objectMapper = objectMapper;
     }
 
     @Override
@@ -49,6 +55,13 @@ public class SpaceServiceImpl implements SpaceService {
         }
 
         return joinSpace(space, user);
+    }
+
+    @Override
+    public Message leaveSpace(Long spaceId, User user) {
+        boolean success = spaceUserInfoService.deleteBySpaceIdAndUserId(spaceId, user.getId());
+        kafkaService.sendToSpace(spaceId, SpaceOperation.MEMBER_LEFT);
+        return new Message(success ? "退出成功" : "退出失败, 尚未加入空间", success);
     }
 
     @Transactional
@@ -67,41 +80,37 @@ public class SpaceServiceImpl implements SpaceService {
     }
 
     @Override
-    public Message leaveSpace(Long spaceId, User user) {
-        boolean success = spaceUserInfoService.deleteBySpaceIdAndUserId(spaceId, user.getId());
-        kafkaService.sendToSpace(spaceId, SpaceOperation.MEMBER_LEFT);
-        return new Message(success ? "退出成功" : "退出失败, 尚未加入空间", success);
-    }
-
-    @Override
     @Transactional
     public Pair<Message, Long> createSpace(User user, String name, String description, MultipartFile avatar) {
-        Space existingSpace = spaceRepository.findByName(name);
-        if (existingSpace != null) {
-            return new Pair<>(new Message("空间名已存在", false), existingSpace.getId());
-        }
-
         String avatarUrl = defaultSpaceAvatar;
-
         if (avatar != null) {
             try {
                 avatarUrl = osService.updateSpaceAvatar(name, avatar);
             } catch (IOException e) {
-                return new Pair<>(new Message(e.getMessage(), false), (long) -1);
+                return new Pair<>(new Message(e.getMessage(), false), null);
             }
         }
-
         Space space = new Space();
         space.setName(name);
         space.setDescription(description);
         space.setAvatar(avatarUrl);
         space.setMemberCount(0);
+        try {
+            space = spaceRepository.save(space);
+        } catch (DataIntegrityViolationException exception) {
+            return new Pair<>(new Message("空间名称已存在", false), null);
+        }
         space = spaceRepository.save(space);
         Message message = joinSpace(space, user);
         if (!message.success()) {
-            return new Pair<>(new Message("加入空间失败, 请重试", false), Long.MIN_VALUE);
+            throw new RuntimeException(message.message());
         }
-
+        try {
+            kafkaService.sendToSpaceCreate(space.getId(), objectMapper.writeValueAsString(new SpaceDoc(space.getName(),space.getName(),space.getDescription(),space.getAvatar(), 1)));
+        } catch (JsonProcessingException e) {
+            System.out.println("Kafka send error: " + e.getMessage());
+            throw new RuntimeException(e);
+        }
         return new Pair<>(new Message("创建成功", true), space.getId());
     }
 

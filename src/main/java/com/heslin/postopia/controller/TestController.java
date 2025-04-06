@@ -4,7 +4,7 @@ import com.heslin.postopia.dto.user.UserId;
 import com.heslin.postopia.dto.response.ApiResponse;
 import com.heslin.postopia.dto.response.ApiResponseEntity;
 import com.heslin.postopia.dto.response.BasicApiResponseEntity;
-import com.heslin.postopia.model.User;
+import com.heslin.postopia.jpa.model.User;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;

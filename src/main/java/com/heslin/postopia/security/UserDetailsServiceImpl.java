@@ -6,8 +6,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import com.heslin.postopia.model.User;
-import com.heslin.postopia.repository.UserRepository;
+import com.heslin.postopia.jpa.model.User;
+import com.heslin.postopia.jpa.repository.UserRepository;
 
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService {

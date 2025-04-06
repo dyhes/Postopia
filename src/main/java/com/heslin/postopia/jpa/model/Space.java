@@ -1,0 +1,53 @@
+package com.heslin.postopia.jpa.model;
+
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import jakarta.persistence.*;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
+import com.heslin.postopia.jpa.model.vote.SpaceVote;
+
+import lombok.Data;
+
+@Data
+@Entity
+@Table(name="spaces",
+        indexes = {
+            @Index(name = "unique_space_name", columnList = "name", unique = true)
+        })
+@EntityListeners(AuditingEntityListener.class)
+public class Space {
+    @Id
+    @GeneratedValue(strategy=GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(unique=true, nullable=false, updatable = false)
+
+    private String name;
+    
+    @Column(nullable=false)
+    private String description;
+
+    @CreatedDate
+    private Instant createdAt;
+
+    private boolean isArchived;
+
+    private String avatar;
+
+    @OneToMany(mappedBy="space")
+    private Set<SpaceUserInfo> userInfos = new HashSet<>();
+
+    @OneToMany(mappedBy="space")
+    private List<Post> posts = new ArrayList<>();
+
+    @OneToMany(mappedBy="space")
+    private List<SpaceVote> votes = new ArrayList<>();
+
+    private long memberCount;
+}

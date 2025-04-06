@@ -2,15 +2,11 @@ package com.heslin.postopia.service.opinion;
 
 import com.heslin.postopia.dto.comment.UserOpinionCommentSummary;
 import com.heslin.postopia.dto.post.UserOpinionPostSummary;
-import com.heslin.postopia.model.Post;
-import com.heslin.postopia.model.User;
-import com.heslin.postopia.model.opinion.Opinion;
-import com.heslin.postopia.model.opinion.PostOpinion;
-import com.heslin.postopia.repository.OpinionRepository;
+import com.heslin.postopia.jpa.model.opinion.Opinion;
+import com.heslin.postopia.jpa.repository.OpinionRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
 import jakarta.transaction.Transactional;
-import org.apache.commons.lang3.tuple.Triple;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -18,7 +14,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.List;
-import java.util.Objects;
 
 @Service
 public class OpinionServiceImpl implements OpinionService {

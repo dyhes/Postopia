@@ -1,7 +1,7 @@
 package com.heslin.postopia.service.space_user_info;
 
-import com.heslin.postopia.model.SpaceUserInfo;
-import com.heslin.postopia.repository.SpaceUserInfoRepository;
+import com.heslin.postopia.jpa.model.SpaceUserInfo;
+import com.heslin.postopia.jpa.repository.SpaceUserInfoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

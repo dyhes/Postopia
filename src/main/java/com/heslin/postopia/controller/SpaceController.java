@@ -8,7 +8,7 @@ import com.heslin.postopia.dto.response.ApiResponseEntity;
 import com.heslin.postopia.dto.response.BasicApiResponseEntity;
 import com.heslin.postopia.enums.PopularSpaceOrder;
 import com.heslin.postopia.exception.BadRequestException;
-import com.heslin.postopia.model.User;
+import com.heslin.postopia.jpa.model.User;
 import com.heslin.postopia.service.space.SpaceService;
 import com.heslin.postopia.util.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,7 +40,12 @@ public class SpaceController {
             throw new BadRequestException("space name and description are required");
         }
 
-        Pair<Message, Long> pair = spaceService.createSpace(user, info.name, info.description, avatar);
+        Pair<Message, Long> pair;
+        try {
+            pair = spaceService.createSpace(user, info.name, info.description, avatar);
+        } catch (RuntimeException e) {
+            pair = new Pair<>(new Message(e.getMessage(), false), null);
+        }
 
         return ApiResponseEntity.ok(new ApiResponse<>(pair.second(), pair.first()));
     }

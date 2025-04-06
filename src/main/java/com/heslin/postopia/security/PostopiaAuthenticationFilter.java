@@ -13,7 +13,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.stereotype.Component;
 
-import com.heslin.postopia.model.User;
+import com.heslin.postopia.jpa.model.User;
 import com.heslin.postopia.service.jwt.JWTService;
 
 import jakarta.servlet.FilterChain;

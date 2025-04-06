@@ -1,6 +1,6 @@
 package com.heslin.postopia.service.space_user_info;
 
-import com.heslin.postopia.model.SpaceUserInfo;
+import com.heslin.postopia.jpa.model.SpaceUserInfo;
 
 public interface SpaceUserInfoService {
     boolean isSpaceMember(Long spaceId, Long userId);

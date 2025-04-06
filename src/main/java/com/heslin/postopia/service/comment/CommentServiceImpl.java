@@ -1,7 +1,6 @@
 package com.heslin.postopia.service.comment;
 
 import com.heslin.postopia.dto.comment.UserOpinionCommentSummary;
-import com.heslin.postopia.dto.user.UserId;
 import com.heslin.postopia.dto.comment.CommentInfo;
 import com.heslin.postopia.dto.comment.CommentSummary;
 import com.heslin.postopia.enums.OpinionStatus;
@@ -9,14 +8,12 @@ import com.heslin.postopia.enums.kafka.CommentOperation;
 import com.heslin.postopia.enums.kafka.PostOperation;
 import com.heslin.postopia.exception.ForbiddenException;
 import com.heslin.postopia.exception.ResourceNotFoundException;
-import com.heslin.postopia.model.Comment;
-import com.heslin.postopia.model.Post;
-import com.heslin.postopia.model.User;
-import com.heslin.postopia.model.opinion.CommentOpinion;
-import com.heslin.postopia.repository.CommentRepository;
-import com.heslin.postopia.repository.OpinionRepository;
-import com.heslin.postopia.repository.PostRepository;
-import com.heslin.postopia.service.kafka.KafkaService;
+import com.heslin.postopia.jpa.model.Comment;
+import com.heslin.postopia.jpa.model.Post;
+import com.heslin.postopia.jpa.model.User;
+import com.heslin.postopia.jpa.model.opinion.CommentOpinion;
+import com.heslin.postopia.jpa.repository.CommentRepository;
+import com.heslin.postopia.kafka.KafkaService;
 import com.heslin.postopia.service.opinion.OpinionService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;

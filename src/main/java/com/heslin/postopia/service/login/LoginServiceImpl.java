@@ -5,8 +5,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.heslin.postopia.dto.Credential;
-import com.heslin.postopia.model.User;
-import com.heslin.postopia.repository.UserRepository;
+import com.heslin.postopia.jpa.model.User;
+import com.heslin.postopia.jpa.repository.UserRepository;
 import com.heslin.postopia.service.jwt.JWTService;
 
 @Service

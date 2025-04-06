@@ -1,8 +1,8 @@
 package com.heslin.postopia.service.signup;
 
 import com.heslin.postopia.dto.Message;
-import com.heslin.postopia.model.User;
-import com.heslin.postopia.repository.UserRepository;
+import com.heslin.postopia.jpa.model.User;
+import com.heslin.postopia.jpa.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;

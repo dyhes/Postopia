@@ -3,7 +3,7 @@ package com.heslin.postopia.service.user;
 import com.heslin.postopia.dto.Message;
 import com.heslin.postopia.dto.user.UserId;
 import com.heslin.postopia.dto.user.UserInfo;
-import com.heslin.postopia.model.User;
+import com.heslin.postopia.jpa.model.User;
 import jakarta.mail.MessagingException;
 import org.springframework.web.multipart.MultipartFile;
 
