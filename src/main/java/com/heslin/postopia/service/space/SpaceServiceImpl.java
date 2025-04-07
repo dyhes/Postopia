@@ -105,12 +105,7 @@ public class SpaceServiceImpl implements SpaceService {
         if (!message.success()) {
             throw new RuntimeException(message.message());
         }
-        try {
-            kafkaService.sendToSpaceCreate(space.getId(), objectMapper.writeValueAsString(new SpaceDoc(space.getName(),space.getName(),space.getDescription(),space.getAvatar(), 1)));
-        } catch (JsonProcessingException e) {
-            System.out.println("Kafka send error: " + e.getMessage());
-            throw new RuntimeException(e);
-        }
+        kafkaService.sendToCreate("space", space.getName(), new SpaceDoc(space.getName(),space.getName(),space.getDescription(),space.getAvatar(), 1));
         return new Pair<>(new Message("创建成功", true), space.getId());
     }
 
@@ -131,5 +126,9 @@ public class SpaceServiceImpl implements SpaceService {
             default -> throw new UnsupportedOperationException("Unimplemented order " + order);
         }
     }
-    
+
+    @Override
+    public SpaceInfo getSpaceInfo(Long spaceId) {
+        return spaceRepository.findSpaceInfoById(spaceId).orElse(null);
+    }
 }

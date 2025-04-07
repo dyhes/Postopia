@@ -1,3 +1,5 @@
 package com.heslin.postopia.dto;
 
-public record SpaceInfo(Long id, String name, String avatar){}
+import java.time.Instant;
+
+public record SpaceInfo(Long id, String name, String avatar, String description, Instant createdAt, Long memberCount){}

@@ -20,4 +20,6 @@ public interface SpaceService {
     public Page<SpaceInfo> getSpacesByUserId(Long userId, Pageable pageable);
 
     public Page<SpaceInfo> getPopularSpaces(PopularSpaceOrder order, Pageable pageable);
+
+    public SpaceInfo getSpaceInfo(Long spaceId);
 }

@@ -9,6 +9,7 @@ import com.heslin.postopia.dto.response.BasicApiResponseEntity;
 import com.heslin.postopia.enums.PopularSpaceOrder;
 import com.heslin.postopia.exception.BadRequestException;
 import com.heslin.postopia.jpa.model.User;
+import com.heslin.postopia.service.os.OSService;
 import com.heslin.postopia.service.space.SpaceService;
 import com.heslin.postopia.util.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,10 +25,12 @@ import org.springframework.web.multipart.MultipartFile;
 @RequestMapping("/space")
 public class SpaceController {
     private final SpaceService spaceService;
+    private final OSService osService;
 
     @Autowired
-    public SpaceController(SpaceService spaceService) {
+    public SpaceController(SpaceService spaceService, OSService osService) {
         this.spaceService = spaceService;
+        this.osService = osService;
     }
 
     public record SpaceDto(String name, String description) {
@@ -35,7 +38,6 @@ public class SpaceController {
 
     @PostMapping("create")
     public ApiResponseEntity<Long> createSpace(@AuthenticationPrincipal User user, @RequestPart("info") SpaceDto info, @RequestPart(name = "avatar", required = false) MultipartFile avatar) {
-        String avatarUrl = null;
         if (info.name == null || info.description == null) {
             throw new BadRequestException("space name and description are required");
         }
@@ -73,6 +75,12 @@ public class SpaceController {
         Pageable pageable = PageRequest.of(page, size);
         Page<SpaceInfo> spaces = spaceService.getPopularSpaces(order, pageable);
         return ApiResponseEntity.ok(new ApiResponse<>(null,new PageResult<>(spaces)));
+    }
+
+    @GetMapping("info")
+    public ApiResponseEntity<SpaceInfo> getSpaceInfo(@RequestParam(name = "id") Long spaceId) {
+        SpaceInfo space = spaceService.getSpaceInfo(spaceId);
+        return ApiResponseEntity.ok(space, "success");
     }
 
     @PostMapping("leave")

@@ -1,7 +1,10 @@
 package com.heslin.postopia.controller;
 
+import com.heslin.postopia.elasticsearch.model.CommentDoc;
+import com.heslin.postopia.elasticsearch.model.PostDoc;
 import com.heslin.postopia.elasticsearch.model.SpaceDoc;
 import com.heslin.postopia.dto.response.PagedApiResponseEntity;
+import com.heslin.postopia.elasticsearch.model.UserDoc;
 import com.heslin.postopia.service.search.SearchService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -22,10 +25,35 @@ public class SearchController {
     }
 
     @GetMapping("space")
-    public PagedApiResponseEntity<SpaceDoc> searchSpace(@RequestParam String query,
+    public PagedApiResponseEntity<SpaceDoc> searchSpaces(@RequestParam String query,
                                                         @RequestParam(defaultValue = "0") int page,
                                                         @RequestParam(defaultValue = "20") int size)  {
         Pageable pageable = PageRequest.of(page, size);
         return PagedApiResponseEntity.ok(searchService.searchSpaces(query, pageable));
     }
+
+    @GetMapping("post")
+    public PagedApiResponseEntity<PostDoc> searchPosts(@RequestParam String query,
+                                                       @RequestParam(defaultValue = "0") int page,
+                                                       @RequestParam(defaultValue = "20") int size)  {
+        Pageable pageable = PageRequest.of(page, size);
+        return PagedApiResponseEntity.ok(searchService.searchPosts(query, pageable));
+    }
+
+    @GetMapping("comment")
+    public PagedApiResponseEntity<CommentDoc> searchComments(@RequestParam String query,
+                                                             @RequestParam(defaultValue = "0") int page,
+                                                             @RequestParam(defaultValue = "20") int size)  {
+        Pageable pageable = PageRequest.of(page, size);
+        return PagedApiResponseEntity.ok(searchService.searchComments(query, pageable));
+    }
+
+    @GetMapping("user")
+    public PagedApiResponseEntity<UserDoc> searchUsers(@RequestParam String query,
+                                                       @RequestParam(defaultValue = "0") int page,
+                                                       @RequestParam(defaultValue = "20") int size)  {
+        Pageable pageable = PageRequest.of(page, size);
+        return PagedApiResponseEntity.ok(searchService.searchUsers(query, pageable));
+    }
+
 }
