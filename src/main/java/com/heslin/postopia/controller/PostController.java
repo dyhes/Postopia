@@ -3,6 +3,7 @@ package com.heslin.postopia.controller;
 import com.heslin.postopia.dto.PageResult;
 import com.heslin.postopia.dto.PostDraftDto;
 import com.heslin.postopia.dto.post.PostInfo;
+import com.heslin.postopia.dto.post.PostSubject;
 import com.heslin.postopia.dto.post.SpacePostSummary;
 import com.heslin.postopia.dto.response.ApiResponse;
 import com.heslin.postopia.dto.response.ApiResponseEntity;
@@ -24,6 +25,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 
 @RestController
 @RequestMapping("post")
@@ -36,7 +39,7 @@ public class PostController {
         this.postService = postService;
     }
 
-    public record CreatePostDto(Long spaceId, String subject, String content, String spaceName, String spaceAvatar) {}
+    public record CreatePostDto(Long spaceId, String subject, String content, String spaceName) {}
 
     public record PostIdDto(Long id) {}
 
@@ -89,13 +92,12 @@ public class PostController {
 
     @PostMapping("create")
     public ApiResponseEntity<Long> createPost(@AuthenticationPrincipal User user, @RequestBody CreatePostDto request) {
-        if (request.spaceId == null || request.spaceAvatar == null || request.spaceName == null || request.subject == null || request.content == null) {
+        if (Utils.allFieldsNonNull(request)) {
             throw new BadRequestException("spaceInfos, subject and content are required");
         }
         Space space = Space.builder()
                     .id(request.spaceId)
                     .name(request.spaceName)
-                    .avatar(request.spaceAvatar)
                     .build();
         var pair = postService.createPost(space, user, request.subject, request.content);
         return ApiResponseEntity.ok(new ApiResponse<>(pair.first(), pair.second()));
@@ -134,7 +136,7 @@ public class PostController {
         return BasicApiResponseEntity.ok("帖子删除成功");
     }
 
-    public record ReplyPostDto(Long postId, String postSubject, String content, String spaceName, String spaceAvatar) {}
+    public record ReplyPostDto(Long postId, String content, String spaceName) {}
     
     @PostMapping("reply")
     public ApiResponseEntity<Long> replyPost(@AuthenticationPrincipal User user, @RequestBody ReplyPostDto request) {
@@ -142,7 +144,7 @@ public class PostController {
             throw new BadRequestException("postId and content are required");
         }
         Post post = Post.builder().id(request.postId).build();
-        Space space = Space.builder().avatar(request.spaceAvatar).name(request.spaceName).build();
+        Space space = Space.builder().name(request.spaceName).build();
         //postService.checkPostStatus(request.id);
         Comment comment = postService.replyPost(post, request.content, user, space);
         return BasicApiResponseEntity.ok(comment.getId(), "回复成功", true);
@@ -187,5 +189,10 @@ public class PostController {
         }
         postService.disLikePost(dto.id, user);
         return BasicApiResponseEntity.ok("post disliked!");
+    }
+
+    @GetMapping("subjects")
+    public ApiResponseEntity<List<PostSubject>> getSubjects(@RequestParam List<Long> ids) {
+        return ApiResponseEntity.ok(postService.getPostSubjects(ids), "success");
     }
 }

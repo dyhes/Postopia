@@ -38,6 +38,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query("UPDATE User u SET u.showEmail = :show WHERE u.id = :id")
     void updateShowStatusById(@Param("show") boolean show, @Param("id") Long id);
 
-    @Query("select new com.heslin.postopia.dto.Avatar(u.username, u.avatar) from User u where u.username in :names")
-    List<Avatar> findSpaceAvatars(List<String> names);
+    @Query("select new com.heslin.postopia.dto.Avatar(u.avatar, u.username) from User u where u.username in ?1")
+    List<Avatar> findUserAvatars(List<String> names);
 }

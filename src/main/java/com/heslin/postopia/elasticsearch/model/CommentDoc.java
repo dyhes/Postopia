@@ -23,14 +23,10 @@ public class CommentDoc {
     private String content;
     @Field(type = FieldType.Keyword)
     private String postId;
-    @Field(type = FieldType.Keyword, index = false)
-    private String postSubject;
     @Field(type = FieldType.Keyword)
     private String userName;
     @Field(type = FieldType.Keyword)
     private String spaceName;
-    @Field(type = FieldType.Text, index = false)
-    private String spaceAvatar;
     @Field(type = FieldType.Long, index = false, docValues = false)
     private long opinionCount;
     @Field(type = FieldType.Date, index = false, docValues = false)

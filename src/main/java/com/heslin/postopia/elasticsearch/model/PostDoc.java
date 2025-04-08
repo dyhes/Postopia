@@ -27,27 +27,10 @@ public class PostDoc {
     private String content;
     @Field(type = FieldType.Keyword)
     private String spaceName;
-    @Field(type = FieldType.Text, index = false)
-    private String spaceAvatar;
     @Field(type = FieldType.Long, index = false, docValues = false)
     private long commentCount;
     @Field(type = FieldType.Long, index = false, docValues = false)
     private long opinionCount;
     @Field(type = FieldType.Date, index = false, docValues = false)
     private Instant createdAt;
-
-    @Override
-    public String toString() {
-        return "PostDoc{" +
-        "id=" + id +
-        ", userName='" + userName + '\'' +
-        ", subject='" + subject + '\'' +
-        ", content='" + content + '\'' +
-        ", spaceName='" + spaceName + '\'' +
-        ", spaceAvatar='" + spaceAvatar + '\'' +
-        ", commentCount=" + commentCount +
-        ", opinionCount=" + opinionCount +
-        ", createdAt=" + createdAt +
-        '}';
-    }
 }

@@ -2,10 +2,7 @@ package com.heslin.postopia.service.post;
 
 import com.heslin.postopia.dto.Message;
 import com.heslin.postopia.dto.PostDraftDto;
-import com.heslin.postopia.dto.post.PostInfo;
-import com.heslin.postopia.dto.post.PostSummary;
-import com.heslin.postopia.dto.post.SpacePostSummary;
-import com.heslin.postopia.dto.post.UserOpinionPostSummary;
+import com.heslin.postopia.dto.post.*;
 import com.heslin.postopia.elasticsearch.model.PostDoc;
 import com.heslin.postopia.enums.OpinionStatus;
 import com.heslin.postopia.enums.PostStatus;
@@ -63,7 +60,7 @@ public class PostServiceImpl implements PostService {
         post.setStatus(PostStatus.PUBLISHED);
         post = postRepository.save(post);
 
-        kafkaService.sendToCreate("post", post.getId().toString(), new PostDoc(post.getId(), user.getUsername(), post.getSubject(), post.getContent(), space.getName(), space.getAvatar(), 0, 0, post.getCreatedAt()));
+        kafkaService.sendToCreate("post", post.getId().toString(), new PostDoc(post.getId(), user.getUsername(), post.getSubject(), post.getContent(), space.getName(), 0, 0, post.getCreatedAt()));
         return new Pair<>(post.getId(), new Message("Post created successfully", true));
     }
 
@@ -184,5 +181,10 @@ public class PostServiceImpl implements PostService {
     @Override
     public boolean deleteDraft(Long id, Long userId) {
         return postDraftRepository.deletePostDraftById(id, userId) > 0;
+    }
+
+    @Override
+    public List<PostSubject> getPostSubjects(List<Long> ids) {
+        return postRepository.findPostSubjects(ids);
     }
 }

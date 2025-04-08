@@ -30,6 +30,6 @@ public interface SpaceRepository extends PagingAndSortingRepository<Space, Long>
 
     Optional<SpaceInfo> findSpaceInfoById(Long spaceId);
 
-    @Query("select new com.heslin.postopia.dto.Avatar(s.name, s.avatar) from Space s where s.name in :names")
-    List<Avatar> findSpaceAvatars(List<String> names);
+    @Query("select new com.heslin.postopia.dto.Avatar(s.avatar, s.name) from Space s where s.name in :names")
+    List<Avatar> findSpaceAvatars(@Param("names") List<String> names);
 }

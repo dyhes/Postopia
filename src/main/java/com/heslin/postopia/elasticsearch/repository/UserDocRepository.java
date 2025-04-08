@@ -14,7 +14,7 @@ public interface UserDocRepository extends ElasticsearchRepository<UserDoc, Stri
             {
               "multi_match": {
                 "query": "?0",
-                "fields": ["name", "nickName"],
+                "fields": ["name", "nickname"],
                 "type": "best_fields",
                 "tie_breaker": 1.0
               }

@@ -19,7 +19,7 @@ public class UserDoc {
     @Field(type = FieldType.Text, analyzer = "ik_max_word", searchAnalyzer = "ik_smart")
     private String name;
     @Field(type = FieldType.Text, analyzer = "ik_max_word", searchAnalyzer = "ik_smart")
-    private String nickName;
+    private String nickname;
     @Field(type = FieldType.Text, index = false)
     private String avatar;
 }

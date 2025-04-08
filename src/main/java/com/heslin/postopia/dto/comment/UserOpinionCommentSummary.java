@@ -13,7 +13,7 @@ public class UserOpinionCommentSummary extends UserCommentSummary{
     private final String userAvatar;
     private final Instant updatedAt;
 
-    public UserOpinionCommentSummary(Long id, String spaceName, Long postId, String postSubject, String subContent, String replyUsername, String relpyNickName, Instant createdAt, long positiveCount, long negativeCount, OpinionStatus opinionStatus, String userName, String username, String nickName, String userAvatar, Instant updatedAt) {
+    public UserOpinionCommentSummary(Long id, String spaceName, Long postId, String postSubject, String subContent, String replyUsername, String relpyNickName, Instant createdAt, long positiveCount, long negativeCount, OpinionStatus opinionStatus, String username, String nickName, String userAvatar, Instant updatedAt) {
         super(id, spaceName, postId, postSubject, subContent, replyUsername, relpyNickName, createdAt, positiveCount, negativeCount, opinionStatus);
         this.username = username;
         this.nickname = nickName;

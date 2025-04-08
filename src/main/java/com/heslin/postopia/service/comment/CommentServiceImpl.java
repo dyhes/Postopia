@@ -66,10 +66,8 @@ public class CommentServiceImpl implements CommentService {
             comment.getId(),
             comment.getContent(),
             post.getId().toString(),
-            post.getSubject(),
             user.getUsername(),
             space.getName(),
-            space.getAvatar(),
             0,
             comment.getCreatedAt()));
         kafkaService.sendToPost(post.getId(), PostOperation.COMMENT_CREATED);

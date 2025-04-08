@@ -1,6 +1,7 @@
 package com.heslin.postopia.jpa.repository;
 
 import com.heslin.postopia.dto.post.PostInfo;
+import com.heslin.postopia.dto.post.PostSubject;
 import com.heslin.postopia.dto.post.PostSummary;
 import com.heslin.postopia.dto.post.SpacePostSummary;
 import com.heslin.postopia.enums.PostStatus;
@@ -14,6 +15,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -91,4 +93,7 @@ public interface PostRepository extends JpaRepository<Post, Long> {
                 where u.id = :qid
             """)
     Page<PostSummary> findPostSummariesByUserId(@Param("qid") Long qid, @Param("sid") Long sid, Pageable pageable);
+
+    @Query("select new com.heslin.postopia.dto.post.PostSubject(p.subject, p.id) from Post p where p.id in :ids")
+    List<PostSubject> findPostSubjects(List<Long> ids);
 }

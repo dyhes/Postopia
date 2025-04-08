@@ -90,6 +90,11 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<Avatar> getUserAvatars(List<String> names) {
-        return userRepository.findSpaceAvatars(names);
+        System.out.println("names");
+        System.out.println(names);
+        var ret =  userRepository.findUserAvatars(names);
+        System.out.println("ret");
+        System.out.println(ret);
+        return ret;
     }
 }
