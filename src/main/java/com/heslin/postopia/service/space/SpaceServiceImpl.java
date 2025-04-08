@@ -2,6 +2,7 @@ package com.heslin.postopia.service.space;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.heslin.postopia.dto.Avatar;
 import com.heslin.postopia.elasticsearch.model.SpaceDoc;
 import com.heslin.postopia.dto.Message;
 import com.heslin.postopia.dto.SpaceInfo;
@@ -11,6 +12,7 @@ import com.heslin.postopia.jpa.model.Space;
 import com.heslin.postopia.jpa.model.SpaceUserInfo;
 import com.heslin.postopia.jpa.model.User;
 import com.heslin.postopia.jpa.repository.SpaceRepository;
+import com.heslin.postopia.jpa.repository.UserRepository;
 import com.heslin.postopia.kafka.KafkaService;
 import com.heslin.postopia.service.os.OSService;
 import com.heslin.postopia.service.space_user_info.SpaceUserInfoService;
@@ -26,6 +28,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.util.List;
 
 @Service
 public class SpaceServiceImpl implements SpaceService {
@@ -35,15 +38,17 @@ public class SpaceServiceImpl implements SpaceService {
     private final String defaultSpaceAvatar;
     private final KafkaService kafkaService;
     private final ObjectMapper objectMapper;
+    private final UserRepository userRepository;
 
     @Autowired
-    public SpaceServiceImpl(@Value("${postopia.avatar.space}") String defaultSpaceAvatar, OSService osService, SpaceRepository spaceRepository, SpaceUserInfoService spaceUserInfoService, KafkaService kafkaService, ObjectMapper objectMapper) {
+    public SpaceServiceImpl(@Value("${postopia.avatar.space}") String defaultSpaceAvatar, OSService osService, SpaceRepository spaceRepository, SpaceUserInfoService spaceUserInfoService, KafkaService kafkaService, ObjectMapper objectMapper, UserRepository userRepository) {
         this.osService = osService;
         this.spaceRepository = spaceRepository;
         this.spaceUserInfoService = spaceUserInfoService;
         this.defaultSpaceAvatar = defaultSpaceAvatar;
         this.kafkaService = kafkaService;
         this.objectMapper = objectMapper;
+        this.userRepository = userRepository;
     }
 
     @Override
@@ -130,5 +135,10 @@ public class SpaceServiceImpl implements SpaceService {
     @Override
     public SpaceInfo getSpaceInfo(Long spaceId) {
         return spaceRepository.findSpaceInfoById(spaceId).orElse(null);
+    }
+
+    @Override
+    public List<Avatar> getSpaceAvatars(List<String> names) {
+        return spaceRepository.findSpaceAvatars(names);
     }
 }

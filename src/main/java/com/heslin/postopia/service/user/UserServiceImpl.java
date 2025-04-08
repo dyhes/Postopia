@@ -1,5 +1,6 @@
 package com.heslin.postopia.service.user;
 
+import com.heslin.postopia.dto.Avatar;
 import com.heslin.postopia.dto.Message;
 import com.heslin.postopia.dto.user.UserId;
 import com.heslin.postopia.dto.user.UserInfo;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -84,5 +86,10 @@ public class UserServiceImpl implements UserService {
     @Override
     public void updateShowEmail(boolean show, Long id) {
         userRepository.updateShowStatusById(show, id);
+    }
+
+    @Override
+    public List<Avatar> getUserAvatars(List<String> names) {
+        return userRepository.findSpaceAvatars(names);
     }
 }

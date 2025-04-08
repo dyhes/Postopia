@@ -1,5 +1,6 @@
 package com.heslin.postopia.controller;
 
+import com.heslin.postopia.dto.Avatar;
 import com.heslin.postopia.dto.Message;
 import com.heslin.postopia.dto.SpaceInfo;
 import com.heslin.postopia.dto.PageResult;
@@ -20,17 +21,17 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+
 
 @RestController
 @RequestMapping("/space")
 public class SpaceController {
     private final SpaceService spaceService;
-    private final OSService osService;
 
     @Autowired
-    public SpaceController(SpaceService spaceService, OSService osService) {
+    public SpaceController(SpaceService spaceService) {
         this.spaceService = spaceService;
-        this.osService = osService;
     }
 
     public record SpaceDto(String name, String description) {
@@ -52,10 +53,7 @@ public class SpaceController {
         return ApiResponseEntity.ok(new ApiResponse<>(pair.second(), pair.first()));
     }
 
-    public record SpaceIdDto(Long spaceId) {
-    }
-
-    ;
+    public record SpaceIdDto(Long spaceId) {}
 
     @PostMapping("join")
     public BasicApiResponseEntity joinSpace(@AuthenticationPrincipal User user, @RequestBody SpaceIdDto space) {
@@ -91,6 +89,11 @@ public class SpaceController {
 
         Message message = spaceService.leaveSpace(space.spaceId, user);
             return BasicApiResponseEntity.ok(message);
-        }
-        
+    }
+
+    @GetMapping("avatars")
+    public ApiResponseEntity<List<Avatar>> getSpaceAvatar(@RequestParam List<String> names) {
+        var ret = spaceService.getSpaceAvatars(names);
+        return ApiResponseEntity.ok(ret, "success");
+    }
 }

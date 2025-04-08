@@ -1,5 +1,6 @@
 package com.heslin.postopia.service.user;
 
+import com.heslin.postopia.dto.Avatar;
 import com.heslin.postopia.dto.Message;
 import com.heslin.postopia.dto.user.UserId;
 import com.heslin.postopia.dto.user.UserInfo;
@@ -8,6 +9,7 @@ import jakarta.mail.MessagingException;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
 
 public interface UserService {
     public User findUserById(Long id);
@@ -25,4 +27,6 @@ public interface UserService {
     void updateShowEmail(boolean show, Long id);
 
     String uploadFile(UserId userId, MultipartFile img, boolean isVideo) throws IOException;
+
+    List<Avatar> getUserAvatars(List<String> names);
 }

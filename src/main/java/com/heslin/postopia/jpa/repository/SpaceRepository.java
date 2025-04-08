@@ -1,5 +1,6 @@
 package com.heslin.postopia.jpa.repository;
 
+import com.heslin.postopia.dto.Avatar;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Repository;
 import com.heslin.postopia.dto.SpaceInfo;
 import com.heslin.postopia.jpa.model.Space;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -27,4 +29,7 @@ public interface SpaceRepository extends PagingAndSortingRepository<Space, Long>
     Page<SpaceInfo> findPopularSpacesByPostCount(Pageable pageable);
 
     Optional<SpaceInfo> findSpaceInfoById(Long spaceId);
+
+    @Query("select new com.heslin.postopia.dto.Avatar(s.name, s.avatar) from Space s where s.name in :names")
+    List<Avatar> findSpaceAvatars(List<String> names);
 }

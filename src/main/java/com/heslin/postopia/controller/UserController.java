@@ -1,5 +1,6 @@
 package com.heslin.postopia.controller;
 
+import com.heslin.postopia.dto.Avatar;
 import com.heslin.postopia.dto.Message;
 import com.heslin.postopia.dto.SpaceInfo;
 import com.heslin.postopia.dto.comment.UserOpinionCommentSummary;
@@ -31,6 +32,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
 
 @RestController
 @RequestMapping("user")
@@ -184,5 +186,11 @@ public class UserController {
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction, "o.updatedAt"));
         Long queryId = userId == null? user.getId() : userId.getId();
         return ApiResponseEntity.ok(new ApiResponse<>("获取帖子态度列表成功", new PageResult<>(postService.getPostOpinionsByUser(queryId, opinion, pageable))));
+    }
+
+    @GetMapping("avatars")
+    public ApiResponseEntity<List<Avatar>> getUserAvatar(@RequestParam List<String> names) {
+        var ret = userService.getUserAvatars(names);
+        return ApiResponseEntity.ok(ret, "success");
     }
 }

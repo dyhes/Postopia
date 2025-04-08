@@ -22,6 +22,7 @@ import lombok.Data;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+// 定义索引include
 @Table(name="spaces",
         indexes = {
             @Index(name = "unique_space_name", columnList = "name", unique = true)
@@ -33,7 +34,6 @@ public class Space {
     private Long id;
 
     @Column(unique=true, nullable=false, updatable = false)
-
     private String name;
     
     @Column(nullable=false)

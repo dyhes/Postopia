@@ -22,7 +22,10 @@ import java.util.Set;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "users")
+@Table(name="names",
+    indexes = {
+        @Index(name = "unique_user_name", columnList = "username", unique = true)
+    })
 @EntityListeners(AuditingEntityListener.class)
 public class User {
     @Id

@@ -1,5 +1,6 @@
 package com.heslin.postopia.jpa.repository;
 
+import com.heslin.postopia.dto.Avatar;
 import com.heslin.postopia.dto.user.UserInfo;
 import com.heslin.postopia.jpa.model.User;
 import jakarta.transaction.Transactional;
@@ -8,6 +9,8 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+
+import java.util.List;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
@@ -34,4 +37,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Modifying
     @Query("UPDATE User u SET u.showEmail = :show WHERE u.id = :id")
     void updateShowStatusById(@Param("show") boolean show, @Param("id") Long id);
+
+    @Query("select new com.heslin.postopia.dto.Avatar(u.username, u.avatar) from User u where u.username in :names")
+    List<Avatar> findSpaceAvatars(List<String> names);
 }
