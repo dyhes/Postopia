@@ -52,12 +52,12 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
     @Query("""
             select
-            new com.heslin.postopia.dto.post.SpacePostSummary(p.id, p.subject, SUBSTRING(p.content, 1, 100), p.positiveCount, p.negativeCount, p.commentCount, new com.heslin.postopia.dto.user.UserId(u.id), u.nickname, u.avatar,
+            new com.heslin.postopia.dto.post.SpacePostSummary(p.id, p.subject, SUBSTRING(p.content, 1, 100), p.positiveCount, p.negativeCount, p.commentCount, u.username, u.nickname, u.avatar,
                     CASE
                         WHEN o.id IS NULL THEN com.heslin.postopia.enums.OpinionStatus.NIL
                         WHEN o.isPositive = true THEN com.heslin.postopia.enums.OpinionStatus.POSITIVE
                         ELSE com.heslin.postopia.enums.OpinionStatus.NEGATIVE
-                    END)
+                    END, p.createdAt)
                     from Post p
                     JOIN p.user u
                     LEFT JOIN PostOpinion o on o.post.id = p.id and o.user.id = :uid
@@ -67,7 +67,7 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
 
     @Query("""
-            select new com.heslin.postopia.dto.post.PostSummary(s.id, s.name, p.id, p.subject, SUBSTRING(p.content, 1, 100), p.positiveCount, p.negativeCount, p.commentCount)
+            select new com.heslin.postopia.dto.post.PostSummary(s.name, p.id, p.subject, SUBSTRING(p.content, 1, 100), p.positiveCount, p.negativeCount, p.commentCount, p.createdAt)
                 from Post p
                 join p.user u
                 join p.space s
@@ -78,12 +78,12 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
 
     @Query("""
-            select new com.heslin.postopia.dto.post.UserPostSummary(s.id, s.name, p.id, p.subject, SUBSTRING(p.content, 1, 100), p.positiveCount, p.negativeCount, p.commentCount,
+            select new com.heslin.postopia.dto.post.UserPostSummary(s.name, p.id, p.subject, SUBSTRING(p.content, 1, 100), p.positiveCount, p.negativeCount, p.commentCount,
                     CASE
                         WHEN o.id IS NULL THEN com.heslin.postopia.enums.OpinionStatus.NIL
                         WHEN o.isPositive = true THEN com.heslin.postopia.enums.OpinionStatus.POSITIVE
                         ELSE com.heslin.postopia.enums.OpinionStatus.NEGATIVE
-                    END)
+                    END, p.createdAt)
                 from Post p
                 join p.user u
                 join p.space s

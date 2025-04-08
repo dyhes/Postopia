@@ -131,11 +131,11 @@ public class CommentServiceImpl implements CommentService {
             mp.put(commentInfo.getId(), commentInfo);
             return commentInfo.getId();
         }).toList(), userId).stream().map(arr -> new CommentInfo(
-                (Long) arr[0], (String) arr[1],
-                (Instant) arr[2], (Long) arr[3],
-                (String) arr[4], (String) arr[5],
-                OpinionStatus.valueOf((String) arr[6]),
-                (Long) arr[7], (long) arr[8], (long) arr[9]
+                (Long) arr[0],(Long) arr[1], (String) arr[2],
+                (Instant) arr[3],
+                (String) arr[4], (String) arr[5], (String) arr[6],
+                OpinionStatus.valueOf((String) arr[7]),
+                (long) arr[8], (long) arr[9]
         )).toList();
         for (CommentInfo commentInfo : flattenChildren) {
             mp.put(commentInfo.getId(), commentInfo);

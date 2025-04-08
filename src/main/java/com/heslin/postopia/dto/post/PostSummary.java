@@ -7,11 +7,12 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.Instant;
+
 // 用户自身视角的自己的帖子摘要
 @Getter
 @AllArgsConstructor
 public class PostSummary {
-    private final Long spaceId;
     private final String spaceName;
     private final Long postId;
     private final String subject;
@@ -19,4 +20,5 @@ public class PostSummary {
     private final long positiveCount;
     private final long negativeCount;
     private final long commentCount;
+    private final Instant createdAt;
 }

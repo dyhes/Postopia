@@ -28,7 +28,7 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
     int deleteComment(@Param("id") Long id, @Param("pid") Long pid, @Param("uid") Long uid);
 
     @Query("""
-                select new com.heslin.postopia.dto.comment.CommentInfo(c.id,c.content, c.createdAt, u.id, u.nickname, u.avatar,
+                select new com.heslin.postopia.dto.comment.CommentInfo(c.id, null, c.content, c.createdAt, u.username, u.nickname, u.avatar,
                         CASE
                             WHEN o.id IS NULL THEN com.heslin.postopia.enums.OpinionStatus.NIL
                             WHEN o.isPositive = true THEN com.heslin.postopia.enums.OpinionStatus.POSITIVE
@@ -47,17 +47,17 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
                    -- 初始查询：选择指定父评论的直接子评论
                    SELECT
                        c.id,
+                       c.parent_id,
                        c.content,
                        c.created_at,
-                       u.id AS user_id,
-                       u.nickname AS nickname,
-                       u.avatar AS avatar,
+                       u.username,
+                       u.nickname,
+                       u.avatar,
                        CASE
                            WHEN o.id IS NULL THEN 'NIL'
                            WHEN o.is_positive = TRUE THEN 'POSITIVE'
                            ELSE 'NEGATIVE'
                        END AS opinion_status,
-                       c.parent_id AS parent_id,  -- 用于递归连接
                        c.positive_count,
                        c.negative_count,
                    FROM
@@ -74,17 +74,17 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
                    -- 递归查询：逐层获取嵌套子评论
                    SELECT
                        child.id,
+                       child.parent_id,
                        child.content,
                        child.created_at,
-                       u_child.id AS user_id,
-                       u_child.nickname AS nickname,
-                       u_child.avatar AS avatar,
+                       u_child.username,
+                       u_child.nickname,
+                       u_child.avatar,
                        CASE
                            WHEN o_child.id IS NULL THEN 'NIL'
                            WHEN o_child.is_positive = TRUE THEN 'POSITIVE'
                            ELSE 'NEGATIVE'
                        END AS opinion_status,
-                       child.parent_id AS parent_id,
                        child.positive_count,
                        child.negative_count,
                    FROM
@@ -98,13 +98,13 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
                )
                SELECT
                    id,
+                   parent_id,
                    content,
                    created_at,
-                   user_id,
+                   username,
                    nickname,
                    avatar,
                    opinion_status,
-                   parent_id,
                    positive_count,
                    negative_count,
                FROM comment_tree
@@ -114,8 +114,8 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
 
     @Query("""
     select new com.heslin.postopia.dto.comment.UserCommentSummary(
-        c.id, s.id, s.name, p.id, p.subject,SUBSTRING(c.content, 1, 100),
-                pu.id,
+        c.id, s.name, p.id, p.subject,SUBSTRING(c.content, 1, 100),
+                pu.username,
                 pu.nickname,
                 c.createdAt,
                 c.positiveCount,
@@ -135,8 +135,8 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
 
     @Query("""
                 select new com.heslin.postopia.dto.comment.CommentSummary(
-                c.id, s.id, s.name, p.id, p.subject, SUBSTRING(c.content, 1, 100),
-                pu.id,
+                c.id, s.name, p.id, p.subject, SUBSTRING(c.content, 1, 100),
+                pu.username,
                 pu.nickname,
                 c.createdAt, c.positiveCount, c.negativeCount)
                 from Comment c

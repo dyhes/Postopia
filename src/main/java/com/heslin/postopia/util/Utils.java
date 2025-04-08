@@ -1,5 +1,7 @@
 package com.heslin.postopia.util;
 
+import com.heslin.postopia.dto.comment.CommentInfo;
+
 import java.lang.reflect.RecordComponent;
 import java.util.Arrays;
 import java.util.Objects;

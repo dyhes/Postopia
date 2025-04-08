@@ -8,14 +8,16 @@ import java.time.Instant;
 
 @Getter
 public class UserOpinionCommentSummary extends UserCommentSummary{
-    private final UserId userId;
-    private final String nickName;
+    private final String username;
+    private final String nickname;
+    private final String userAvatar;
     private final Instant updatedAt;
 
-    public UserOpinionCommentSummary(Long id, Long spaceId, String spaceName, Long postId, String postSubject, String subContent, Long replyTo, String relpyNickName, Instant createdAt, long positiveCount, long negativeCount, OpinionStatus opinionStatus, Long userId, String nickName, Instant updatedAt) {
-        super(id, spaceId, spaceName, postId, postSubject, subContent, replyTo, relpyNickName, createdAt, positiveCount, negativeCount, opinionStatus);
-        this.userId = new UserId(userId);
-        this.nickName = nickName;
+    public UserOpinionCommentSummary(Long id, String spaceName, Long postId, String postSubject, String subContent, String replyUsername, String relpyNickName, Instant createdAt, long positiveCount, long negativeCount, OpinionStatus opinionStatus, String userName, String username, String nickName, String userAvatar, Instant updatedAt) {
+        super(id, spaceName, postId, postSubject, subContent, replyUsername, relpyNickName, createdAt, positiveCount, negativeCount, opinionStatus);
+        this.username = username;
+        this.nickname = nickName;
         this.updatedAt = updatedAt;
+        this.userAvatar = userAvatar;
     }
 }

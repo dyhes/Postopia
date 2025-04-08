@@ -18,13 +18,13 @@ public interface OpinionRepository extends JpaRepository<Opinion, Long> {
     """
     select new com.heslin.postopia.dto.comment.UserOpinionCommentSummary(
         c.id, s.id, s.name, p.id, p.subject,SUBSTRING(c.content, 1, 100),
-                pu.id,
+                pu.username,
                 pu.nickname,
                 c.createdAt,
                 c.positiveCount,
                 c.negativeCount,
                 CASE WHEN o.isPositive = true THEN com.heslin.postopia.enums.OpinionStatus.POSITIVE ELSE com.heslin.postopia.enums.OpinionStatus.NEGATIVE END,
-                u.id,
+                u.username,
                 u.nickname,
                 o.updatedAt
                 ) from CommentOpinion o
@@ -42,15 +42,16 @@ public interface OpinionRepository extends JpaRepository<Opinion, Long> {
     @Query(
     """
     select new com.heslin.postopia.dto.post.UserOpinionPostSummary(
-        s.id, s.name, p.id, p.subject, SUBSTRING(p.content, 1, 100),
+        s.name, p.id, p.subject, SUBSTRING(p.content, 1, 100),
                 p.positiveCount,
                 p.negativeCount,
                 p.commentCount,
                 CASE WHEN o.isPositive = true THEN com.heslin.postopia.enums.OpinionStatus.POSITIVE ELSE com.heslin.postopia.enums.OpinionStatus.NEGATIVE END,
-                u.id,
+                u.username,
                 u.nickname,
-                u.avatar,    
-                o.updatedAt
+                u.avatar,
+                o.updatedAt,
+                p.createdAt
                 ) from PostOpinion o
                 JOIN o.post p
                 JOIN p.user u

@@ -12,8 +12,8 @@ public class UserCommentSummary extends CommentSummary {
     private final OpinionStatus opinionStatus;
 
 
-    public UserCommentSummary(Long id, Long spaceId, String spaceName, Long postId, String postSubject, String subContent, Long replyTo, String nickName, Instant createdAt, long positiveCount, long negativeCount, OpinionStatus opinionStatus) {
-        super(id, spaceId, spaceName, postId, postSubject, subContent, replyTo, nickName, createdAt, positiveCount, negativeCount);
+    public UserCommentSummary(Long id, String spaceName, Long postId, String postSubject, String subContent, String username, String nickName, Instant createdAt, long positiveCount, long negativeCount, OpinionStatus opinionStatus) {
+        super(id, spaceName, postId, postSubject, subContent, username, nickName, createdAt, positiveCount, negativeCount);
         this.opinionStatus = opinionStatus;
     }
 }
