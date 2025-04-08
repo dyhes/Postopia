@@ -3,6 +3,7 @@ package com.heslin.postopia.service.comment;
 import com.heslin.postopia.dto.comment.UserOpinionCommentSummary;
 import com.heslin.postopia.dto.comment.CommentInfo;
 import com.heslin.postopia.dto.comment.CommentSummary;
+import com.heslin.postopia.elasticsearch.model.CommentDoc;
 import com.heslin.postopia.enums.OpinionStatus;
 import com.heslin.postopia.enums.kafka.CommentOperation;
 import com.heslin.postopia.enums.kafka.PostOperation;
@@ -10,15 +11,19 @@ import com.heslin.postopia.exception.ForbiddenException;
 import com.heslin.postopia.exception.ResourceNotFoundException;
 import com.heslin.postopia.jpa.model.Comment;
 import com.heslin.postopia.jpa.model.Post;
+import com.heslin.postopia.jpa.model.Space;
 import com.heslin.postopia.jpa.model.User;
 import com.heslin.postopia.jpa.model.opinion.CommentOpinion;
 import com.heslin.postopia.jpa.repository.CommentRepository;
 import com.heslin.postopia.kafka.KafkaService;
 import com.heslin.postopia.service.opinion.OpinionService;
+import jakarta.persistence.Id;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.elasticsearch.annotations.Field;
+import org.springframework.data.elasticsearch.annotations.FieldType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Service;
 
@@ -41,28 +46,46 @@ public class CommentServiceImpl implements CommentService {
         this.kafkaService = kafkaService;
     }
 
-    @Override
     @Transactional
-    public Comment replyToPost(Post post, String content,@AuthenticationPrincipal User user) {
-        Comment comment = new Comment();
-        comment.setUser(user);
-        comment.setPost(post);
-        comment.setContent(content);
+    protected Comment createComment(User user, Post post, Space space, String content) {
+        return createComment(user, post, space, content, null);
+    }
+
+    @Transactional
+    protected Comment createComment(User user, Post post, Space space, String content, Comment parent) {
+        Comment comment =
+        Comment.builder()
+        .user(user)
+        .post(post)
+        .content(content)
+        .parent(parent)
+        .build();
         comment = commentRepository.save(comment);
+        kafkaService.sendToCreate("comment", comment.getId().toString(),
+            new CommentDoc(
+            comment.getId(),
+            comment.getContent(),
+            post.getId().toString(),
+            post.getSubject(),
+            user.getUsername(),
+            space.getName(),
+            space.getAvatar(),
+            0,
+            comment.getCreatedAt()));
         kafkaService.sendToPost(post.getId(), PostOperation.COMMENT_CREATED);
         return comment;
     }
 
     @Override
     @Transactional
-    public void reply(Post post, Comment parent, String content,@AuthenticationPrincipal User user) {
-        Comment comment = new Comment();
-        comment.setUser(user);
-        comment.setPost(post);
-        comment.setContent(content);
-        comment.setParent(parent);
-        commentRepository.save(comment);
-        kafkaService.sendToPost(post.getId(), PostOperation.COMMENT_CREATED);
+    public Comment replyToPost(Post post, String content, User user, Space space) {
+        return createComment(user, post, space, content);
+    }
+
+    @Override
+    @Transactional
+    public Comment reply(Post post, Comment parent, String content, User user, Space space) {
+        return createComment(user, post, space, content, parent);
     }
 
     @Override

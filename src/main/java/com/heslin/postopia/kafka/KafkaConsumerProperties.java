@@ -15,25 +15,19 @@ import java.util.Map;
 @Validated
 public class KafkaConsumerProperties {
     // 基础配置
-    private String bootstrapServers;
     private String groupId;
-    private Class<?> keyDeserializer;
     private int maxPollRecords;
     private int fetchMinSize;
     private int fetchMaxWait;
+    private String bootstrapServers;
 
     public Map<String, Object> buildConfigs() {
-        Map<String, Object> configs = new HashMap<>();
-        configs.putAll(
-        Map.of(
-            ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers,
-            ConsumerConfig.GROUP_ID_CONFIG, groupId,
-            ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, keyDeserializer,
-            ConsumerConfig.MAX_POLL_RECORDS_CONFIG, maxPollRecords,
-            ConsumerConfig.FETCH_MIN_BYTES_CONFIG, fetchMinSize,
-            ConsumerConfig.FETCH_MAX_WAIT_MS_CONFIG, fetchMaxWait
-            )
-        );
-        return configs;
+        return new HashMap<>(Map.of(
+        ConsumerConfig.GROUP_ID_CONFIG, groupId,
+        ConsumerConfig.MAX_POLL_RECORDS_CONFIG, maxPollRecords,
+        ConsumerConfig.FETCH_MIN_BYTES_CONFIG, fetchMinSize,
+        ConsumerConfig.FETCH_MAX_WAIT_MS_CONFIG, fetchMaxWait,
+        ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers
+        ));
     }
 }

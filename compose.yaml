@@ -63,12 +63,3 @@ services:
     ports:
       - "9200:9200"
       - "9300:9300"
-    command: >
-      bash -c '
-        if [ ! -d plugins/ik ]; then
-          ./bin/elasticsearch-plugin install -b https://get.infini.cloud/elasticsearch/analysis-ik/8.15.5 && 
-          mkdir -p config/analysis-ik &&
-          echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?><properties><entry key=\"ext_dict\"></entry></properties>" > config/analysis-ik/IKAnalyzer.cfg.xml
-        fi &&
-        ./bin/elasticsearch
-      '

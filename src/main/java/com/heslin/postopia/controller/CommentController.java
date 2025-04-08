@@ -7,6 +7,7 @@ import com.heslin.postopia.dto.response.BasicApiResponseEntity;
 import com.heslin.postopia.exception.BadRequestException;
 import com.heslin.postopia.jpa.model.Comment;
 import com.heslin.postopia.jpa.model.Post;
+import com.heslin.postopia.jpa.model.Space;
 import com.heslin.postopia.jpa.model.User;
 import com.heslin.postopia.service.comment.CommentService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,17 +29,18 @@ public class CommentController {
         this.commentService = commentService;
     }
 
-    public record CommentReplyDto(String content, Long commentId, Long postId) {}
+    public record CommentReplyDto(String content, Long commentId, Long postId, String postSubject, String spaceName, String spaceAvatar) {}
 
     @PostMapping("reply")
     public BasicApiResponseEntity reply(@RequestBody CommentReplyDto dto, @AuthenticationPrincipal User user) {
-        if (dto.commentId() == null || dto.postId() == null || dto.content() == null)
-            throw new BadRequestException("parameters content, commentId and postId are required");
-        Post post = new Post();
-        post.setId(dto.postId());
+        if (dto.commentId() == null || dto.postId() == null || dto.content() == null || dto.spaceAvatar == null || dto.spaceName == null || dto.postSubject == null) {
+            throw new BadRequestException("parameters are required");
+        }
+        Post post = Post.builder().subject(dto.postSubject()).id(dto.postId()).build();
         Comment comment = new Comment();
         comment.setId(dto.commentId());
-        commentService.reply(post, comment, dto.content(), user);
+        Space space = Space.builder().avatar(dto.spaceAvatar).name(dto.spaceName).build();
+        commentService.reply(post, comment, dto.content(), user, space);
         return BasicApiResponseEntity.ok("回复成功");
     }
 

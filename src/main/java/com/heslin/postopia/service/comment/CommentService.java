@@ -6,15 +6,16 @@ import com.heslin.postopia.dto.comment.UserOpinionCommentSummary;
 import com.heslin.postopia.enums.OpinionStatus;
 import com.heslin.postopia.jpa.model.Comment;
 import com.heslin.postopia.jpa.model.Post;
+import com.heslin.postopia.jpa.model.Space;
 import com.heslin.postopia.jpa.model.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 
 public interface  CommentService {
-    Comment replyToPost(Post post, String content, @AuthenticationPrincipal User user);
+    Comment replyToPost(Post post, String content, User user, Space space);
 
-    void reply(Post post, Comment comment, String content, @AuthenticationPrincipal User user);
+    Comment reply(Post post, Comment comment, String content, User user, Space space);
 
     void deleteComment(Long id, Long postId, Long userId);
 

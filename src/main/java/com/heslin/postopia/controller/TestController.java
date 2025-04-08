@@ -16,7 +16,9 @@ public class TestController {
 
     @GetMapping("/is_authenticated")
     public BasicApiResponseEntity test(@AuthenticationPrincipal User user) {
-        String s = "User " + new UserId(user.getId()) + " is authenticated";
+        String s = "User " + new UserId(user.getId()) + " ";
+        s += user.getUsername();
+        s += " is authenticated";
         return BasicApiResponseEntity.ok(s);
     }
 

@@ -61,8 +61,8 @@ public class PostopiaAuthenticationFilter extends BasicAuthenticationFilter {
         try {
             if (jwtService.validateToken(token)) {
                 Long userId = jwtService.extractUserId(token);
-                User user = new User();
-                user.setId(userId);
+                String username = jwtService.extractUsername(token);
+                User user = User.builder().id(userId).username(username).build();
                 return new UsernamePasswordAuthenticationToken(user, null, new ArrayList<>());
             }
             

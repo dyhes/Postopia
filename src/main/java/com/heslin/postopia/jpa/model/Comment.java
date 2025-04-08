@@ -3,7 +3,10 @@ package com.heslin.postopia.jpa.model;
 import com.heslin.postopia.jpa.model.opinion.CommentOpinion;
 import com.heslin.postopia.jpa.model.vote.CommentVote;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
@@ -15,6 +18,8 @@ import java.util.Set;
 
 @Data
 @Entity
+@AllArgsConstructor
+@Builder
 @Table(name = "comments")
 @EntityListeners(AuditingEntityListener.class)
 public class Comment {

@@ -1,24 +1,25 @@
 package com.heslin.postopia.service.post;
 
 import com.heslin.postopia.dto.Message;
+import com.heslin.postopia.dto.PostDraftDto;
 import com.heslin.postopia.dto.post.PostInfo;
 import com.heslin.postopia.dto.post.PostSummary;
 import com.heslin.postopia.dto.post.SpacePostSummary;
 import com.heslin.postopia.dto.post.UserOpinionPostSummary;
+import com.heslin.postopia.elasticsearch.model.PostDoc;
 import com.heslin.postopia.enums.OpinionStatus;
 import com.heslin.postopia.enums.PostStatus;
 import com.heslin.postopia.enums.kafka.PostOperation;
 import com.heslin.postopia.exception.ForbiddenException;
 import com.heslin.postopia.exception.ResourceNotFoundException;
-import com.heslin.postopia.jpa.model.Comment;
-import com.heslin.postopia.jpa.model.Post;
-import com.heslin.postopia.jpa.model.Space;
-import com.heslin.postopia.jpa.model.User;
+import com.heslin.postopia.jpa.model.*;
 import com.heslin.postopia.jpa.model.opinion.PostOpinion;
+import com.heslin.postopia.jpa.repository.PostDraftRepository;
 import com.heslin.postopia.jpa.repository.PostRepository;
 import com.heslin.postopia.service.comment.CommentService;
 import com.heslin.postopia.kafka.KafkaService;
 import com.heslin.postopia.service.opinion.OpinionService;
+import com.heslin.postopia.service.space_user_info.SpaceUserInfoService;
 import com.heslin.postopia.util.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -26,6 +27,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.List;
 
 @Service
@@ -38,24 +40,30 @@ public class PostServiceImpl implements PostService {
     private final OpinionService opinionService;
 
     private final KafkaService kafkaService;
+    private final PostDraftRepository postDraftRepository;
+    private final SpaceUserInfoService spaceUserInfoService;
 
     @Autowired
-    public PostServiceImpl(PostRepository postRepository, CommentService commentService, OpinionService opinionService, KafkaService kafkaService) {
+    public PostServiceImpl(PostRepository postRepository, CommentService commentService, OpinionService opinionService, KafkaService kafkaService, PostDraftRepository postDraftRepository, SpaceUserInfoService spaceUserInfoService) {
         this.postRepository = postRepository;
         this.commentService = commentService;
         this.opinionService = opinionService;
         this.kafkaService = kafkaService;
+        this.postDraftRepository = postDraftRepository;
+        this.spaceUserInfoService = spaceUserInfoService;
     }
 
     @Override
-    public Pair<Long, Message> createPost(boolean isDraft, Space space, User user, String subject, String content) {
+    public Pair<Long, Message> createPost(Space space, User user, String subject, String content) {
         var post = new Post();
         post.setSpace(space);
         post.setUser(user);
         post.setSubject(subject);
         post.setContent(content);
-        post.setStatus(isDraft ? PostStatus.DRAFT : PostStatus.PUBLISHED);
+        post.setStatus(PostStatus.PUBLISHED);
         post = postRepository.save(post);
+
+        kafkaService.sendToCreate("post", post.getId().toString(), new PostDoc(post.getId(), user.getUsername(), post.getSubject(), post.getContent(), space.getName(), space.getAvatar(), 0, 0, post.getCreatedAt()));
         return new Pair<>(post.getId(), new Message("Post created successfully", true));
     }
 
@@ -120,10 +128,8 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public Comment replyPost(Long id, String content, User user) {
-        var post = new Post();
-        post.setId(id);
-        return commentService.replyToPost(post, content, user);
+    public Comment replyPost(Post post, String content, User user, Space space) {
+        return commentService.replyToPost(post, content, user, space);
     }
 
     @Override
@@ -149,5 +155,34 @@ public class PostServiceImpl implements PostService {
     public Page<UserOpinionPostSummary> getPostOpinionsByUser(Long id, OpinionStatus opinionStatus, Pageable pageable) {
         List<Boolean> statuses = opinionStatus == OpinionStatus.NIL ? List.of(true, false) : opinionStatus == OpinionStatus.POSITIVE ? List.of(true) : List.of(false);
         return opinionService.getPostOpinionsByUser(id, statuses, pageable);
+    }
+
+    @Override
+    public boolean draftPost(Space space, User user, String subject, String content, Long id) {
+        if (id == null) {
+            if (!spaceUserInfoService.isSpaceMember(space.getId(), user.getId())) {
+                return false;
+            }
+            PostDraft postDraft = PostDraft.builder()
+            .subject(subject)
+            .content(content)
+            .user(user)
+            .space(space)
+            .build();
+            postDraftRepository.save(postDraft);
+            return true;
+        } else {
+            return postDraftRepository.updatePostDraft(id, subject, content, user.getId(), Instant.now()) > 0;
+        }
+    }
+
+    @Override
+    public Page<PostDraftDto> getPostDrafts(User user, Pageable pageable) {
+        return postDraftRepository.findPostDraftsByUserId(user.getId(), pageable);
+    }
+
+    @Override
+    public boolean deleteDraft(Long id, Long userId) {
+        return postDraftRepository.deletePostDraftById(id, userId) > 0;
     }
 }

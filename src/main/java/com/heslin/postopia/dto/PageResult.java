@@ -13,7 +13,7 @@ public class PageResult<T> {
 
     public PageResult(Page<T> page) {
         this.data = page.getContent();
-        this.currentPage = page.getNumber() + 1;
+        this.currentPage = page.getNumber();
         this.totalPage = page.getTotalPages();
     }
 }

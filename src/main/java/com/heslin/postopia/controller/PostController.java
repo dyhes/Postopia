@@ -1,18 +1,23 @@
 package com.heslin.postopia.controller;
 
 import com.heslin.postopia.dto.PageResult;
+import com.heslin.postopia.dto.PostDraftDto;
 import com.heslin.postopia.dto.post.PostInfo;
 import com.heslin.postopia.dto.post.SpacePostSummary;
 import com.heslin.postopia.dto.response.ApiResponse;
 import com.heslin.postopia.dto.response.ApiResponseEntity;
 import com.heslin.postopia.dto.response.BasicApiResponseEntity;
+import com.heslin.postopia.dto.response.PagedApiResponseEntity;
 import com.heslin.postopia.exception.BadRequestException;
 import com.heslin.postopia.jpa.model.Comment;
+import com.heslin.postopia.jpa.model.Post;
 import com.heslin.postopia.jpa.model.Space;
 import com.heslin.postopia.jpa.model.User;
 import com.heslin.postopia.service.post.PostService;
+import com.heslin.postopia.util.Utils;
 import jakarta.persistence.EntityManager;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -24,17 +29,14 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("post")
 public class PostController {
 
-    private final EntityManager entityManager;
-
     private final PostService postService;
 
     @Autowired
-    public PostController(EntityManager entityManager, PostService postService) {
-        this.entityManager = entityManager;
+    public PostController(PostService postService) {
         this.postService = postService;
     }
 
-    public record CreatePostDto(Long spaceId, String subject, String content, boolean isDraft) {}
+    public record CreatePostDto(Long spaceId, String subject, String content, String spaceName, String spaceAvatar) {}
 
     public record PostIdDto(Long id) {}
 
@@ -51,14 +53,51 @@ public class PostController {
         return BasicApiResponseEntity.ok("帖子更新成功");
     }
 
-    @PostMapping("create")
-    public ApiResponseEntity<Long> createPost(@AuthenticationPrincipal User user, @RequestBody CreatePostDto request) {
+    public record PostDraftRequest(Long id, String subject, String content, Long spaceId){}
+
+    @PostMapping("draft")
+    public BasicApiResponseEntity draftPost(@AuthenticationPrincipal User user, @RequestBody PostDraftRequest request) {
         if (request.spaceId == null || request.subject == null || request.content == null) {
-            throw new BadRequestException("spaceId, subject and content are required");
+            throw new BadRequestException();
+        }
+        Space space = Space.builder().id(request.spaceId).build();
+        try {
+            boolean success = postService.draftPost(space, user, request.subject, request.content, request.id);
+            return BasicApiResponseEntity.ok(success);
+        } catch (DataIntegrityViolationException e) {
+            throw new BadRequestException("draft post failed, please check the spaceId");
+        }
+    }
+
+    @PostMapping("deleteDraft")
+    public BasicApiResponseEntity deleteDraft(@AuthenticationPrincipal User user, @RequestBody PostIdDto request) {
+        if (request.id == null) {
+            throw new BadRequestException("postId is required");
+        }
+        boolean success = postService.deleteDraft(request.id, user.getId());
+        return BasicApiResponseEntity.ok(success? "草稿删除成功" : "草稿不存在", success);
+    }
+
+    @GetMapping("draftList")
+    public PagedApiResponseEntity<PostDraftDto> getPosts(
+    @AuthenticationPrincipal User user,
+    @RequestParam(defaultValue = "0")  int page,
+    @RequestParam(defaultValue = "20") int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "d.updatedAt"));
+        return PagedApiResponseEntity.ok(postService.getPostDrafts(user, pageable));
         }
 
-        Space space = entityManager.getReference(Space.class, request.spaceId);
-        var pair = postService.createPost(request.isDraft, space, user, request.subject, request.content);
+    @PostMapping("create")
+    public ApiResponseEntity<Long> createPost(@AuthenticationPrincipal User user, @RequestBody CreatePostDto request) {
+        if (request.spaceId == null || request.spaceAvatar == null || request.spaceName == null || request.subject == null || request.content == null) {
+            throw new BadRequestException("spaceInfos, subject and content are required");
+        }
+        Space space = Space.builder()
+                    .id(request.spaceId)
+                    .name(request.spaceName)
+                    .avatar(request.spaceAvatar)
+                    .build();
+        var pair = postService.createPost(space, user, request.subject, request.content);
         return ApiResponseEntity.ok(new ApiResponse<>(pair.first(), pair.second()));
     }
 
@@ -95,16 +134,17 @@ public class PostController {
         return BasicApiResponseEntity.ok("帖子删除成功");
     }
 
-    public record ReplyPostDto(Long id, String content) {}
+    public record ReplyPostDto(Long postId, String postSubject, String content, String spaceName, String spaceAvatar) {}
     
     @PostMapping("reply")
     public ApiResponseEntity<Long> replyPost(@AuthenticationPrincipal User user, @RequestBody ReplyPostDto request) {
-        if (request.id == null || request.content == null) {
+        if (!Utils.allFieldsNonNull(request)) {
             throw new BadRequestException("postId and content are required");
         }
-        
+        Post post = Post.builder().id(request.postId).build();
+        Space space = Space.builder().avatar(request.spaceAvatar).name(request.spaceName).build();
         //postService.checkPostStatus(request.id);
-        Comment comment = postService.replyPost(request.id, request.content, user);
+        Comment comment = postService.replyPost(post, request.content, user, space);
         return BasicApiResponseEntity.ok(comment.getId(), "回复成功", true);
     }
 

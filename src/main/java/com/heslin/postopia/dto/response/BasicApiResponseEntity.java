@@ -18,6 +18,10 @@ public class BasicApiResponseEntity extends ApiResponseEntity<EmptyData> {
         return BasicApiResponseEntity.ok(message, true);
     }
 
+    public static BasicApiResponseEntity ok(boolean success) {
+        return BasicApiResponseEntity.ok(success? "success" : "failed", success);
+    }
+
     public static BasicApiResponseEntity ok(String message, boolean success) {
         return new BasicApiResponseEntity(new ApiResponse<>(message, success , null), HttpStatus.OK);
     }

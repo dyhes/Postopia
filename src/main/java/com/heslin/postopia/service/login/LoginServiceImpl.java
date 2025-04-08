@@ -29,7 +29,7 @@ public class LoginServiceImpl implements LoginService {
             throw new RuntimeException("用户 @" + username + "密码错误");
         }
         String refreshToken = jwtService.generateRefreshToken(user);
-        String accessToken = jwtService.generateToken(user);
+        String accessToken = jwtService.generateAcesssToken(user);
         return new Credential(refreshToken, accessToken);
     }
 }

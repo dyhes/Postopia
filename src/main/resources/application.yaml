@@ -1,7 +1,6 @@
 spring:
   kafka:
     producer:
-      key-serializer: org.apache.kafka.common.serialization.LongSerializer
       batch-size: 16384
       compression-type: snappy
       retries: 3
@@ -10,7 +9,6 @@ spring:
         linger.ms: 1000
     consumer:
       group-id: consumer-group
-      key-deserializer: org.apache.kafka.common.serialization.LongDeserializer
       max-poll-records: 1000
       fetch-min-size: 10240
       fetch-max-wait: 1000
@@ -83,8 +81,8 @@ postopia:
 
   # 头像 URL 配置
   avatar:
-    space: https://res.cloudinary.com/dz2tishzo/image/upload/v1727686154/73648326_mygdb6.jpg
-    user: https://res.cloudinary.com/dz2tishzo/image/upload/v1727686154/73648326_mygdb6.jpg
+    space: https://res.cloudinary.com/dz2tishzo/image/upload/v1744035577/2025-conference-cat_yylqqz.jpg
+    user: https://res.cloudinary.com/dz2tishzo/image/upload/v1742789232/user_avatar/6510615555426900569.png
 
   # 开放 API 路径（列表配置）[1](@ref)
   open:

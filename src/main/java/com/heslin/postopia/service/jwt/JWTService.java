@@ -35,7 +35,11 @@ public class JWTService {
     }
 
     public Long extractUserId(String token) {
-        return Long.valueOf(extractClaim(token, Claims::getSubject));
+        return Long.valueOf(extractClaim(token, Claims::getId));
+    }
+
+    public String extractUsername(String token) {
+        return extractClaim(token, Claims::getSubject);
     }
 
     public Date extractExpiration(String token) {
@@ -55,27 +59,25 @@ public class JWTService {
         return extractExpiration(token).before(new Date());
     }
 
-    public String generateToken(User user) {
-        return createToken(user.getId().toString(), jwtExpiration);
+    public String generateAcesssToken(User user) {
+        return createToken(user.getId().toString(), user.getUsername(), jwtExpiration);
     }
 
     public String generateRefreshToken(User user) {
-        return createToken(user.getId().toString(), refreshExpiration);
-    }
-
-    public String generateToken(Long id) {
-        return createToken(id.toString(), jwtExpiration);
+        return createToken(user.getId().toString(), user.getUsername(), refreshExpiration);
     }
 
     public String refresh(String token) {
         if (validateToken(token)) {
-            return generateToken(extractUserId(token));
+            User user = User.builder().id(extractUserId(token)).username(extractUsername(token)).build();
+            return generateAcesssToken(user);
         }
         return null;
     }
 
-    private String createToken(String subject, Long expiration) {
+    private String createToken(String id, String subject, Long expiration) {
         return Jwts.builder()
+                    .id(id)
                     .subject(subject)
                     .issuedAt(new Date(System.currentTimeMillis()))
                     .expiration(new Date(System.currentTimeMillis() + expiration))

@@ -6,6 +6,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
@@ -30,6 +33,8 @@ import lombok.Data;
 
 @Data
 @Entity
+@AllArgsConstructor
+@Builder
 @Table(name = "posts")
 @EntityListeners(AuditingEntityListener.class)
 public class Post {
@@ -50,7 +55,6 @@ public class Post {
     @Column(nullable=false)
     private String subject;
 
-    @Column(nullable=false)
     private String content;
 
     @ManyToOne(fetch=FetchType.LAZY)

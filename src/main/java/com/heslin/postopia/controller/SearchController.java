@@ -40,12 +40,57 @@ public class SearchController {
         return PagedApiResponseEntity.ok(searchService.searchPosts(query, pageable));
     }
 
+    @GetMapping("postBySpace")
+    public PagedApiResponseEntity<PostDoc> searchPostsBySpace(@RequestParam String query,
+                                                       @RequestParam String spaceName,
+                                                       @RequestParam(defaultValue = "0") int page,
+                                                       @RequestParam(defaultValue = "20") int size)  {
+        Pageable pageable = PageRequest.of(page, size);
+        return PagedApiResponseEntity.ok(searchService.searchPostsBySpace(query, spaceName, pageable));
+    }
+
+    @GetMapping("postByUser")
+    public PagedApiResponseEntity<PostDoc> searchPostsByUser(@RequestParam String query,
+                                                       @RequestParam String userName,
+                                                       @RequestParam(defaultValue = "0") int page,
+                                                       @RequestParam(defaultValue = "20") int size)  {
+        Pageable pageable = PageRequest.of(page, size);
+        return PagedApiResponseEntity.ok(searchService.searchPostsByUser(query, userName, pageable));
+    }
+
     @GetMapping("comment")
     public PagedApiResponseEntity<CommentDoc> searchComments(@RequestParam String query,
                                                              @RequestParam(defaultValue = "0") int page,
                                                              @RequestParam(defaultValue = "20") int size)  {
         Pageable pageable = PageRequest.of(page, size);
         return PagedApiResponseEntity.ok(searchService.searchComments(query, pageable));
+    }
+
+    @GetMapping("commentByPost")
+    public PagedApiResponseEntity<CommentDoc> searchCommentsByPost(@RequestParam String query,
+                                                                @RequestParam String postId,
+                                                             @RequestParam(defaultValue = "0") int page,
+                                                             @RequestParam(defaultValue = "20") int size)  {
+        Pageable pageable = PageRequest.of(page, size);
+        return PagedApiResponseEntity.ok(searchService.searchCommentsByPost(query, postId, pageable));
+    }
+
+    @GetMapping("commentByUser")
+    public PagedApiResponseEntity<CommentDoc> searchCommentsByUser(@RequestParam String query,
+                                                                   @RequestParam String userName,
+                                                                   @RequestParam(defaultValue = "0") int page,
+                                                                   @RequestParam(defaultValue = "20") int size)  {
+        Pageable pageable = PageRequest.of(page, size);
+        return PagedApiResponseEntity.ok(searchService.searchCommentsByUser(query, userName, pageable));
+    }
+
+    @GetMapping("commentBySpace")
+    public PagedApiResponseEntity<CommentDoc> searchCommentsBySpace(@RequestParam String query,
+                                                                   @RequestParam String spaceName,
+                                                                   @RequestParam(defaultValue = "0") int page,
+                                                                   @RequestParam(defaultValue = "20") int size)  {
+        Pageable pageable = PageRequest.of(page, size);
+        return PagedApiResponseEntity.ok(searchService.searchCommentsBySpace(query, spaceName, pageable));
     }
 
     @GetMapping("user")

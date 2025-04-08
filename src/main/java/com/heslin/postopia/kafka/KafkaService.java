@@ -2,19 +2,23 @@ package com.heslin.postopia.kafka;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.heslin.postopia.elasticsearch.model.CommentDoc;
+import com.heslin.postopia.elasticsearch.model.PostDoc;
 import com.heslin.postopia.elasticsearch.model.SpaceDoc;
 import com.heslin.postopia.dto.diff.CommentDiff;
 import com.heslin.postopia.dto.diff.Diff;
 import com.heslin.postopia.dto.diff.PostDiff;
 import com.heslin.postopia.dto.diff.SpaceDiff;
+import com.heslin.postopia.elasticsearch.model.UserDoc;
 import com.heslin.postopia.enums.kafka.CommentOperation;
 import com.heslin.postopia.enums.kafka.PostOperation;
 import com.heslin.postopia.enums.kafka.SpaceOperation;
-import com.heslin.postopia.service.search.ElasticSevice;
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.elasticsearch.client.elc.ElasticsearchTemplate;
+import org.springframework.data.elasticsearch.core.query.IndexQueryBuilder;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.retry.annotation.Retryable;
@@ -30,39 +34,77 @@ import java.util.stream.Collectors;
 @Service
 public class KafkaService {
     private final KafkaTemplate<Long, Integer> integerKafkaTemplate;
-    private final KafkaTemplate<Long, String> stringKafkaTemplate;
+    private final KafkaTemplate<String, String> stringKafkaTemplate;
     private final EntityManager entityManager;
     private final ObjectMapper objectMapper;
-    private final ElasticSevice elasticSevice;
+    private final ElasticsearchTemplate elasticsearchTemplate;
 
     @Autowired
-    public KafkaService(KafkaTemplate<Long, Integer> integerKafkaTemplate, KafkaTemplate<Long, String> stringKafkaTemplate, EntityManager entityManager, ObjectMapper objectMapper, ElasticSevice elasticSevice) {
+    public KafkaService(KafkaTemplate<Long, Integer> integerKafkaTemplate, KafkaTemplate<String, String> stringKafkaTemplate, EntityManager entityManager, ObjectMapper objectMapper, ElasticsearchTemplate elasticsearchTemplate) {
         this.integerKafkaTemplate = integerKafkaTemplate;
         this.stringKafkaTemplate = stringKafkaTemplate;
         this.entityManager = entityManager;
         this.objectMapper = objectMapper;
-        this.elasticSevice = elasticSevice;
+        this.elasticsearchTemplate = elasticsearchTemplate;
     }
 
-    public void sendToSpaceCreate(Long key, String value){
-        stringKafkaTemplate.send("space_create", key, value);
+    public void sendToUpdate(String fieldType, String key, String value){
+        stringKafkaTemplate.send(fieldType + "_update", key, value);
+    }
+
+    public void sendToCreate(String docType, String key, Object value){
+        try {
+            stringKafkaTemplate.send(docType + "_create", key, objectMapper.writeValueAsString(value));
+        } catch (JsonProcessingException e) {
+            System.out.println("Kafka send error: " + e.getMessage());
+            throw new RuntimeException(e);
+        }
+    }
+
+    private <T> void processDocCreate(List<ConsumerRecord<String, String>> records, Function<T, String> getRouting, Class<T> documentClass) {
+        var queries = records.stream()
+                .map(record -> {
+                    try {
+                        System.out.println(record.value());
+                        T doc = objectMapper.readValue(record.value(), documentClass);
+                        System.out.println(doc);
+                        System.out.println(getRouting.apply(doc));
+                        return new IndexQueryBuilder()
+                                .withId(record.key())
+                                .withRouting(getRouting.apply(doc))
+                                .withObject(doc)
+                                .build();
+                    } catch (JsonProcessingException e) {
+                        System.out.println("Error parsing JSON: " + e.getMessage());
+                        throw new RuntimeException(e);
+                    }
+                })
+                .toList();
+        elasticsearchTemplate.bulkIndex(queries, documentClass);
     }
 
     @KafkaListener(topics = "space_create", containerFactory = "batchStringFactory")
     @Transactional
-    protected void processSpaceCreate(List<ConsumerRecord<Long, String>> records) {
-        var docs = records.stream()
-        .map(record -> {
-            try {
-                System.out.println(record.value());
-                return objectMapper.readValue(record.value(), SpaceDoc.class);
-            } catch (JsonProcessingException e) {
-                System.out.println("Error parsing JSON: " + e.getMessage());
-                throw new RuntimeException(e);
-            }
-        })
-        .toList();
-        elasticSevice.indexSpaces(docs);
+    protected void processSpaceCreate(List<ConsumerRecord<String, String>> records) {
+        processDocCreate(records, SpaceDoc::getId, SpaceDoc.class);
+    }
+
+    @KafkaListener(topics = "user_create", containerFactory = "batchStringFactory")
+    @Transactional
+    protected void processUserCreate(List<ConsumerRecord<String, String>> records) {
+        processDocCreate(records, UserDoc::getId, UserDoc.class);
+    }
+
+    @KafkaListener(topics = "post_create", containerFactory = "batchStringFactory")
+    @Transactional
+    protected void processPostCreate(List<ConsumerRecord<String, String>> records) {
+        processDocCreate(records, PostDoc::getSpaceName, PostDoc.class);
+    }
+
+    @KafkaListener(topics = "comment_create", containerFactory = "batchStringFactory")
+    @Transactional
+    protected void processCommentCreate(List<ConsumerRecord<String, String>> records) {
+        processDocCreate(records, CommentDoc::getSpaceName, CommentDoc.class);
     }
 
 

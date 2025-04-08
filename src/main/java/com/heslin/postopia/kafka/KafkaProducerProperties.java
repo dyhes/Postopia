@@ -13,7 +13,6 @@ import java.util.Map;
 @ConfigurationProperties(prefix = "spring.kafka.producer")
 @Data
 public class KafkaProducerProperties {
-    private Class<?> keySerializer;
     private int batchSize;
     private String compressionType;
     private int retries;
@@ -24,7 +23,6 @@ public class KafkaProducerProperties {
         Map<String, Object> configs = new HashMap<>(properties);
         configs.putAll(
             Map.of(
-                ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, keySerializer,
                 ProducerConfig.BATCH_SIZE_CONFIG, batchSize,
                 ProducerConfig.COMPRESSION_TYPE_CONFIG, compressionType,
                 ProducerConfig.RETRIES_CONFIG, retries,
