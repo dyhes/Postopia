@@ -1,8 +1,10 @@
 package com.heslin.postopia.service.space;
 
-import com.heslin.postopia.dto.Avatar;
+import com.heslin.postopia.elasticsearch.dto.Avatar;
 import com.heslin.postopia.dto.Message;
 import com.heslin.postopia.dto.SpaceInfo;
+import com.heslin.postopia.elasticsearch.dto.SearchedPostInfo;
+import com.heslin.postopia.elasticsearch.dto.SearchedSpaceInfo;
 import com.heslin.postopia.enums.PopularSpaceOrder;
 import com.heslin.postopia.jpa.model.User;
 import com.heslin.postopia.util.Pair;
@@ -27,4 +29,6 @@ public interface SpaceService {
     public SpaceInfo getSpaceInfo(Long spaceId);
 
     public List<Avatar> getSpaceAvatars(List<String> names);
+
+    public List<SearchedSpaceInfo> getSearchedSpaceInfos(List<String> names);
 }

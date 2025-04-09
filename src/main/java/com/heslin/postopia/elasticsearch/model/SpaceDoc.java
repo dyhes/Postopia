@@ -19,9 +19,4 @@ public class SpaceDoc {
     private String name;
     @Field(type = FieldType.Text, analyzer = "ik_max_word", searchAnalyzer = "ik_smart")
     private String description;
-    @Field(type = FieldType.Text, index = false)
-    private String avatar;
-    @Field(type = FieldType.Long, index = false, docValues = false)
-    private long memberCount;
-
 }

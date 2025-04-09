@@ -40,7 +40,7 @@ public class SearchController {
         return PagedApiResponseEntity.ok(searchService.searchPosts(query, pageable));
     }
 
-    @GetMapping("postBySpace")
+    @GetMapping("space-post")
     public PagedApiResponseEntity<PostDoc> searchPostsBySpace(@RequestParam String query,
                                                        @RequestParam String spaceName,
                                                        @RequestParam(defaultValue = "0") int page,
@@ -49,7 +49,7 @@ public class SearchController {
         return PagedApiResponseEntity.ok(searchService.searchPostsBySpace(query, spaceName, pageable));
     }
 
-    @GetMapping("postByUser")
+    @GetMapping("user-post")
     public PagedApiResponseEntity<PostDoc> searchPostsByUser(@RequestParam String query,
                                                        @RequestParam String userName,
                                                        @RequestParam(defaultValue = "0") int page,
@@ -66,7 +66,7 @@ public class SearchController {
         return PagedApiResponseEntity.ok(searchService.searchComments(query, pageable));
     }
 
-    @GetMapping("commentByPost")
+    @GetMapping("post-comment")
     public PagedApiResponseEntity<CommentDoc> searchCommentsByPost(@RequestParam String query,
                                                                 @RequestParam String postId,
                                                              @RequestParam(defaultValue = "0") int page,
@@ -75,7 +75,7 @@ public class SearchController {
         return PagedApiResponseEntity.ok(searchService.searchCommentsByPost(query, postId, pageable));
     }
 
-    @GetMapping("commentByUser")
+    @GetMapping("user-comment")
     public PagedApiResponseEntity<CommentDoc> searchCommentsByUser(@RequestParam String query,
                                                                    @RequestParam String userName,
                                                                    @RequestParam(defaultValue = "0") int page,
@@ -84,7 +84,7 @@ public class SearchController {
         return PagedApiResponseEntity.ok(searchService.searchCommentsByUser(query, userName, pageable));
     }
 
-    @GetMapping("commentBySpace")
+    @GetMapping("space-comment")
     public PagedApiResponseEntity<CommentDoc> searchCommentsBySpace(@RequestParam String query,
                                                                    @RequestParam String spaceName,
                                                                    @RequestParam(defaultValue = "0") int page,

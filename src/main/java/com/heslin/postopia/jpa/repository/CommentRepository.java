@@ -2,6 +2,7 @@ package com.heslin.postopia.jpa.repository;
 
 import com.heslin.postopia.dto.comment.CommentInfo;
 import com.heslin.postopia.dto.comment.CommentSummary;
+import com.heslin.postopia.elasticsearch.dto.SearchedCommentInfo;
 import com.heslin.postopia.jpa.model.Comment;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
@@ -147,4 +148,6 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
             """)
     Page<CommentSummary> findCommentsBySelf(@Param("uid") Long id, Pageable pageable);
 
+    @Query("select new com.heslin.postopia.elasticsearch.dto.SearchedCommentInfo( c.id, c.user.nickname, c.user.avatar, c.positiveCount, c.negativeCount, c.createdAt) from Comment c where c.id in :ids")
+    List<SearchedCommentInfo> getCommentInfosInSearch(List<Long> ids);
 }

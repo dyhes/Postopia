@@ -1,6 +1,6 @@
 package com.heslin.postopia.controller;
 
-import com.heslin.postopia.dto.Avatar;
+import com.heslin.postopia.elasticsearch.dto.Avatar;
 import com.heslin.postopia.dto.Message;
 import com.heslin.postopia.dto.SpaceInfo;
 import com.heslin.postopia.dto.comment.UserOpinionCommentSummary;

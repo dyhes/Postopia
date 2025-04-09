@@ -1,6 +1,6 @@
 package com.heslin.postopia.service.user;
 
-import com.heslin.postopia.dto.Avatar;
+import com.heslin.postopia.elasticsearch.dto.Avatar;
 import com.heslin.postopia.dto.Message;
 import com.heslin.postopia.dto.user.UserId;
 import com.heslin.postopia.dto.user.UserInfo;

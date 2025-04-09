@@ -20,6 +20,4 @@ public class UserDoc {
     private String name;
     @Field(type = FieldType.Text, analyzer = "ik_max_word", searchAnalyzer = "ik_smart")
     private String nickname;
-    @Field(type = FieldType.Text, index = false)
-    private String avatar;
 }

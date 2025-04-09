@@ -40,7 +40,7 @@ public class SignupServiceImpl implements SignupService {
             System.out.println("DataIntegrityViolationException: " + e);
             return new Message("用户 @" + username + " 已存在", false);
         }
-        kafkaService.sendToCreate("user", user.getUsername(), new UserDoc(user.getUsername(), user.getUsername(), user.getNickname(), user.getAvatar()));
+        kafkaService.sendToCreate("user", user.getUsername(), new UserDoc(user.getUsername(), user.getUsername(), user.getNickname()));
         return new Message("用户 @" + username + " 注册成功", true);
     }
 }

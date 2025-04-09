@@ -1,8 +1,9 @@
 package com.heslin.postopia.service.post;
 
 import com.heslin.postopia.dto.Message;
-import com.heslin.postopia.dto.PostDraftDto;
+import com.heslin.postopia.dto.post.PostDraftDto;
 import com.heslin.postopia.dto.post.*;
+import com.heslin.postopia.elasticsearch.dto.SearchedPostInfo;
 import com.heslin.postopia.enums.OpinionStatus;
 import com.heslin.postopia.jpa.model.Comment;
 import com.heslin.postopia.jpa.model.Post;
@@ -42,5 +43,5 @@ public interface PostService {
 
     boolean deleteDraft(Long id, Long userId);
 
-    List<PostSubject> getPostSubjects(List<Long> ids);
+    List<SearchedPostInfo> getPostInfosInSearch(List<Long> ids);
 }

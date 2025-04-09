@@ -1,6 +1,6 @@
 package com.heslin.postopia.jpa.repository;
 
-import com.heslin.postopia.dto.Avatar;
+import com.heslin.postopia.elasticsearch.dto.Avatar;
 import com.heslin.postopia.dto.user.UserInfo;
 import com.heslin.postopia.jpa.model.User;
 import jakarta.transaction.Transactional;
@@ -38,6 +38,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query("UPDATE User u SET u.showEmail = :show WHERE u.id = :id")
     void updateShowStatusById(@Param("show") boolean show, @Param("id") Long id);
 
-    @Query("select new com.heslin.postopia.dto.Avatar(u.avatar, u.username) from User u where u.username in ?1")
+    @Query("select new com.heslin.postopia.elasticsearch.dto.Avatar(u.username, u.avatar) from User u where u.username in ?1")
     List<Avatar> findUserAvatars(List<String> names);
 }

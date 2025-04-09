@@ -1,8 +1,8 @@
 package com.heslin.postopia.service.space;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.heslin.postopia.dto.Avatar;
+import com.heslin.postopia.elasticsearch.dto.Avatar;
+import com.heslin.postopia.elasticsearch.dto.SearchedSpaceInfo;
 import com.heslin.postopia.elasticsearch.model.SpaceDoc;
 import com.heslin.postopia.dto.Message;
 import com.heslin.postopia.dto.SpaceInfo;
@@ -37,18 +37,14 @@ public class SpaceServiceImpl implements SpaceService {
     private final OSService osService;
     private final String defaultSpaceAvatar;
     private final KafkaService kafkaService;
-    private final ObjectMapper objectMapper;
-    private final UserRepository userRepository;
 
     @Autowired
-    public SpaceServiceImpl(@Value("${postopia.avatar.space}") String defaultSpaceAvatar, OSService osService, SpaceRepository spaceRepository, SpaceUserInfoService spaceUserInfoService, KafkaService kafkaService, ObjectMapper objectMapper, UserRepository userRepository) {
+    public SpaceServiceImpl(@Value("${postopia.avatar.space}") String defaultSpaceAvatar, OSService osService, SpaceRepository spaceRepository, SpaceUserInfoService spaceUserInfoService, KafkaService kafkaService) {
         this.osService = osService;
         this.spaceRepository = spaceRepository;
         this.spaceUserInfoService = spaceUserInfoService;
         this.defaultSpaceAvatar = defaultSpaceAvatar;
         this.kafkaService = kafkaService;
-        this.objectMapper = objectMapper;
-        this.userRepository = userRepository;
     }
 
     @Override
@@ -110,7 +106,7 @@ public class SpaceServiceImpl implements SpaceService {
         if (!message.success()) {
             throw new RuntimeException(message.message());
         }
-        kafkaService.sendToCreate("space", space.getName(), new SpaceDoc(space.getName(),space.getName(),space.getDescription(),space.getAvatar(), 1));
+        kafkaService.sendToCreate("space", space.getName(), new SpaceDoc(space.getName(),space.getName(),space.getDescription()));
         return new Pair<>(new Message("创建成功", true), space.getId());
     }
 
@@ -140,5 +136,10 @@ public class SpaceServiceImpl implements SpaceService {
     @Override
     public List<Avatar> getSpaceAvatars(List<String> names) {
         return spaceRepository.findSpaceAvatars(names);
+    }
+
+    @Override
+    public List<SearchedSpaceInfo> getSearchedSpaceInfos(List<String> names) {
+        return spaceRepository.findSearchedSpaceInfos(names);
     }
 }

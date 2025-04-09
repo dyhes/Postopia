@@ -1,6 +1,6 @@
 package com.heslin.postopia.jpa.repository;
 
-import com.heslin.postopia.dto.PostDraftDto;
+import com.heslin.postopia.dto.post.PostDraftDto;
 import com.heslin.postopia.jpa.model.PostDraft;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;

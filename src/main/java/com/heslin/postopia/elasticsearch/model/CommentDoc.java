@@ -22,13 +22,12 @@ public class CommentDoc {
     @Field(type = FieldType.Text, analyzer = "ik_max_word", searchAnalyzer = "ik_smart")
     private String content;
     @Field(type = FieldType.Keyword)
+    private String parentId;
+    @Field(type = FieldType.Keyword)
     private String postId;
     @Field(type = FieldType.Keyword)
-    private String userName;
-    @Field(type = FieldType.Keyword)
     private String spaceName;
-    @Field(type = FieldType.Long, index = false, docValues = false)
-    private long opinionCount;
-    @Field(type = FieldType.Date, index = false, docValues = false)
-    private Instant createdAt;
+    @Field(type = FieldType.Keyword)
+    private String userName;
+
 }

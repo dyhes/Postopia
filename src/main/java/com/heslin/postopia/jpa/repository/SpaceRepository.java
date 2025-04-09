@@ -1,6 +1,7 @@
 package com.heslin.postopia.jpa.repository;
 
-import com.heslin.postopia.dto.Avatar;
+import com.heslin.postopia.elasticsearch.dto.Avatar;
+import com.heslin.postopia.elasticsearch.dto.SearchedSpaceInfo;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -30,6 +31,9 @@ public interface SpaceRepository extends PagingAndSortingRepository<Space, Long>
 
     Optional<SpaceInfo> findSpaceInfoById(Long spaceId);
 
-    @Query("select new com.heslin.postopia.dto.Avatar(s.avatar, s.name) from Space s where s.name in :names")
+    @Query("select new com.heslin.postopia.elasticsearch.dto.Avatar(s.name, s.avatar) from Space s where s.name in :names")
     List<Avatar> findSpaceAvatars(@Param("names") List<String> names);
+
+    @Query("select new com.heslin.postopia.elasticsearch.dto.SearchedSpaceInfo(s.name, s.avatar, s.memberCount) from Space s where s.name in :names")
+    List<SearchedSpaceInfo> findSearchedSpaceInfos(@Param("names") List<String> names);
 }

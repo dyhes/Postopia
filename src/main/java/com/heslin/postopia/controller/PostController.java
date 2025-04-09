@@ -1,9 +1,9 @@
 package com.heslin.postopia.controller;
 
 import com.heslin.postopia.dto.PageResult;
-import com.heslin.postopia.dto.PostDraftDto;
+import com.heslin.postopia.dto.post.PostDraftDto;
 import com.heslin.postopia.dto.post.PostInfo;
-import com.heslin.postopia.dto.post.PostSubject;
+import com.heslin.postopia.elasticsearch.dto.SearchedPostInfo;
 import com.heslin.postopia.dto.post.SpacePostSummary;
 import com.heslin.postopia.dto.response.ApiResponse;
 import com.heslin.postopia.dto.response.ApiResponseEntity;
@@ -16,7 +16,6 @@ import com.heslin.postopia.jpa.model.Space;
 import com.heslin.postopia.jpa.model.User;
 import com.heslin.postopia.service.post.PostService;
 import com.heslin.postopia.util.Utils;
-import jakarta.persistence.EntityManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageRequest;
@@ -72,7 +71,7 @@ public class PostController {
         }
     }
 
-    @PostMapping("deleteDraft")
+    @PostMapping("draft-delete")
     public BasicApiResponseEntity deleteDraft(@AuthenticationPrincipal User user, @RequestBody PostIdDto request) {
         if (request.id == null) {
             throw new BadRequestException("postId is required");
@@ -81,7 +80,7 @@ public class PostController {
         return BasicApiResponseEntity.ok(success? "草稿删除成功" : "草稿不存在", success);
     }
 
-    @GetMapping("draftList")
+    @GetMapping("draft-list")
     public PagedApiResponseEntity<PostDraftDto> getPosts(
     @AuthenticationPrincipal User user,
     @RequestParam(defaultValue = "0")  int page,
@@ -191,8 +190,8 @@ public class PostController {
         return BasicApiResponseEntity.ok("post disliked!");
     }
 
-    @GetMapping("subjects")
-    public ApiResponseEntity<List<PostSubject>> getSubjects(@RequestParam List<Long> ids) {
-        return ApiResponseEntity.ok(postService.getPostSubjects(ids), "success");
+    @GetMapping("search-info")
+    public ApiResponseEntity<List<SearchedPostInfo>> getPostInfosInSearch(@RequestParam List<Long> ids) {
+        return ApiResponseEntity.ok(postService.getPostInfosInSearch(ids), "success");
     }
 }

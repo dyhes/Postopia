@@ -1,7 +1,7 @@
 package com.heslin.postopia.jpa.repository;
 
 import com.heslin.postopia.dto.post.PostInfo;
-import com.heslin.postopia.dto.post.PostSubject;
+import com.heslin.postopia.elasticsearch.dto.SearchedPostInfo;
 import com.heslin.postopia.dto.post.PostSummary;
 import com.heslin.postopia.dto.post.SpacePostSummary;
 import com.heslin.postopia.enums.PostStatus;
@@ -94,6 +94,6 @@ public interface PostRepository extends JpaRepository<Post, Long> {
             """)
     Page<PostSummary> findPostSummariesByUserId(@Param("qid") Long qid, @Param("sid") Long sid, Pageable pageable);
 
-    @Query("select new com.heslin.postopia.dto.post.PostSubject(p.subject, p.id) from Post p where p.id in :ids")
-    List<PostSubject> findPostSubjects(List<Long> ids);
+    @Query("select new com.heslin.postopia.elasticsearch.dto.SearchedPostInfo(p.id, p.subject, p.positiveCount, p.negativeCount, p.commentCount, p.space.avatar, p.createdAt) from Post p where p.id in :ids")
+    List<SearchedPostInfo> findPostInfosInSearch(List<Long> ids);
 }

@@ -4,6 +4,8 @@ import com.heslin.postopia.dto.comment.CommentInfo;
 import com.heslin.postopia.dto.PageResult;
 import com.heslin.postopia.dto.response.ApiResponseEntity;
 import com.heslin.postopia.dto.response.BasicApiResponseEntity;
+import com.heslin.postopia.elasticsearch.dto.SearchedCommentInfo;
+import com.heslin.postopia.elasticsearch.dto.SearchedPostInfo;
 import com.heslin.postopia.exception.BadRequestException;
 import com.heslin.postopia.jpa.model.Comment;
 import com.heslin.postopia.jpa.model.Post;
@@ -17,6 +19,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("comment")
@@ -87,5 +91,10 @@ public class CommentController {
     ) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction, "c.createdAt"));
         return ApiResponseEntity.ok(new PageResult<>(commentService.getCommentsByPost(postId,user.getId(), pageable)), "success", true);
+    }
+
+    @GetMapping("search-info")
+    public ApiResponseEntity<List<SearchedCommentInfo>> getCommentInfosInSearch(@RequestParam List<Long> ids) {
+        return ApiResponseEntity.ok(commentService.getCommentInfosInSearch(ids), "success");
     }
 }

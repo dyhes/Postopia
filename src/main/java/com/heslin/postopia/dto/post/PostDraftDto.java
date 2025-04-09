@@ -1,4 +1,4 @@
-package com.heslin.postopia.dto;
+package com.heslin.postopia.dto.post;
 
 import java.time.Instant;
 

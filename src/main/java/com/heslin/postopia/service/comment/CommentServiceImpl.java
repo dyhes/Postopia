@@ -3,6 +3,7 @@ package com.heslin.postopia.service.comment;
 import com.heslin.postopia.dto.comment.UserOpinionCommentSummary;
 import com.heslin.postopia.dto.comment.CommentInfo;
 import com.heslin.postopia.dto.comment.CommentSummary;
+import com.heslin.postopia.elasticsearch.dto.SearchedCommentInfo;
 import com.heslin.postopia.elasticsearch.model.CommentDoc;
 import com.heslin.postopia.enums.OpinionStatus;
 import com.heslin.postopia.enums.kafka.CommentOperation;
@@ -65,11 +66,10 @@ public class CommentServiceImpl implements CommentService {
             new CommentDoc(
             comment.getId(),
             comment.getContent(),
+            parent != null? parent.getId().toString() : null,
             post.getId().toString(),
-            user.getUsername(),
             space.getName(),
-            0,
-            comment.getCreatedAt()));
+            user.getUsername()));
         kafkaService.sendToPost(post.getId(), PostOperation.COMMENT_CREATED);
         return comment;
     }
@@ -160,5 +160,10 @@ public class CommentServiceImpl implements CommentService {
     public Page<UserOpinionCommentSummary> getCommentOpinionsByUser(Long id, OpinionStatus opinionStatus, Pageable pageable) {
         List<Boolean> statuses = opinionStatus == OpinionStatus.NIL ? List.of(true, false) : opinionStatus == OpinionStatus.POSITIVE ? List.of(true) : List.of(false);
         return opinionService.getCommentOpinionsByUser(id, statuses, pageable);
+    }
+
+    @Override
+    public List<SearchedCommentInfo> getCommentInfosInSearch(List<Long> ids) {
+        return commentRepository.getCommentInfosInSearch(ids);
     }
 }
