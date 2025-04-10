@@ -72,7 +72,7 @@ public interface PostDocRepository extends ElasticsearchRepository<PostDoc, Long
       "filter": [
         {
           "term": {
-            "userName": "?1"
+            "username": "?1"
           }
         }
       ]

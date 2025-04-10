@@ -26,5 +26,5 @@ public class PostDoc {
     @Field(type = FieldType.Keyword)
     private String spaceName;
     @Field(type = FieldType.Keyword)
-    private String userName;
+    private String username;
 }

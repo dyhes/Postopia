@@ -69,10 +69,11 @@ public class SearchController {
     @GetMapping("post-comment")
     public PagedApiResponseEntity<CommentDoc> searchCommentsByPost(@RequestParam String query,
                                                                 @RequestParam String postId,
+                                                                @RequestParam String spaceName,
                                                              @RequestParam(defaultValue = "0") int page,
                                                              @RequestParam(defaultValue = "20") int size)  {
         Pageable pageable = PageRequest.of(page, size);
-        return PagedApiResponseEntity.ok(searchService.searchCommentsByPost(query, postId, pageable));
+        return PagedApiResponseEntity.ok(searchService.searchCommentsByPost(query, postId, spaceName, pageable));
     }
 
     @GetMapping("user-comment")

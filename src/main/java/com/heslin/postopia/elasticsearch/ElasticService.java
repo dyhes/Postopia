@@ -71,7 +71,7 @@ public class ElasticService implements SearchService {
     }
 
     @Override
-    public Page<CommentDoc> searchCommentsByPost(String query, String postId, Pageable pageable) {
-        return commentDocRepository.matchCommentDocByPost(query, postId, pageable);
+    public Page<CommentDoc> searchCommentsByPost(String query, String postId, String spaceName, Pageable pageable) {
+        return commentDocRepository.matchCommentDocByPost(query, postId, spaceName, pageable);
     }
 }

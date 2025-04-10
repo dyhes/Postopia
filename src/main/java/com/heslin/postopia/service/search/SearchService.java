@@ -24,5 +24,5 @@ public interface SearchService {
 
     Page<CommentDoc> searchCommentsBySpace(String query, String spaceName, Pageable pageable);
 
-    Page<CommentDoc> searchCommentsByPost(String query, String postId, Pageable pageable);
+    Page<CommentDoc> searchCommentsByPost(String query, String postId, String spaceName, Pageable pageable);
 }

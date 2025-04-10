@@ -54,7 +54,7 @@ public interface CommentDocRepository extends ElasticsearchRepository<CommentDoc
           }
         ],
         "filter": [
-          { "term": { "userName": "?1" } }
+          { "term": { "username": "?1" } }
         ]
       }
     }
@@ -72,10 +72,10 @@ public interface CommentDocRepository extends ElasticsearchRepository<CommentDoc
           }
         ],
         "filter": [
-          { "term": { "postId": "?1" } }
+          { "term": { "postId": "?1", "_routing": [ "?2" ] } }
         ]
       }
     }
     """)
-    Page<CommentDoc> matchCommentDocByPost(String query, String keyword, Pageable pageable);
+    Page<CommentDoc> matchCommentDocByPost(String query, String postId, String spaceName, Pageable pageable);
 }
