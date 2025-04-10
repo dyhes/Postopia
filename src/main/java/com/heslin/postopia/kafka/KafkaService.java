@@ -1,7 +1,9 @@
 package com.heslin.postopia.kafka;
-
+import co.elastic.clients.elasticsearch._types.query_dsl.QueryBuilders;
+import co.elastic.clients.elasticsearch.core.BulkRequest;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.heslin.postopia.elasticsearch.dto.RoutedDocUpdate;
 import com.heslin.postopia.elasticsearch.model.CommentDoc;
 import com.heslin.postopia.elasticsearch.model.PostDoc;
 import com.heslin.postopia.elasticsearch.model.SpaceDoc;
@@ -17,7 +19,12 @@ import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.elasticsearch.client.elc.ElasticsearchTemplate;
+import org.springframework.data.elasticsearch.client.elc.NativeQuery;
+import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
+import org.springframework.data.elasticsearch.core.document.Document;
+import org.springframework.data.elasticsearch.core.query.DeleteQuery;
+import org.springframework.data.elasticsearch.core.query.Query;
+import org.springframework.data.elasticsearch.core.query.UpdateQuery;
 import org.springframework.data.elasticsearch.core.query.IndexQueryBuilder;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -37,22 +44,82 @@ public class KafkaService {
     private final KafkaTemplate<String, String> stringKafkaTemplate;
     private final EntityManager entityManager;
     private final ObjectMapper objectMapper;
-    private final ElasticsearchTemplate elasticsearchTemplate;
+    private final ElasticsearchOperations elasticsearchOperations;
 
     @Autowired
-    public KafkaService(KafkaTemplate<Long, Integer> integerKafkaTemplate, KafkaTemplate<String, String> stringKafkaTemplate, EntityManager entityManager, ObjectMapper objectMapper, ElasticsearchTemplate elasticsearchTemplate) {
+    public KafkaService(KafkaTemplate<Long, Integer> integerKafkaTemplate, KafkaTemplate<String, String> stringKafkaTemplate, EntityManager entityManager, ObjectMapper objectMapper, ElasticsearchOperations elasticsearchOperations) {
         this.integerKafkaTemplate = integerKafkaTemplate;
         this.stringKafkaTemplate = stringKafkaTemplate;
         this.entityManager = entityManager;
         this.objectMapper = objectMapper;
-        this.elasticsearchTemplate = elasticsearchTemplate;
+        this.elasticsearchOperations = elasticsearchOperations;
     }
 
-    public void sendToUpdate(String fieldType, String key, String value){
-        stringKafkaTemplate.send(fieldType + "_update", key, value);
+    public void sendToDocDelete(String fieldType, String key, String value){
+        stringKafkaTemplate.send(fieldType + "_delete", key, value);
     }
 
-    public void sendToCreate(String docType, String key, Object value){
+    protected <T, C> void processDocDelete(String id, String route,  Class<T> documentClass, String childField, Class<C> childrenClass) {
+        // 未传入routing，待优化
+        elasticsearchOperations.delete(id, documentClass);
+        Query termQuery = NativeQuery.builder().withQuery(QueryBuilders.term(builder -> builder.field(childField).value(id))).withRoute(route).build();
+        DeleteQuery deleteQuery = DeleteQuery.builder(termQuery).build();
+        elasticsearchOperations.delete(deleteQuery, childrenClass);
+    }
+
+    @KafkaListener(topics = "post_delete", containerFactory = "stringFactory")
+    @Transactional
+    protected void processPostDelete(ConsumerRecord<String, String> record) {
+        processDocDelete(record.key(), record.value(), PostDoc.class, "postId", CommentDoc.class);
+    }
+
+    @KafkaListener(topics = "comment_delete", containerFactory = "stringFactory")
+    @Transactional
+    protected void processCommentDelete(ConsumerRecord<String, String> record) {
+        processDocDelete(record.key(), record.value(), CommentDoc.class, "parentId", CommentDoc.class);
+    }
+
+    public void sendToDocUpdate(String fieldType, String key, String routing, Map<String, Object> update) {
+        try {
+            String docUpdate = objectMapper.writeValueAsString(update);
+            String value = objectMapper.writeValueAsString(new RoutedDocUpdate(routing, docUpdate));
+            stringKafkaTemplate.send(fieldType + "_update", key, value);
+        } catch (JsonProcessingException e) {
+            System.out.println("Kafka send error: " + e.getMessage());
+            throw new RuntimeException(e);
+        }
+    }
+
+    protected <T> void processDocUpdate(List<ConsumerRecord<String, String>> records, Class<T> documentClass) {
+        var queries = records.stream().map(record -> {
+            try {
+                RoutedDocUpdate docUpdate = objectMapper.readValue(record.value(), RoutedDocUpdate.class);
+                return UpdateQuery.builder(record.key())
+                        .withRouting(docUpdate.routing())
+                        .withDocument(Document.parse(docUpdate.docUpdate()))
+                        .build();
+            } catch (JsonProcessingException e) {
+                System.out.println("Error parsing JSON: " + e.getMessage());
+                throw new RuntimeException(e);
+            }
+        }).toList();
+        new BulkRequest.Builder();
+        elasticsearchOperations.bulkUpdate(queries, documentClass);
+    }
+
+    @KafkaListener(topics = "user_update", containerFactory = "batchStringFactory")
+    @Transactional
+    protected void processUserUpdate(List<ConsumerRecord<String, String>> records) {
+        processDocUpdate(records, UserDoc.class);
+    }
+
+    @KafkaListener(topics = "post_update", containerFactory = "batchStringFactory")
+    @Transactional
+    protected void processPostUpdate(List<ConsumerRecord<String, String>> records) {
+        processDocUpdate(records, PostDoc.class);
+    }
+
+    public void sendToDocCreate(String docType, String key, Object value){
         try {
             stringKafkaTemplate.send(docType + "_create", key, objectMapper.writeValueAsString(value));
         } catch (JsonProcessingException e) {
@@ -80,7 +147,7 @@ public class KafkaService {
                     }
                 })
                 .toList();
-        elasticsearchTemplate.bulkIndex(queries, documentClass);
+        elasticsearchOperations.bulkIndex(queries, documentClass);
     }
 
     @KafkaListener(topics = "space_create", containerFactory = "batchStringFactory")
@@ -106,7 +173,6 @@ public class KafkaService {
     protected void processCommentCreate(List<ConsumerRecord<String, String>> records) {
         processDocCreate(records, CommentDoc::getSpaceName, CommentDoc.class);
     }
-
 
     private void send(String topic, Long key, Enum value) {
         integerKafkaTemplate.send(topic, key, value.ordinal());

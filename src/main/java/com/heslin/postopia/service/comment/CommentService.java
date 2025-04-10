@@ -20,7 +20,7 @@ public interface  CommentService {
 
     Comment reply(Post post, Comment comment, String content, User user, Space space);
 
-    void deleteComment(Long id, Long postId, Long userId);
+    boolean deleteComment(Long id, Long postId, Long userId, String spaceName);
 
     void checkAuthority(Long id, @AuthenticationPrincipal User user);
 

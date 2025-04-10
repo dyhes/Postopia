@@ -13,6 +13,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -96,4 +97,9 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
     @Query("select new com.heslin.postopia.elasticsearch.dto.SearchedPostInfo(p.id, p.subject, p.positiveCount, p.negativeCount, p.commentCount, p.space.avatar, p.createdAt) from Post p where p.id in :ids")
     List<SearchedPostInfo> findPostInfosInSearch(List<Long> ids);
+
+    @Transactional
+    @Modifying
+    @Query("delete from Post p where p.id = :id and p.user.id = :uid")
+    int deletePost(@Param("id") Long id,@Param("uid") Long userId);
 }

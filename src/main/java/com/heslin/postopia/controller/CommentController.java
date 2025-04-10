@@ -52,7 +52,7 @@ public class CommentController {
     public record CommentIdDto(Long id) {
     };
 
-    public record DeleteDto(Long id, Long postId) {
+    public record DeleteDto(Long id, Long postId, String spaceName) {
     }
 
     @PostMapping("delete")
@@ -60,8 +60,8 @@ public class CommentController {
         if (dto.id == null || dto.postId == null) {
             throw new BadRequestException("id and postId cannot be null");
         }
-        commentService.deleteComment(dto.id(), dto.postId(), user.getId());
-        return BasicApiResponseEntity.ok("删除成功");
+        boolean success = commentService.deleteComment(dto.id(), dto.postId(), user.getId(), dto.spaceName);
+        return BasicApiResponseEntity.ok(success);
     }
 
     @PostMapping("like")

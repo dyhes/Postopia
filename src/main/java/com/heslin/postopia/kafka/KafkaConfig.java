@@ -83,4 +83,13 @@ public class KafkaConfig {
         factory.setConsumerFactory(consumerFactory);
         return factory;
     }
+
+    @Bean
+    public KafkaListenerContainerFactory<?> stringFactory(@Qualifier("stringConsumerFactory") ConsumerFactory<String, String> consumerFactory) {
+        ConcurrentKafkaListenerContainerFactory<String, String> factory = new ConcurrentKafkaListenerContainerFactory<>();
+        // 不启用批量模式
+        factory.setBatchListener(false);
+        factory.setConsumerFactory(consumerFactory);
+        return factory;
+    }
 }

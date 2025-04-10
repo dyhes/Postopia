@@ -19,7 +19,7 @@ import java.util.List;
 public interface PostService {
     Pair<Long, Message> createPost(Space space, User user, String subject, String content);
     void authorize(User user, Long postId);
-    void deletePost(Long id);
+    boolean deletePost(Long id, Long userId, String spaceName);
     void archivePost(Long id);
     void unarchivedPost(Long id);
     void updatePost(Long id, String subject, String content);

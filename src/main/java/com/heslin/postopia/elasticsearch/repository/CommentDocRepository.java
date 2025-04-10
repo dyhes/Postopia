@@ -36,7 +36,7 @@ public interface CommentDocRepository extends ElasticsearchRepository<CommentDoc
           }
         ],
         "filter": [
-          { "term": { "spaceName": "?1" } }
+          { "term": { "spaceName": "?1" , "_routing": [ "?1" ]} }
         ]
       }
     }

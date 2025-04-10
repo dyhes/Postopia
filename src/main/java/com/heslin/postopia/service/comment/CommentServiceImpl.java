@@ -18,13 +18,10 @@ import com.heslin.postopia.jpa.model.opinion.CommentOpinion;
 import com.heslin.postopia.jpa.repository.CommentRepository;
 import com.heslin.postopia.kafka.KafkaService;
 import com.heslin.postopia.service.opinion.OpinionService;
-import jakarta.persistence.Id;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.elasticsearch.annotations.Field;
-import org.springframework.data.elasticsearch.annotations.FieldType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Service;
 
@@ -62,7 +59,7 @@ public class CommentServiceImpl implements CommentService {
         .parent(parent)
         .build();
         comment = commentRepository.save(comment);
-        kafkaService.sendToCreate("comment", comment.getId().toString(),
+        kafkaService.sendToDocCreate("comment", comment.getId().toString(),
             new CommentDoc(
             comment.getId(),
             comment.getContent(),
@@ -87,11 +84,13 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    public void deleteComment(Long id, Long postId, Long userId) {
-        boolean succeed = commentRepository.deleteComment(id, postId, userId) == 1;
-        if (succeed) {
+    public boolean deleteComment(Long id, Long postId, Long userId, String spaceName) {
+        boolean success = commentRepository.deleteComment(id, postId, userId) == 1;
+        if (success) {
             kafkaService.sendToPost(postId, PostOperation.COMMENT_DELETED);
+            kafkaService.sendToDocDelete("comment", id.toString(), spaceName);
         }
+        return success;
     }
 
     @Override

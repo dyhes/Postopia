@@ -1,6 +1,7 @@
 package com.heslin.postopia.util;
 
 import com.heslin.postopia.dto.comment.CommentInfo;
+import com.heslin.postopia.exception.BadRequestException;
 
 import java.lang.reflect.RecordComponent;
 import java.util.Arrays;
@@ -13,6 +14,12 @@ public class Utils {
             throw new IllegalArgumentException("Invalid ordinal for " + enumClass.getSimpleName());
         }
         return values[ordinal];
+    }
+
+    public static void checkRequestBody(Object record) {
+        if (!allFieldsNonNull(record)) {
+            throw new BadRequestException("parameters are required");
+        }
     }
 
     public static boolean allFieldsNonNull(Object record) {

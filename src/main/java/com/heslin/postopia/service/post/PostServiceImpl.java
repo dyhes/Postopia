@@ -61,13 +61,17 @@ public class PostServiceImpl implements PostService {
         post.setStatus(PostStatus.PUBLISHED);
         post = postRepository.save(post);
 
-        kafkaService.sendToCreate("post", post.getId().toString(), new PostDoc(post.getId(), post.getSubject(), post.getContent(), space.getName(), user.getUsername()));
+        kafkaService.sendToDocCreate("post", post.getId().toString(), new PostDoc(post.getId(), post.getSubject(), post.getContent(), space.getName(), user.getUsername()));
         return new Pair<>(post.getId(), new Message("Post created successfully", true));
     }
 
     @Override
-    public void deletePost(Long id) {
-        postRepository.deleteById(id);
+    public boolean deletePost(Long id, Long userId, String spaceName) {
+        boolean success = postRepository.deletePost(id, userId) > 0;
+        if (success) {
+            kafkaService.sendToDocDelete("post", id.toString(), spaceName);
+        }
+        return success;
     }
 
     @Override

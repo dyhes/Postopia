@@ -1,6 +1,5 @@
 package com.heslin.postopia.service.space;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.heslin.postopia.elasticsearch.dto.Avatar;
 import com.heslin.postopia.elasticsearch.dto.SearchedSpaceInfo;
 import com.heslin.postopia.elasticsearch.model.SpaceDoc;
@@ -12,7 +11,6 @@ import com.heslin.postopia.jpa.model.Space;
 import com.heslin.postopia.jpa.model.SpaceUserInfo;
 import com.heslin.postopia.jpa.model.User;
 import com.heslin.postopia.jpa.repository.SpaceRepository;
-import com.heslin.postopia.jpa.repository.UserRepository;
 import com.heslin.postopia.kafka.KafkaService;
 import com.heslin.postopia.service.os.OSService;
 import com.heslin.postopia.service.space_user_info.SpaceUserInfoService;
@@ -106,7 +104,7 @@ public class SpaceServiceImpl implements SpaceService {
         if (!message.success()) {
             throw new RuntimeException(message.message());
         }
-        kafkaService.sendToCreate("space", space.getName(), new SpaceDoc(space.getName(),space.getName(),space.getDescription()));
+        kafkaService.sendToDocCreate("space", space.getName(), new SpaceDoc(space.getName(),space.getName(),space.getDescription()));
         return new Pair<>(new Message("创建成功", true), space.getId());
     }
 

@@ -46,9 +46,7 @@ public class PostController {
 
     @PostMapping("update")
     public BasicApiResponseEntity updatePost(@AuthenticationPrincipal User user, @RequestBody UpdatePostDto request) {
-        if (request.id == null || request.subject == null || request.content == null) {
-            throw new BadRequestException("postId, subject and content are required");
-        }
+        Utils.checkRequestBody(request);
 
         postService.authorize(user, request.id);
         postService.updatePost(request.id, request.subject, request.content);
@@ -123,16 +121,14 @@ public class PostController {
         postService.unarchivedPost(request.id);
         return BasicApiResponseEntity.ok("帖子取消归档成功");
     }
-    
-    @PostMapping("delete")
-    public BasicApiResponseEntity deletePost(@AuthenticationPrincipal User user, @RequestBody PostIdDto request) {
-        if (request.id == null) {
-            throw new BadRequestException("postId is required");
-        }
 
-        postService.authorize(user, request.id);
-        postService.deletePost(request.id);
-        return BasicApiResponseEntity.ok("帖子删除成功");
+    public record DeletePostDto(Long id, String spaceName) {}
+
+    @PostMapping("delete")
+    public BasicApiResponseEntity deletePost(@AuthenticationPrincipal User user, @RequestBody DeletePostDto request) {
+        Utils.checkRequestBody(request);
+        boolean success = postService.deletePost(request.id, user.getId(), request.spaceName);
+        return BasicApiResponseEntity.ok(success);
     }
 
     public record ReplyPostDto(Long postId, String content, String spaceName) {}
