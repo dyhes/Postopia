@@ -6,6 +6,7 @@ import com.heslin.postopia.dto.user.UserId;
 import com.heslin.postopia.dto.user.UserInfo;
 import com.heslin.postopia.jpa.model.User;
 import com.heslin.postopia.jpa.repository.UserRepository;
+import com.heslin.postopia.kafka.KafkaService;
 import com.heslin.postopia.service.mail.MailService;
 import com.heslin.postopia.service.os.OSService;
 import com.heslin.postopia.service.redis.RedisService;
@@ -15,7 +16,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -27,13 +31,15 @@ public class UserServiceImpl implements UserService {
     private final RedisService redisService;
 
     private final OSService osService;
+    private final KafkaService kafkaService;
 
     @Autowired
-    public UserServiceImpl(UserRepository userRepository, MailService mailService, RedisService redisService, OSService osService) {
+    public UserServiceImpl(UserRepository userRepository, MailService mailService, RedisService redisService, OSService osService, KafkaService kafkaService) {
         this.userRepository = userRepository;
         this.mailService = mailService;
         this.redisService = redisService;
         this.osService = osService;
+        this.kafkaService = kafkaService;
     }
 
     @Override
@@ -42,8 +48,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void updateUserNickName(Long id, String nickname) {
-        userRepository.updateNickname(id, nickname);
+    public void updateUserNickName(User user, String nickname) {
+        userRepository.updateNickname(user.getId(), nickname);
+        Map<String, Object> mp = new HashMap<>();
+        mp.put("nickname", nickname);
+        kafkaService.sendToDocUpdate("user", user.getUsername(), user.getUsername(), mp);
     }
 
     @Override

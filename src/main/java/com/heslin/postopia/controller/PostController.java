@@ -42,15 +42,13 @@ public class PostController {
 
     public record PostIdDto(Long id) {}
 
-    public record UpdatePostDto(Long id, String subject, String content) {}
+    public record UpdatePostDto(Long id, String subject, String content, String spaceName) {}
 
     @PostMapping("update")
     public BasicApiResponseEntity updatePost(@AuthenticationPrincipal User user, @RequestBody UpdatePostDto request) {
         Utils.checkRequestBody(request);
-
-        postService.authorize(user, request.id);
-        postService.updatePost(request.id, request.subject, request.content);
-        return BasicApiResponseEntity.ok("帖子更新成功");
+        boolean success = postService.updatePost(request.id, user.getId(), request.spaceName, request.subject, request.content);
+        return BasicApiResponseEntity.ok(success);
     }
 
     public record PostDraftRequest(Long id, String subject, String content, Long spaceId){}

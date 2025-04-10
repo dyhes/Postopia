@@ -22,7 +22,7 @@ public interface PostService {
     boolean deletePost(Long id, Long userId, String spaceName);
     void archivePost(Long id);
     void unarchivedPost(Long id);
-    void updatePost(Long id, String subject, String content);
+    boolean updatePost(Long id, Long userId, String spaceName, String subject, String content);
 
     Comment replyPost(Post post, String content, User user, Space space);
     void checkPostStatus(Long id);

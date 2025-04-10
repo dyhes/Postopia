@@ -13,7 +13,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -31,8 +30,8 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
     @Modifying
     @Transactional
-    @Query("update Post p set p.subject = :subject, p.content = :content where p.id = :id")
-    void updateSubjectAndContent(@Param("id")Long id, @Param("subject")String subject, @Param("content")String content);
+    @Query("update Post p set p.subject = :subject, p.content = :content where p.id = :id and p.user.id = :uid and p.status != com.heslin.postopia.enums.PostStatus.ARCHIVED")
+    int updateSubjectAndContent(@Param("id")Long id, @Param("uid")Long uid, @Param("subject")String subject, @Param("content")String content);
 
 
     Optional<PostStatus> findStatusById(Long id);
@@ -64,7 +63,7 @@ public interface PostRepository extends JpaRepository<Post, Long> {
                     from Post p
                     JOIN p.user u
                     LEFT JOIN PostOpinion o on o.post.id = p.id and o.user.id = :uid
-                    where p.space.id = :id and p.status != com.heslin.postopia.enums.PostStatus.DRAFT
+                    where p.space.id = :id
             """)
     Page<SpacePostSummary> findPostSummariesBySpaceId(@Param("id") Long id, @Param("uid") Long userId, Pageable pageable);
 

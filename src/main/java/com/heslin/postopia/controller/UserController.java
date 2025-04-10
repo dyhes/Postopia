@@ -21,7 +21,9 @@ import com.heslin.postopia.service.comment.CommentService;
 import com.heslin.postopia.service.post.PostService;
 import com.heslin.postopia.service.space.SpaceService;
 import com.heslin.postopia.service.user.UserService;
+import com.heslin.postopia.util.Utils;
 import jakarta.mail.MessagingException;
+import jdk.jshell.execution.Util;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -50,20 +52,16 @@ public class UserController {
         this.commentService = commentService;
     }
 
-    public record NickNameDto(Long id, String nickname) {
-    };
+    public record NickNameDto(String nickname) {}
 
     @PostMapping("nickname")
-    public BasicApiResponseEntity updateNickName(@RequestBody NickNameDto dto) {
-        if (dto.id == null || dto.nickname == null) {
-            throw new BadRequestException();
-        }
-        userService.updateUserNickName(dto.id, dto.nickname);
+    public BasicApiResponseEntity updateNickName(@AuthenticationPrincipal User user, @RequestBody NickNameDto dto) {
+        Utils.checkRequestBody(dto);
+        userService.updateUserNickName(user, dto.nickname);
         return BasicApiResponseEntity.ok("succeed!");
     }
 
-    public record EmailDto(String email) {
-    }
+    public record EmailDto(String email) {}
 
     @PostMapping("email/request/{email}")
     public BasicApiResponseEntity updateEmail(@PathVariable String email, @AuthenticationPrincipal User user) {
@@ -79,10 +77,7 @@ public class UserController {
         return BasicApiResponseEntity.ok("mail succeed!");
     }
 
-    public record ShowDto(boolean show) {
-    }
-
-    ;
+    public record ShowDto(boolean show) {}
 
     @PostMapping("email/show")
     public BasicApiResponseEntity switchEmailShowingState(@RequestBody ShowDto showDto, @AuthenticationPrincipal User user) {

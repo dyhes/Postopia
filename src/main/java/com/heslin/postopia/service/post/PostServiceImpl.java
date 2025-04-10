@@ -26,7 +26,10 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 @Service
 public class PostServiceImpl implements PostService {
@@ -93,8 +96,15 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public void updatePost(Long id, String subject, String content) {
-        postRepository.updateSubjectAndContent(id, subject, content);
+    public boolean updatePost(Long id, Long userId, String spaceName, String subject, String content) {
+        boolean success = postRepository.updateSubjectAndContent(id, userId, subject, content) > 0;
+        if (success) {
+            Map<String, Object> update = new HashMap<>();
+            update.put("subject", subject);
+            update.put("content", content);
+            kafkaService.sendToDocUpdate("post", id.toString(), spaceName, update);
+        }
+        return success;
     }
 
     @Override

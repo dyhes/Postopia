@@ -12,13 +12,13 @@ import java.io.IOException;
 import java.util.List;
 
 public interface UserService {
-    public User findUserById(Long id);
+    User findUserById(Long id);
 
-    public void updateUserNickName(Long id, String nickname);
+    void updateUserNickName(User user, String nickname);
 
-    public void updateUserEmail(String email, User user) throws MessagingException;
+    void updateUserEmail(String email, User user) throws MessagingException;
 
-    public Message verifyUserEmail(String email, String code, User user);
+    Message verifyUserEmail(String email, String code, User user);
 
     String updateUserAvatar(UserId id, MultipartFile avatar) throws IOException;
 
