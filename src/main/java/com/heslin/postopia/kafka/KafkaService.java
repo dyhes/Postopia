@@ -15,6 +15,9 @@ import com.heslin.postopia.elasticsearch.model.UserDoc;
 import com.heslin.postopia.enums.kafka.CommentOperation;
 import com.heslin.postopia.enums.kafka.PostOperation;
 import com.heslin.postopia.enums.kafka.SpaceOperation;
+import com.heslin.postopia.jpa.model.Message;
+import com.heslin.postopia.jpa.model.User;
+import com.heslin.postopia.service.message.MessageService;
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -31,6 +34,7 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -42,17 +46,35 @@ import java.util.stream.Collectors;
 public class KafkaService {
     private final KafkaTemplate<Long, Integer> liKafkaTemplate;
     private final KafkaTemplate<String, String> ssKafkaTemplate;
+    private final KafkaTemplate<Long, String> lsKafkaTemplate;
     private final EntityManager entityManager;
     private final ObjectMapper objectMapper;
     private final ElasticsearchOperations elasticsearchOperations;
+    private final MessageService messageService;
 
     @Autowired
-    public KafkaService(KafkaTemplate<Long, Integer> liKafkaTemplate, KafkaTemplate<String, String> ssKafkaTemplate, EntityManager entityManager, ObjectMapper objectMapper, ElasticsearchOperations elasticsearchOperations) {
+    public KafkaService(KafkaTemplate<Long, Integer> liKafkaTemplate, KafkaTemplate<String, String> ssKafkaTemplate, KafkaTemplate<Long, String> lsKafkaTemplate, EntityManager entityManager, ObjectMapper objectMapper, ElasticsearchOperations elasticsearchOperations, MessageService messageService) {
         this.liKafkaTemplate = liKafkaTemplate;
         this.ssKafkaTemplate = ssKafkaTemplate;
+        this.lsKafkaTemplate = lsKafkaTemplate;
         this.entityManager = entityManager;
         this.objectMapper = objectMapper;
         this.elasticsearchOperations = elasticsearchOperations;
+        this.messageService = messageService;
+    }
+
+    public void sendMessage(Long uid, String content) {
+        lsKafkaTemplate.send("msg", uid, content);
+    }
+
+    @KafkaListener(topics = "msg", containerFactory = "batchLSFactory")
+    @Transactional
+    protected void processMessages(List<ConsumerRecord<Long, String>> records) {
+        Instant current = Instant.now();
+        List<Message> messages = records.stream().map(record -> {
+            return Message.builder().user(User.builder().id(record.key()).build()).content(record.value()).isRead(false).createdAt(current).build();}
+        ).toList();
+        messageService.saveAll(messages);
     }
 
     public void sendToDocDelete(String fieldType, String key, String value){

@@ -27,7 +27,7 @@ spring:
     hikari:
       connectionTimeout: 20000
       maximumPoolSize: 5
-    url: jdbc:postgresql://localhost:5432/postopia_dev
+    url: jdbc:postgresql://localhost:5432/postopia_dev?rewriteBatchedStatements=true
     username: postopia_dev
     password: postopia_dev
 
@@ -39,7 +39,13 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
+        jdbc:
+          batch_size: 1000
+          order_inserts: true
+          batch_versioned_data: true
+        generate_statistics: true
     show-sql: true
+
 
 
   # 邮件配置

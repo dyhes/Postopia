@@ -47,6 +47,21 @@ public class KafkaConfig {
     }
 
     @Bean
+    public ProducerFactory<Long, String> lsProducerFactory(KafkaProducerProperties kafkaProducerProperties) { // 注入自动配置的 KafkaProperties
+        Map<String, Object> configs = kafkaProducerProperties.buildConfigs();
+        configs.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, LongSerializer.class);
+        configs.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+        return new DefaultKafkaProducerFactory<>(configs);
+    }
+
+    @Bean
+    public KafkaTemplate<Long, String> lsKafkaTemplate(
+    @Qualifier("lsProducerFactory") ProducerFactory<Long, String> producerFactory
+    ) {
+        return new KafkaTemplate<>(producerFactory);
+    }
+
+    @Bean
     public ConsumerFactory<Long, Integer> liConsumerFactory(KafkaConsumerProperties kafkaConsumerProperties) {
         Map<String, Object> configs = kafkaConsumerProperties.buildConfigs();
         configs.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, LongDeserializer.class);
@@ -87,6 +102,23 @@ public class KafkaConfig {
         ConcurrentKafkaListenerContainerFactory<String, String> factory = new ConcurrentKafkaListenerContainerFactory<>();
         // 不启用批量模式
         factory.setBatchListener(false);
+        factory.setConsumerFactory(consumerFactory);
+        return factory;
+    }
+
+    @Bean
+    public ConsumerFactory<Long, String> lsConsumerFactory(KafkaConsumerProperties kafkaConsumerProperties) {
+        Map<String, Object> configs = kafkaConsumerProperties.buildConfigs();
+        configs.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, LongDeserializer.class);
+        configs.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+        return new DefaultKafkaConsumerFactory<>(configs);
+    }
+
+    @Bean
+    public KafkaListenerContainerFactory<?> batchLSFactory(@Qualifier("lsConsumerFactory") ConsumerFactory<Long, String> consumerFactory) {
+        ConcurrentKafkaListenerContainerFactory<Long, String> factory = new ConcurrentKafkaListenerContainerFactory<>();
+        // 启用批量模式
+        factory.setBatchListener(true);
         factory.setConsumerFactory(consumerFactory);
         return factory;
     }
