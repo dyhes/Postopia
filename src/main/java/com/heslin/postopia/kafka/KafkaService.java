@@ -40,23 +40,23 @@ import java.util.stream.Collectors;
 
 @Service
 public class KafkaService {
-    private final KafkaTemplate<Long, Integer> integerKafkaTemplate;
-    private final KafkaTemplate<String, String> stringKafkaTemplate;
+    private final KafkaTemplate<Long, Integer> liKafkaTemplate;
+    private final KafkaTemplate<String, String> ssKafkaTemplate;
     private final EntityManager entityManager;
     private final ObjectMapper objectMapper;
     private final ElasticsearchOperations elasticsearchOperations;
 
     @Autowired
-    public KafkaService(KafkaTemplate<Long, Integer> integerKafkaTemplate, KafkaTemplate<String, String> stringKafkaTemplate, EntityManager entityManager, ObjectMapper objectMapper, ElasticsearchOperations elasticsearchOperations) {
-        this.integerKafkaTemplate = integerKafkaTemplate;
-        this.stringKafkaTemplate = stringKafkaTemplate;
+    public KafkaService(KafkaTemplate<Long, Integer> liKafkaTemplate, KafkaTemplate<String, String> ssKafkaTemplate, EntityManager entityManager, ObjectMapper objectMapper, ElasticsearchOperations elasticsearchOperations) {
+        this.liKafkaTemplate = liKafkaTemplate;
+        this.ssKafkaTemplate = ssKafkaTemplate;
         this.entityManager = entityManager;
         this.objectMapper = objectMapper;
         this.elasticsearchOperations = elasticsearchOperations;
     }
 
     public void sendToDocDelete(String fieldType, String key, String value){
-        stringKafkaTemplate.send(fieldType + "_delete", key, value);
+        ssKafkaTemplate.send(fieldType + "_delete", key, value);
     }
 
     protected <T, C> void processDocDelete(String id, String route,  Class<T> documentClass, String childField, Class<C> childrenClass) {
@@ -67,13 +67,13 @@ public class KafkaService {
         elasticsearchOperations.delete(deleteQuery, childrenClass);
     }
 
-    @KafkaListener(topics = "post_delete", containerFactory = "stringFactory")
+    @KafkaListener(topics = "post_delete", containerFactory = "ssFactory")
     @Transactional
     protected void processPostDelete(ConsumerRecord<String, String> record) {
         processDocDelete(record.key(), record.value(), PostDoc.class, "postId", CommentDoc.class);
     }
 
-    @KafkaListener(topics = "comment_delete", containerFactory = "stringFactory")
+    @KafkaListener(topics = "comment_delete", containerFactory = "ssFactory")
     @Transactional
     protected void processCommentDelete(ConsumerRecord<String, String> record) {
         processDocDelete(record.key(), record.value(), CommentDoc.class, "parentId", CommentDoc.class);
@@ -83,7 +83,7 @@ public class KafkaService {
         try {
             String docUpdate = objectMapper.writeValueAsString(update);
             String value = objectMapper.writeValueAsString(new RoutedDocUpdate(routing, docUpdate));
-            stringKafkaTemplate.send(fieldType + "_update", key, value);
+            ssKafkaTemplate.send(fieldType + "_update", key, value);
         } catch (JsonProcessingException e) {
             System.out.println("Kafka send error: " + e.getMessage());
             throw new RuntimeException(e);
@@ -107,13 +107,13 @@ public class KafkaService {
         elasticsearchOperations.bulkUpdate(queries, documentClass);
     }
 
-    @KafkaListener(topics = "user_update", containerFactory = "batchStringFactory")
+    @KafkaListener(topics = "user_update", containerFactory = "batchSSFactory")
     @Transactional
     protected void processUserUpdate(List<ConsumerRecord<String, String>> records) {
         processDocUpdate(records, UserDoc.class);
     }
 
-    @KafkaListener(topics = "post_update", containerFactory = "batchStringFactory")
+    @KafkaListener(topics = "post_update", containerFactory = "batchSSFactory")
     @Transactional
     protected void processPostUpdate(List<ConsumerRecord<String, String>> records) {
         processDocUpdate(records, PostDoc.class);
@@ -121,7 +121,7 @@ public class KafkaService {
 
     public void sendToDocCreate(String docType, String key, Object value){
         try {
-            stringKafkaTemplate.send(docType + "_create", key, objectMapper.writeValueAsString(value));
+            ssKafkaTemplate.send(docType + "_create", key, objectMapper.writeValueAsString(value));
         } catch (JsonProcessingException e) {
             System.out.println("Kafka send error: " + e.getMessage());
             throw new RuntimeException(e);
@@ -150,32 +150,32 @@ public class KafkaService {
         elasticsearchOperations.bulkIndex(queries, documentClass);
     }
 
-    @KafkaListener(topics = "space_create", containerFactory = "batchStringFactory")
+    @KafkaListener(topics = "space_create", containerFactory = "batchSSFactory")
     @Transactional
     protected void processSpaceCreate(List<ConsumerRecord<String, String>> records) {
         processDocCreate(records, SpaceDoc::getId, SpaceDoc.class);
     }
 
-    @KafkaListener(topics = "user_create", containerFactory = "batchStringFactory")
+    @KafkaListener(topics = "user_create", containerFactory = "batchSSFactory")
     @Transactional
     protected void processUserCreate(List<ConsumerRecord<String, String>> records) {
         processDocCreate(records, UserDoc::getId, UserDoc.class);
     }
 
-    @KafkaListener(topics = "post_create", containerFactory = "batchStringFactory")
+    @KafkaListener(topics = "post_create", containerFactory = "batchSSFactory")
     @Transactional
     protected void processPostCreate(List<ConsumerRecord<String, String>> records) {
         processDocCreate(records, PostDoc::getSpaceName, PostDoc.class);
     }
 
-    @KafkaListener(topics = "comment_create", containerFactory = "batchStringFactory")
+    @KafkaListener(topics = "comment_create", containerFactory = "batchSSFactory")
     @Transactional
     protected void processCommentCreate(List<ConsumerRecord<String, String>> records) {
         processDocCreate(records, CommentDoc::getSpaceName, CommentDoc.class);
     }
 
     private void send(String topic, Long key, Enum value) {
-        integerKafkaTemplate.send(topic, key, value.ordinal());
+        liKafkaTemplate.send(topic, key, value.ordinal());
     }
 
     public void sendToPost(Long postId, PostOperation value) {
@@ -190,7 +190,7 @@ public class KafkaService {
         send("space", spaceId, value);
     }
 
-    @KafkaListener(topics = "post", containerFactory = "batchIntegerFactory")
+    @KafkaListener(topics = "post", containerFactory = "batchLIFactory")
     @Transactional
     protected void processPostOperations(List<ConsumerRecord<Long, Integer>> records) {
         var mp = new HashMap<Long, Diff>();
@@ -201,7 +201,7 @@ public class KafkaService {
         executeBatchDiffOperations(mp, "posts");
     }
 
-    @KafkaListener(topics = "comment", containerFactory = "batchIntegerFactory")
+    @KafkaListener(topics = "comment", containerFactory = "batchLIFactory")
     @Transactional
     protected void processCommentOperations(List<ConsumerRecord<Long, Integer>> records) {
         var mp = new HashMap<Long, Diff>();
@@ -212,7 +212,7 @@ public class KafkaService {
         executeBatchDiffOperations(mp, "comments");
     }
 
-    @KafkaListener(topics = "space", containerFactory = "batchIntegerFactory")
+    @KafkaListener(topics = "space", containerFactory = "batchLIFactory")
     @Transactional
     protected void processSpaceOperations(List<ConsumerRecord<Long, Integer>> records) {
         var mp = new HashMap<Long, Diff>();
