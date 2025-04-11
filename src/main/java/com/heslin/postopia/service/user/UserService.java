@@ -1,7 +1,7 @@
 package com.heslin.postopia.service.user;
 
 import com.heslin.postopia.elasticsearch.dto.Avatar;
-import com.heslin.postopia.dto.Message;
+import com.heslin.postopia.dto.ResMessage;
 import com.heslin.postopia.dto.user.UserId;
 import com.heslin.postopia.dto.user.UserInfo;
 import com.heslin.postopia.jpa.model.User;
@@ -18,7 +18,7 @@ public interface UserService {
 
     void updateUserEmail(String email, User user) throws MessagingException;
 
-    Message verifyUserEmail(String email, String code, User user);
+    ResMessage verifyUserEmail(String email, String code, User user);
 
     String updateUserAvatar(UserId id, MultipartFile avatar) throws IOException;
 

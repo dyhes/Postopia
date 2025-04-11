@@ -1,7 +1,7 @@
 package com.heslin.postopia.service.user;
 
 import com.heslin.postopia.elasticsearch.dto.Avatar;
-import com.heslin.postopia.dto.Message;
+import com.heslin.postopia.dto.ResMessage;
 import com.heslin.postopia.dto.user.UserId;
 import com.heslin.postopia.dto.user.UserInfo;
 import com.heslin.postopia.jpa.model.User;
@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -61,17 +60,17 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Message verifyUserEmail(String email, String code, User user) {
+    public ResMessage verifyUserEmail(String email, String code, User user) {
         String credential = redisService.get(email);
         if (credential != null) {
             String[] credentials = credential.split("\\.");
             if (user.getId().equals(Long.parseLong(credentials[0])) && code.equals(credentials[1])) {
                 redisService.delete(email);
                 userRepository.updateEmail(user.getId(), email);
-                return new Message("success", true);
+                return new ResMessage("success", true);
             }
         }
-        return new Message("doesn't exist or expired", false);
+        return new ResMessage("doesn't exist or expired", false);
 
     }
 

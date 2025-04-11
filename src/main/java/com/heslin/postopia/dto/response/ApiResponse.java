@@ -1,6 +1,6 @@
 package com.heslin.postopia.dto.response;
 
-import com.heslin.postopia.dto.Message;
+import com.heslin.postopia.dto.ResMessage;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -24,9 +24,9 @@ public class ApiResponse<T> {
         this.success = true;
     }
 
-    public ApiResponse(T data, Message message) {
-        this.message = message.message();
+    public ApiResponse(T data, ResMessage resMessage) {
+        this.message = resMessage.message();
         this.data = data;
-        this.success = message.success();
+        this.success = resMessage.success();
     }
 }

@@ -1,6 +1,6 @@
 package com.heslin.postopia.service.post;
 
-import com.heslin.postopia.dto.Message;
+import com.heslin.postopia.dto.ResMessage;
 import com.heslin.postopia.dto.post.PostDraftDto;
 import com.heslin.postopia.dto.post.*;
 import com.heslin.postopia.elasticsearch.dto.SearchedPostInfo;
@@ -29,7 +29,6 @@ import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 @Service
 public class PostServiceImpl implements PostService {
@@ -55,7 +54,7 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public Pair<Long, Message> createPost(Space space, User user, String subject, String content) {
+    public Pair<Long, ResMessage> createPost(Space space, User user, String subject, String content) {
         var post = new Post();
         post.setSpace(space);
         post.setUser(user);
@@ -65,7 +64,7 @@ public class PostServiceImpl implements PostService {
         post = postRepository.save(post);
 
         kafkaService.sendToDocCreate("post", post.getId().toString(), new PostDoc(post.getId(), post.getSubject(), post.getContent(), space.getName(), user.getUsername()));
-        return new Pair<>(post.getId(), new Message("Post created successfully", true));
+        return new Pair<>(post.getId(), new ResMessage("Post created successfully", true));
     }
 
     @Override

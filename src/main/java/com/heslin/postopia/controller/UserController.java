@@ -1,7 +1,7 @@
 package com.heslin.postopia.controller;
 
 import com.heslin.postopia.elasticsearch.dto.Avatar;
-import com.heslin.postopia.dto.Message;
+import com.heslin.postopia.dto.ResMessage;
 import com.heslin.postopia.dto.SpaceInfo;
 import com.heslin.postopia.dto.comment.UserOpinionCommentSummary;
 import com.heslin.postopia.dto.post.UserOpinionPostSummary;
@@ -23,7 +23,6 @@ import com.heslin.postopia.service.space.SpaceService;
 import com.heslin.postopia.service.user.UserService;
 import com.heslin.postopia.util.Utils;
 import jakarta.mail.MessagingException;
-import jdk.jshell.execution.Util;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -87,7 +86,7 @@ public class UserController {
 
     @PostMapping("email/verify/{email}/{code}")
     public BasicApiResponseEntity verifyEmail(@PathVariable String email, @PathVariable String code, @AuthenticationPrincipal User user) {
-        Message verify = userService.verifyUserEmail(email, code, user);
+        ResMessage verify = userService.verifyUserEmail(email, code, user);
         return BasicApiResponseEntity.ok(verify);
     }
 

@@ -1,7 +1,7 @@
 package com.heslin.postopia.service.signup;
 
-import com.heslin.postopia.dto.Message;
+import com.heslin.postopia.dto.ResMessage;
 
 public interface SignupService {
-    public Message signup(String username, String password);
+    public ResMessage signup(String username, String password);
 } 

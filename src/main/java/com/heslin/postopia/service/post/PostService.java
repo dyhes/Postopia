@@ -1,6 +1,6 @@
 package com.heslin.postopia.service.post;
 
-import com.heslin.postopia.dto.Message;
+import com.heslin.postopia.dto.ResMessage;
 import com.heslin.postopia.dto.post.PostDraftDto;
 import com.heslin.postopia.dto.post.*;
 import com.heslin.postopia.elasticsearch.dto.SearchedPostInfo;
@@ -17,7 +17,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import java.util.List;
 
 public interface PostService {
-    Pair<Long, Message> createPost(Space space, User user, String subject, String content);
+    Pair<Long, ResMessage> createPost(Space space, User user, String subject, String content);
     void authorize(User user, Long postId);
     boolean deletePost(Long id, Long userId, String spaceName);
     void archivePost(Long id);

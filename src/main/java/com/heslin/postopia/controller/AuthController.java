@@ -1,6 +1,5 @@
 package com.heslin.postopia.controller;
 
-import com.heslin.postopia.enums.OpinionStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -8,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.heslin.postopia.dto.Credential;
-import com.heslin.postopia.dto.Message;
+import com.heslin.postopia.dto.ResMessage;
 import com.heslin.postopia.dto.response.ApiResponse;
 import com.heslin.postopia.dto.response.ApiResponseEntity;
 import com.heslin.postopia.dto.response.BasicApiResponseEntity;
@@ -39,8 +38,8 @@ public class AuthController {
             throw new BadRequestException("Username and password are required");
         }
         
-        Message message = signupService.signup(signupDto.username, signupDto.password);
-        return BasicApiResponseEntity.ok(message);
+        ResMessage resMessage = signupService.signup(signupDto.username, signupDto.password);
+        return BasicApiResponseEntity.ok(resMessage);
     }
 
     public record LoginDto(String username, String password) {}

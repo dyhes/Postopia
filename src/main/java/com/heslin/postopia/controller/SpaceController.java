@@ -1,7 +1,7 @@
 package com.heslin.postopia.controller;
 
 import com.heslin.postopia.elasticsearch.dto.Avatar;
-import com.heslin.postopia.dto.Message;
+import com.heslin.postopia.dto.ResMessage;
 import com.heslin.postopia.dto.SpaceInfo;
 import com.heslin.postopia.dto.PageResult;
 import com.heslin.postopia.dto.response.ApiResponse;
@@ -43,11 +43,11 @@ public class SpaceController {
             throw new BadRequestException("space name and description are required");
         }
 
-        Pair<Message, Long> pair;
+        Pair<ResMessage, Long> pair;
         try {
             pair = spaceService.createSpace(user, info.name, info.description, avatar);
         } catch (RuntimeException e) {
-            pair = new Pair<>(new Message(e.getMessage(), false), null);
+            pair = new Pair<>(new ResMessage(e.getMessage(), false), null);
         }
 
         return ApiResponseEntity.ok(new ApiResponse<>(pair.second(), pair.first()));
@@ -61,8 +61,8 @@ public class SpaceController {
             return BasicApiResponseEntity.badRequest("spaceId is required");
         }
 
-        Message message = spaceService.joinSpace(space.spaceId, user);
-        return BasicApiResponseEntity.ok(message);
+        ResMessage resMessage = spaceService.joinSpace(space.spaceId, user);
+        return BasicApiResponseEntity.ok(resMessage);
     }
 
     @GetMapping("list")
@@ -87,8 +87,8 @@ public class SpaceController {
                 return BasicApiResponseEntity.badRequest("spaceId is required");
             }
 
-        Message message = spaceService.leaveSpace(space.spaceId, user);
-            return BasicApiResponseEntity.ok(message);
+        ResMessage resMessage = spaceService.leaveSpace(space.spaceId, user);
+            return BasicApiResponseEntity.ok(resMessage);
     }
 
     @GetMapping("avatars")

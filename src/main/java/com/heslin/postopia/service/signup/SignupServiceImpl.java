@@ -1,6 +1,6 @@
 package com.heslin.postopia.service.signup;
 
-import com.heslin.postopia.dto.Message;
+import com.heslin.postopia.dto.ResMessage;
 import com.heslin.postopia.elasticsearch.model.UserDoc;
 import com.heslin.postopia.jpa.model.User;
 import com.heslin.postopia.jpa.repository.UserRepository;
@@ -27,7 +27,7 @@ public class SignupServiceImpl implements SignupService {
     }
 
     @Override
-    public Message signup(String username, String password) {
+    public ResMessage signup(String username, String password) {
         User user = new User();
         try {
             user.setUsername(username);
@@ -38,9 +38,9 @@ public class SignupServiceImpl implements SignupService {
             user = userRepository.save(user);
         } catch (DataIntegrityViolationException e) {
             System.out.println("DataIntegrityViolationException: " + e);
-            return new Message("用户 @" + username + " 已存在", false);
+            return new ResMessage("用户 @" + username + " 已存在", false);
         }
         kafkaService.sendToDocCreate("user", user.getUsername(), new UserDoc(user.getUsername(), user.getUsername(), user.getNickname()));
-        return new Message("用户 @" + username + " 注册成功", true);
+        return new ResMessage("用户 @" + username + " 注册成功", true);
     }
 }

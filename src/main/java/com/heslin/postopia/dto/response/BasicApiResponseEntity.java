@@ -2,7 +2,7 @@ package com.heslin.postopia.dto.response;
 
 import org.springframework.http.HttpStatus;
 
-import com.heslin.postopia.dto.Message;
+import com.heslin.postopia.dto.ResMessage;
 
 import lombok.NoArgsConstructor;
 
@@ -26,8 +26,8 @@ public class BasicApiResponseEntity extends ApiResponseEntity<EmptyData> {
         return new BasicApiResponseEntity(new ApiResponse<>(message, success , null), HttpStatus.OK);
     }
 
-    public static BasicApiResponseEntity ok(Message message) {
-        return BasicApiResponseEntity.ok(message.message(), message.success());
+    public static BasicApiResponseEntity ok(ResMessage resMessage) {
+        return BasicApiResponseEntity.ok(resMessage.message(), resMessage.success());
     }
 
     public static BasicApiResponseEntity badRequest(String message) {

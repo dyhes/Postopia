@@ -3,7 +3,7 @@ package com.heslin.postopia.service.space;
 import com.heslin.postopia.elasticsearch.dto.Avatar;
 import com.heslin.postopia.elasticsearch.dto.SearchedSpaceInfo;
 import com.heslin.postopia.elasticsearch.model.SpaceDoc;
-import com.heslin.postopia.dto.Message;
+import com.heslin.postopia.dto.ResMessage;
 import com.heslin.postopia.dto.SpaceInfo;
 import com.heslin.postopia.enums.PopularSpaceOrder;
 import com.heslin.postopia.enums.kafka.SpaceOperation;
@@ -47,26 +47,26 @@ public class SpaceServiceImpl implements SpaceService {
 
     @Override
     @Transactional
-    public Message joinSpace(Long spaceId, User user) {
+    public ResMessage joinSpace(Long spaceId, User user) {
         Space space = spaceRepository.findById(spaceId).orElse(null);
         if (space == null) {
-            return new Message("空间不存在", false);
+            return new ResMessage("空间不存在", false);
         }
 
         return joinSpace(space, user);
     }
 
     @Override
-    public Message leaveSpace(Long spaceId, User user) {
+    public ResMessage leaveSpace(Long spaceId, User user) {
         boolean success = spaceUserInfoService.deleteBySpaceIdAndUserId(spaceId, user.getId());
         kafkaService.sendToSpace(spaceId, SpaceOperation.MEMBER_LEFT);
-        return new Message(success ? "退出成功" : "退出失败, 尚未加入空间", success);
+        return new ResMessage(success ? "退出成功" : "退出失败, 尚未加入空间", success);
     }
 
     @Transactional
-    public Message joinSpace(Space space, User user) {
+    public ResMessage joinSpace(Space space, User user) {
         if (spaceUserInfoService.isSpaceMember(space.getId(), user.getId())) {
-            return new Message("已经加入过该空间", false);
+            return new ResMessage("已经加入过该空间", false);
         }
 
         SpaceUserInfo spaceUserInfo = new SpaceUserInfo();
@@ -75,18 +75,18 @@ public class SpaceServiceImpl implements SpaceService {
         spaceUserInfo.setLastActiveAt(LocalDate.now());
         spaceUserInfoService.joinSpace(spaceUserInfo);
         kafkaService.sendToSpace(space.getId(), SpaceOperation.MEMBER_JOINED);
-        return new Message("加入成功", true);
+        return new ResMessage("加入成功", true);
     }
 
     @Override
     @Transactional
-    public Pair<Message, Long> createSpace(User user, String name, String description, MultipartFile avatar) {
+    public Pair<ResMessage, Long> createSpace(User user, String name, String description, MultipartFile avatar) {
         String avatarUrl = defaultSpaceAvatar;
         if (avatar != null) {
             try {
                 avatarUrl = osService.updateSpaceAvatar(name, avatar);
             } catch (IOException e) {
-                return new Pair<>(new Message(e.getMessage(), false), null);
+                return new Pair<>(new ResMessage(e.getMessage(), false), null);
             }
         }
         Space space = new Space();
@@ -97,15 +97,15 @@ public class SpaceServiceImpl implements SpaceService {
         try {
             space = spaceRepository.save(space);
         } catch (DataIntegrityViolationException exception) {
-            return new Pair<>(new Message("空间名称已存在", false), null);
+            return new Pair<>(new ResMessage("空间名称已存在", false), null);
         }
         space = spaceRepository.save(space);
-        Message message = joinSpace(space, user);
-        if (!message.success()) {
-            throw new RuntimeException(message.message());
+        ResMessage resMessage = joinSpace(space, user);
+        if (!resMessage.success()) {
+            throw new RuntimeException(resMessage.message());
         }
         kafkaService.sendToDocCreate("space", space.getName(), new SpaceDoc(space.getName(),space.getName(),space.getDescription()));
-        return new Pair<>(new Message("创建成功", true), space.getId());
+        return new Pair<>(new ResMessage("创建成功", true), space.getId());
     }
 
     @Override
