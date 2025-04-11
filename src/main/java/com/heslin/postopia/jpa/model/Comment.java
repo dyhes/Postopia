@@ -18,19 +18,12 @@ import java.util.Set;
 
 @Data
 @Entity
+@NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @Table(name = "comments")
 @EntityListeners(AuditingEntityListener.class)
 public class Comment {
-
-    public Comment() {
-
-    }
-
-    public Comment(Long id) {
-        this.id = id;
-    }
 
     @Id
     @GeneratedValue(strategy=GenerationType.IDENTITY)
@@ -44,24 +37,24 @@ public class Comment {
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "post_id")
+    @JoinColumn(name = "post_id",foreignKey = @ForeignKey(name = "fk_comment_post", foreignKeyDefinition = "FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE"))
     private Post post;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "parent_id")
+    @JoinColumn(name = "parent_id", foreignKey = @ForeignKey(name = "fk_comment_comment", foreignKeyDefinition = "FOREIGN KEY (parent_id) REFERENCES comments(id) ON DELETE CASCADE"))
     private Comment parent;
 
-    @OneToMany(mappedBy = "parent", orphanRemoval = true)
-    private List<Comment> children = new ArrayList<>();
+    @OneToMany(mappedBy = "parent", cascade = {CascadeType.REMOVE}, orphanRemoval = true)
+    private List<Comment> children;
 
     @CreatedDate
     private Instant createdAt;
 
-    @OneToMany(mappedBy = "comment", orphanRemoval = true)
-    private Set<CommentOpinion> opinions = new HashSet<>();
+    @OneToMany(mappedBy = "comment",cascade = {CascadeType.REMOVE}, orphanRemoval = true)
+    private Set<CommentOpinion> opinions;
 
-    @OneToMany(mappedBy = "comment", orphanRemoval = true)
-    private List<CommentVote> votes = new ArrayList<>();
+    @OneToMany(mappedBy = "comment", cascade = {CascadeType.REMOVE}, orphanRemoval = true)
+    private List<CommentVote> votes;
 
     private long positiveCount;
 

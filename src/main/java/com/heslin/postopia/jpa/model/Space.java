@@ -47,13 +47,13 @@ public class Space {
     private String avatar;
 
     @OneToMany(mappedBy="space")
-    private Set<SpaceUserInfo> userInfos = new HashSet<>();
+    private Set<SpaceUserInfo> userInfos;
 
     @OneToMany(mappedBy="space")
-    private List<Post> posts = new ArrayList<>();
+    private List<Post> posts;
 
     @OneToMany(mappedBy="space")
-    private List<SpaceVote> votes = new ArrayList<>();
+    private List<SpaceVote> votes;
 
     private long memberCount;
 }

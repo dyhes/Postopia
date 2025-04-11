@@ -16,6 +16,7 @@ import com.heslin.postopia.jpa.model.Space;
 import com.heslin.postopia.jpa.model.User;
 import com.heslin.postopia.service.post.PostService;
 import com.heslin.postopia.util.Utils;
+import jdk.jshell.execution.Util;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageRequest;
@@ -87,9 +88,7 @@ public class PostController {
 
     @PostMapping("create")
     public ApiResponseEntity<Long> createPost(@AuthenticationPrincipal User user, @RequestBody CreatePostDto request) {
-        if (Utils.allFieldsNonNull(request)) {
-            throw new BadRequestException("spaceInfos, subject and content are required");
-        }
+        Utils.checkRequestBody(request);
         Space space = Space.builder()
                     .id(request.spaceId)
                     .name(request.spaceName)

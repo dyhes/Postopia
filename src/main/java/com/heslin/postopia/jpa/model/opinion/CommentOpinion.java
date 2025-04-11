@@ -16,7 +16,8 @@ import org.apache.commons.lang3.tuple.Triple;
 })
 public class CommentOpinion extends Opinion {
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "comment_id")
+    @JoinColumn(name = "comment_id", foreignKey = @ForeignKey(name = "fk_comment_opinion_comment",
+            foreignKeyDefinition = "FOREIGN KEY (comment_id) REFERENCES comments(id) ON DELETE CASCADE"))
     private Comment comment;
 
 

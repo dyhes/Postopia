@@ -58,22 +58,22 @@ public class User {
     private String bindedGithub;
 
     @OneToMany(mappedBy = "user")
-    private Set<SpaceUserInfo> spaces = new HashSet<>();
+    private Set<SpaceUserInfo> spaces;
 
     @OneToMany(mappedBy= "user")
-    private List<Post> posts = new ArrayList<>();
+    private List<Post> posts;
 
     @OneToMany(mappedBy = "user")
-    private List<Comment> comments = new ArrayList<>();
+    private List<Comment> comments;
 
     @OneToMany(mappedBy = "user")
-    private List<PostOpinion> postOpinions = new ArrayList<>();
+    private List<PostOpinion> postOpinions;
 
     @OneToMany(mappedBy = "user")
-    private List<CommentOpinion> commentOpinions = new ArrayList<>();
+    private List<CommentOpinion> commentOpinions;
 
     @OneToMany(mappedBy = "user")
-    private List<VoteOpinion> voteOpinions = new ArrayList<>();
+    private List<VoteOpinion> voteOpinions;
 
 
     @Override

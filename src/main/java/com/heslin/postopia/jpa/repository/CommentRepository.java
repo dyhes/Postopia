@@ -25,7 +25,7 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
 
     @Modifying
     @Transactional
-    @Query("update Comment c set c.negativeCount = c.negativeCount + 1 where c.id = :id and c.post.id = :pid and c.user.id = :uid")
+    @Query("delete Comment c where c.id = :id and c.post.id = :pid and c.user.id = :uid")
     int deleteComment(@Param("id") Long id, @Param("pid") Long pid, @Param("uid") Long uid);
 
     @Query("""
@@ -60,7 +60,7 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
                            ELSE 'NEGATIVE'
                        END AS opinion_status,
                        c.positive_count,
-                       c.negative_count,
+                       c.negative_count
                    FROM
                        comments c
                    JOIN
@@ -71,7 +71,7 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
                        c.parent_id IN (:cids)
         
                    UNION ALL
-                  
+            
                    -- 递归查询：逐层获取嵌套子评论
                    SELECT
                        child.id,
@@ -87,7 +87,7 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
                            ELSE 'NEGATIVE'
                        END AS opinion_status,
                        child.positive_count,
-                       child.negative_count,
+                       child.negative_count
                    FROM
                        comments child
                    JOIN
@@ -107,7 +107,7 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
                    avatar,
                    opinion_status,
                    positive_count,
-                   negative_count,
+                   negative_count
                FROM comment_tree
                ORDER BY created_at ASC;
                                 """, nativeQuery = true)

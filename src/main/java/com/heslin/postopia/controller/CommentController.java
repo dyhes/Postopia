@@ -38,9 +38,7 @@ public class CommentController {
 
     @PostMapping("reply")
     public BasicApiResponseEntity reply(@RequestBody CommentReplyDto dto, @AuthenticationPrincipal User user) {
-        if (Utils.allFieldsNonNull(dto)) {
-            throw new BadRequestException("parameters are required");
-        }
+        Utils.checkRequestBody(dto);
         Post post = Post.builder().id(dto.postId()).build();
         Comment comment = new Comment();
         comment.setId(dto.commentId());
@@ -52,15 +50,13 @@ public class CommentController {
     public record CommentIdDto(Long id) {
     };
 
-    public record DeleteDto(Long id, Long postId, String spaceName) {
+    public record DeleteDto(Long commentId, Long postId, String spaceName) {
     }
 
     @PostMapping("delete")
     public BasicApiResponseEntity delete(@RequestBody DeleteDto dto, @AuthenticationPrincipal User user) {
-        if (dto.id == null || dto.postId == null) {
-            throw new BadRequestException("id and postId cannot be null");
-        }
-        boolean success = commentService.deleteComment(dto.id(), dto.postId(), user.getId(), dto.spaceName);
+        Utils.checkRequestBody(dto);
+        boolean success = commentService.deleteComment(dto.commentId(), dto.postId(), user.getId(), dto.spaceName);
         return BasicApiResponseEntity.ok(success);
     }
 

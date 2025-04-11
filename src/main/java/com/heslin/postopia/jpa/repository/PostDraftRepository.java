@@ -16,7 +16,7 @@ import java.time.Instant;
 @Repository
 public interface PostDraftRepository extends JpaRepository<PostDraft, Long> {
     @Query("""
-        select new com.heslin.postopia.dto.PostDraftDto(d.id, d.subject, d.content, s.id, s.name, s.avatar, d.updatedAt) from PostDraft d
+        select new com.heslin.postopia.dto.post.PostDraftDto(d.id, d.subject, d.content, s.id, s.name, s.avatar, d.updatedAt) from PostDraft d
             JOIN d.space s
         where d.user.id = :uid
     """)

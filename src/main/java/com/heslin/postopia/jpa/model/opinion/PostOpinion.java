@@ -16,7 +16,8 @@ import org.apache.commons.lang3.tuple.Triple;
 })
 public class PostOpinion extends Opinion {
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "post_id")
+    @JoinColumn(name = "post_id", foreignKey = @ForeignKey(name = "fk_post_opinion_post",
+            foreignKeyDefinition = "FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE"))
     private Post post;
 
     @Override
