@@ -1,5 +1,6 @@
 package com.heslin.postopia.jpa.repository;
 
+import com.heslin.postopia.dto.AuthorHint;
 import com.heslin.postopia.dto.post.PostInfo;
 import com.heslin.postopia.elasticsearch.dto.SearchedPostInfo;
 import com.heslin.postopia.dto.post.PostSummary;
@@ -101,4 +102,7 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     @Modifying
     @Query("delete from Post p where p.id = :id and p.user.id = :uid")
     int deletePost(@Param("id") Long id,@Param("uid") Long userId);
+
+    @Query("select new com.heslin.postopia.dto.AuthorHint(p.id, p.user.username, p.subject) from Post p where p.id in :ids")
+    List<AuthorHint> getAuthorHints(@Param("ids") List<Long> postIds);
 }

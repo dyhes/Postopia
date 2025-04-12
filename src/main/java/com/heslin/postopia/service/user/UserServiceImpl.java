@@ -9,7 +9,7 @@ import com.heslin.postopia.jpa.repository.UserRepository;
 import com.heslin.postopia.kafka.KafkaService;
 import com.heslin.postopia.service.mail.MailService;
 import com.heslin.postopia.service.os.OSService;
-import com.heslin.postopia.service.redis.RedisService;
+import com.heslin.postopia.redis.RedisService;
 import jakarta.mail.MessagingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

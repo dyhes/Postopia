@@ -12,6 +12,10 @@ import java.util.List;
 public interface OpinionService {
     boolean upsertOpinion(Opinion opinion);
 
+    boolean deletePostOpinion(Long postId, Long userId, boolean isPositive);
+
+    boolean deleteCommentOpinion(Long commentId, Long userId, boolean isPositive);
+
     Page<UserOpinionCommentSummary> getCommentOpinionsByUser(Long id, List<Boolean> statuses, Pageable pageable);
 
     Page<UserOpinionPostSummary> getPostOpinionsByUser(Long id, List<Boolean> statuses, Pageable pageable);

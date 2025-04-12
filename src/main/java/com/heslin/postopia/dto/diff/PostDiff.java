@@ -49,6 +49,8 @@ public class PostDiff extends Diff {
             }
             case COMMENT_CREATED -> commentDiff++;
             case COMMENT_DELETED -> commentDiff--;
+            case CANCEL_DISLIKE -> negativeDiff--;
+            case CANCEL_LIKE -> positiveDiff--;
         }
     }
 

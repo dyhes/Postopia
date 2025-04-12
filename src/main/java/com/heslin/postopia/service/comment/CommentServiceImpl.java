@@ -1,5 +1,6 @@
 package com.heslin.postopia.service.comment;
 
+import com.heslin.postopia.dto.AuthorHint;
 import com.heslin.postopia.dto.comment.UserOpinionCommentSummary;
 import com.heslin.postopia.dto.comment.CommentInfo;
 import com.heslin.postopia.dto.comment.CommentSummary;
@@ -8,8 +9,6 @@ import com.heslin.postopia.elasticsearch.model.CommentDoc;
 import com.heslin.postopia.enums.OpinionStatus;
 import com.heslin.postopia.enums.kafka.CommentOperation;
 import com.heslin.postopia.enums.kafka.PostOperation;
-import com.heslin.postopia.exception.ForbiddenException;
-import com.heslin.postopia.exception.ResourceNotFoundException;
 import com.heslin.postopia.jpa.model.Comment;
 import com.heslin.postopia.jpa.model.Post;
 import com.heslin.postopia.jpa.model.Space;
@@ -17,12 +16,13 @@ import com.heslin.postopia.jpa.model.User;
 import com.heslin.postopia.jpa.model.opinion.CommentOpinion;
 import com.heslin.postopia.jpa.repository.CommentRepository;
 import com.heslin.postopia.kafka.KafkaService;
+import com.heslin.postopia.redis.RedisService;
 import com.heslin.postopia.service.opinion.OpinionService;
+import com.heslin.postopia.util.PostopiaFormatter;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -38,12 +38,14 @@ public class CommentServiceImpl implements CommentService {
     private final CommentRepository commentRepository;
     private final OpinionService opinionService;
     private final KafkaService kafkaService;
+    private final RedisService redisService;
 
     @Autowired
-    public CommentServiceImpl(CommentRepository commentRepository, OpinionService opinionService, KafkaService kafkaService) {
+    public CommentServiceImpl(CommentRepository commentRepository, OpinionService opinionService, KafkaService kafkaService, RedisService redisService) {
         this.commentRepository = commentRepository;
         this.opinionService = opinionService;
         this.kafkaService = kafkaService;
+        this.redisService = redisService;
     }
 
     @Transactional
@@ -65,10 +67,13 @@ public class CommentServiceImpl implements CommentService {
             space.getName(),
             user.getUsername()));
         kafkaService.sendToPost(post.getId(), PostOperation.COMMENT_CREATED);
-        StringBuilder sbuffer = new StringBuilder();
-        sbuffer.append("postopia-user{").append(user.getUsername()).append("} 回复了您：").append(content, 0, min(content.length(), 20))
-        .append("... postopia-comment{").append(space.getName()).append(";").append(post.getId()).append(";").append(comment.getId()).append("}");
-        kafkaService.sendMessage(replyUser, sbuffer.toString());
+        StringBuilder messageContent = new StringBuilder();
+        messageContent
+        .append(PostopiaFormatter.formatUser(user.getUsername()))
+        .append("回复了您：")
+        .append(content, 0, min(content.length(), 20))
+        .append("... %s".formatted(PostopiaFormatter.formatComment(space.getName(), post.getId(), comment.getId())));
+        kafkaService.sendMessage(replyUser, messageContent.toString());
         return comment;
     }
 
@@ -93,23 +98,6 @@ public class CommentServiceImpl implements CommentService {
             kafkaService.sendToDocDelete("comment", id.toString(), spaceName);
         }
         return success;
-    }
-
-    @Override
-    public void checkAuthority(Long id, User user) {
-        if (!Objects.equals(commentRepository.findUserIdById(id).orElseThrow(() -> new ResourceNotFoundException("Comment not found")), user.getId())) {
-            throw new ForbiddenException("You are not the owner of this comment");
-        }
-    }
-
-    @Override
-    public void likeComment(Long id, User user) {
-        addCommentOpinion(id, true, user);
-    }
-
-    @Override
-    public void disLikeComment(Long id, User user) {
-        addCommentOpinion(id, false, user);
     }
 
     @Override
@@ -144,19 +132,6 @@ public class CommentServiceImpl implements CommentService {
         return top;
     }
 
-    private void addCommentOpinion(Long id, boolean opinion, @AuthenticationPrincipal User user) {
-        CommentOpinion postOpinion = new CommentOpinion();
-        postOpinion.setUser(user);
-        postOpinion.setComment(Comment.builder().id(id).build());
-        postOpinion.setPositive(opinion);
-        boolean isInsert = opinionService.upsertOpinion(postOpinion);
-        if (isInsert) {
-            kafkaService.sendToComment(id, opinion? CommentOperation.LIKED : CommentOperation.DISLIKED );
-        } else {
-            kafkaService.sendToComment(id, opinion? CommentOperation.SWITCH_TO_LIKE : CommentOperation.SWITCH_TO_DISLIKE );
-        }
-    }
-
     @Override
     public Page<UserOpinionCommentSummary> getCommentOpinionsByUser(Long id, OpinionStatus opinionStatus, Pageable pageable) {
         List<Boolean> statuses = opinionStatus == OpinionStatus.NIL ? List.of(true, false) : opinionStatus == OpinionStatus.POSITIVE ? List.of(true) : List.of(false);
@@ -166,5 +141,34 @@ public class CommentServiceImpl implements CommentService {
     @Override
     public List<SearchedCommentInfo> getCommentInfosInSearch(List<Long> ids) {
         return commentRepository.getCommentInfosInSearch(ids);
+    }
+
+    @Override
+    public void upsertCommentOpinion(User user, Long id, Long postId, String spaceName, boolean isPositive) {
+        CommentOpinion postOpinion = new CommentOpinion();
+        postOpinion.setUser(user);
+        postOpinion.setComment(Comment.builder().id(id).build());
+        postOpinion.setPositive(isPositive);
+        boolean isInsert = opinionService.upsertOpinion(postOpinion);
+        if (isInsert) {
+            kafkaService.sendToComment(id, isPositive? CommentOperation.LIKED : CommentOperation.DISLIKED );
+        } else {
+            kafkaService.sendToComment(id, isPositive? CommentOperation.SWITCH_TO_LIKE : CommentOperation.SWITCH_TO_DISLIKE );
+        }
+        redisService.updateOpinionAggregation(spaceName, postId, id, user.getUsername(), isPositive);
+    }
+
+    @Override
+    public boolean deleteCommentOpinion(User user, Long id, boolean isPositive) {
+        boolean success = opinionService.deleteCommentOpinion(id, user.getId(), isPositive);
+        if (success) {
+            kafkaService.sendToComment(id, isPositive? CommentOperation.CANCEL_LIKE : CommentOperation.CANCEL_DISLIKE);
+        }
+        return success;
+    }
+
+    @Override
+    public List<AuthorHint> getAuthorHints(List<Long> commentIds) {
+        return commentRepository.getAuthorHints(commentIds);
     }
 }

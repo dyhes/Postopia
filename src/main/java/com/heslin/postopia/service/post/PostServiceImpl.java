@@ -1,5 +1,6 @@
 package com.heslin.postopia.service.post;
 
+import com.heslin.postopia.dto.AuthorHint;
 import com.heslin.postopia.dto.ResMessage;
 import com.heslin.postopia.dto.post.PostDraftDto;
 import com.heslin.postopia.dto.post.*;
@@ -14,6 +15,7 @@ import com.heslin.postopia.jpa.model.*;
 import com.heslin.postopia.jpa.model.opinion.PostOpinion;
 import com.heslin.postopia.jpa.repository.PostDraftRepository;
 import com.heslin.postopia.jpa.repository.PostRepository;
+import com.heslin.postopia.redis.RedisService;
 import com.heslin.postopia.service.comment.CommentService;
 import com.heslin.postopia.kafka.KafkaService;
 import com.heslin.postopia.service.opinion.OpinionService;
@@ -42,15 +44,17 @@ public class PostServiceImpl implements PostService {
     private final KafkaService kafkaService;
     private final PostDraftRepository postDraftRepository;
     private final SpaceUserInfoService spaceUserInfoService;
+    private final RedisService redisService;
 
     @Autowired
-    public PostServiceImpl(PostRepository postRepository, CommentService commentService, OpinionService opinionService, KafkaService kafkaService, PostDraftRepository postDraftRepository, SpaceUserInfoService spaceUserInfoService) {
+    public PostServiceImpl(PostRepository postRepository, CommentService commentService, OpinionService opinionService, KafkaService kafkaService, PostDraftRepository postDraftRepository, SpaceUserInfoService spaceUserInfoService, RedisService redisService) {
         this.postRepository = postRepository;
         this.commentService = commentService;
         this.opinionService = opinionService;
         this.kafkaService = kafkaService;
         this.postDraftRepository = postDraftRepository;
         this.spaceUserInfoService = spaceUserInfoService;
+        this.redisService = redisService;
     }
 
     @Override
@@ -104,38 +108,6 @@ public class PostServiceImpl implements PostService {
             kafkaService.sendToDocUpdate("post", id.toString(), spaceName, update);
         }
         return success;
-    }
-
-    @Override
-    public void checkPostStatus(Long id) {
-        var status = postRepository.findStatusById(id).orElseThrow(() -> new ForbiddenException("Post not found"));
-        if (status != PostStatus.PUBLISHED) {
-            throw new ForbiddenException();
-        }
-    }
-
-    @Override
-    public void likePost(Long id,@AuthenticationPrincipal User user) {
-        addPostOpinion(id, user, true);
-    }
-
-    @Override
-    public void disLikePost(Long id,@AuthenticationPrincipal  User user) {
-        addPostOpinion(id, user, false);
-    }
-
-
-    private void addPostOpinion(Long id, User user, boolean opinion) {
-        PostOpinion postOpinion = new PostOpinion();
-        postOpinion.setUser(user);
-        postOpinion.setPost(new Post(id));
-        postOpinion.setPositive(opinion);
-        boolean isInsert = opinionService.upsertOpinion(postOpinion);
-        if (isInsert) {
-            kafkaService.sendToPost(id, opinion? PostOperation.LIKED : PostOperation.DISLIKED);
-        } else {
-            kafkaService.sendToPost(id, opinion? PostOperation.SWITCH_TO_LIKE : PostOperation.SWITCH_TO_DISLIKE);
-        }
     }
 
     @Override
@@ -200,5 +172,34 @@ public class PostServiceImpl implements PostService {
     @Override
     public List<SearchedPostInfo> getPostInfosInSearch(List<Long> ids) {
         return postRepository.findPostInfosInSearch(ids);
+    }
+
+    @Override
+    public void upsertPostOpinion(User user, Long id, String spaceName, boolean isPositive) {
+        PostOpinion postOpinion = new PostOpinion();
+        postOpinion.setUser(user);
+        postOpinion.setPost(new Post(id));
+        postOpinion.setPositive(isPositive);
+        boolean isInsert = opinionService.upsertOpinion(postOpinion);
+        if (isInsert) {
+            kafkaService.sendToPost(id, isPositive? PostOperation.LIKED : PostOperation.DISLIKED);
+        } else {
+            kafkaService.sendToPost(id, isPositive? PostOperation.SWITCH_TO_LIKE : PostOperation.SWITCH_TO_DISLIKE);
+        }
+        redisService.updateOpinionAggregation(spaceName, id, null, user.getUsername(), isPositive);
+    }
+
+    @Override
+    public boolean deletePostOpinion(User user, Long id, boolean isPositive) {
+        boolean success = opinionService.deletePostOpinion(id, user.getId(), isPositive);
+        if (success) {
+            kafkaService.sendToPost(id, isPositive? PostOperation.CANCEL_LIKE : PostOperation.CANCEL_DISLIKE);
+        }
+        return success;
+    }
+
+    @Override
+    public List<AuthorHint> getAuthorHints(List<Long> postIds) {
+        return postRepository.getAuthorHints(postIds);
     }
 }

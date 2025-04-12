@@ -1,7 +1,7 @@
 package com.heslin.postopia.service.mail;
 
 import com.heslin.postopia.jpa.model.User;
-import com.heslin.postopia.service.redis.RedisService;
+import com.heslin.postopia.redis.RedisService;
 import com.heslin.postopia.util.Pair;
 import jakarta.mail.MessagingException;
 import org.springframework.beans.factory.annotation.Autowired;

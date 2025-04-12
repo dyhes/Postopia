@@ -9,6 +9,7 @@ import com.heslin.postopia.dto.response.ApiResponse;
 import com.heslin.postopia.dto.response.ApiResponseEntity;
 import com.heslin.postopia.dto.response.BasicApiResponseEntity;
 import com.heslin.postopia.dto.response.PagedApiResponseEntity;
+import com.heslin.postopia.enums.OpinionStatus;
 import com.heslin.postopia.exception.BadRequestException;
 import com.heslin.postopia.jpa.model.Comment;
 import com.heslin.postopia.jpa.model.Post;
@@ -165,22 +166,21 @@ public class PostController {
         return ApiResponseEntity.ok(new ApiResponse<>("获取帖子列表成功", new PageResult<>(postService.getPosts(spaceId, pageable, user))));
     }
 
-    @PostMapping("like")
-    public BasicApiResponseEntity likePost(@RequestBody PostIdDto dto,@AuthenticationPrincipal User user) {
-        if (dto.id == null) {
-            throw new BadRequestException("postId is required");
-        }
-        postService.likePost(dto.id, user);
-        return BasicApiResponseEntity.ok("post liked!");
+    // 非幂等！！！
+    public record PostOpinionDto(Long id, String spaceName, boolean isPositive){}
+    @PostMapping("opinion")
+    public BasicApiResponseEntity upsertPostOpinion(@RequestBody PostOpinionDto request, @AuthenticationPrincipal User user) {
+        Utils.checkRequestBody(request);
+        postService.upsertPostOpinion(user, request.id, request.spaceName, request.isPositive);
+        return BasicApiResponseEntity.ok("success");
     }
 
-    @PostMapping("dislike")
-    public BasicApiResponseEntity disLikePost(@RequestBody PostIdDto dto,@AuthenticationPrincipal User user) {
-        if (dto.id == null) {
-            throw new BadRequestException("postId is required");
-        }
-        postService.disLikePost(dto.id, user);
-        return BasicApiResponseEntity.ok("post disliked!");
+    public record DeletePostOpinionDto(Long id, boolean isPositive){}
+    @PostMapping("opinion-delete")
+    public BasicApiResponseEntity deletePostOpinion(@RequestBody DeletePostOpinionDto request, @AuthenticationPrincipal User user) {
+        Utils.checkRequestBody(request);
+        boolean success = postService.deletePostOpinion(user, request.id, request.isPositive);
+        return BasicApiResponseEntity.ok(success);
     }
 
     @GetMapping("search-info")

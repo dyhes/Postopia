@@ -7,5 +7,7 @@ public enum CommentOperation {
     LIKED,
     DISLIKED,
     SWITCH_TO_LIKE,
-    SWITCH_TO_DISLIKE
+    SWITCH_TO_DISLIKE,
+    CANCEL_LIKE,
+    CANCEL_DISLIKE
 }

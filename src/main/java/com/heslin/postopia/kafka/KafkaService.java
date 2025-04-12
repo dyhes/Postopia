@@ -46,17 +46,15 @@ import java.util.stream.Collectors;
 public class KafkaService {
     private final KafkaTemplate<Long, Integer> liKafkaTemplate;
     private final KafkaTemplate<String, String> ssKafkaTemplate;
-    private final KafkaTemplate<Long, String> lsKafkaTemplate;
     private final EntityManager entityManager;
     private final ObjectMapper objectMapper;
     private final ElasticsearchOperations elasticsearchOperations;
     private final MessageService messageService;
 
     @Autowired
-    public KafkaService(KafkaTemplate<Long, Integer> liKafkaTemplate, KafkaTemplate<String, String> ssKafkaTemplate, KafkaTemplate<Long, String> lsKafkaTemplate, EntityManager entityManager, ObjectMapper objectMapper, ElasticsearchOperations elasticsearchOperations, MessageService messageService) {
+    public KafkaService(KafkaTemplate<Long, Integer> liKafkaTemplate, KafkaTemplate<String, String> ssKafkaTemplate, EntityManager entityManager, ObjectMapper objectMapper, ElasticsearchOperations elasticsearchOperations, MessageService messageService) {
         this.liKafkaTemplate = liKafkaTemplate;
         this.ssKafkaTemplate = ssKafkaTemplate;
-        this.lsKafkaTemplate = lsKafkaTemplate;
         this.entityManager = entityManager;
         this.objectMapper = objectMapper;
         this.elasticsearchOperations = elasticsearchOperations;
@@ -71,8 +69,7 @@ public class KafkaService {
     @Transactional
     protected void processMessages(List<ConsumerRecord<String, String>> records) {
         Instant current = Instant.now();
-        List<Message> messages = records.stream().map(record -> {
-            return Message.builder().username(record.key()).content(record.value()).isRead(false).createdAt(current).build();}
+        List<Message> messages = records.stream().map(record -> Message.builder().username(record.key()).content(record.value()).isRead(false).createdAt(current).build()
         ).toList();
         messageService.saveAll(messages);
     }

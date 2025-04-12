@@ -48,6 +48,8 @@ public class CommentDiff extends Diff {
                 positiveDiff--;
                 negativeDiff++;
             }
+            case CANCEL_DISLIKE -> negativeDiff--;
+            case CANCEL_LIKE -> positiveDiff--;
         }
     }
 

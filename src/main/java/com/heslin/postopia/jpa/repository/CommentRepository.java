@@ -1,5 +1,6 @@
 package com.heslin.postopia.jpa.repository;
 
+import com.heslin.postopia.dto.AuthorHint;
 import com.heslin.postopia.dto.comment.CommentInfo;
 import com.heslin.postopia.dto.comment.CommentSummary;
 import com.heslin.postopia.elasticsearch.dto.SearchedCommentInfo;
@@ -150,4 +151,7 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
 
     @Query("select new com.heslin.postopia.elasticsearch.dto.SearchedCommentInfo( c.id, c.user.nickname, c.user.avatar, c.positiveCount, c.negativeCount, c.createdAt) from Comment c where c.id in :ids")
     List<SearchedCommentInfo> getCommentInfosInSearch(List<Long> ids);
+
+    @Query("select new com.heslin.postopia.dto.AuthorHint(c.id, c.user.username, SUBSTRING(c.content, 20)) from Comment c where c.id in :ids")
+    List<AuthorHint> getAuthorHints(@Param("ids") List<Long> commentIds);
 }

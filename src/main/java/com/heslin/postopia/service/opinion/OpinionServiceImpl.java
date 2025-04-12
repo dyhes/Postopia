@@ -27,6 +27,16 @@ public class OpinionServiceImpl implements OpinionService {
     }
 
     @Override
+    public boolean deleteCommentOpinion(Long commentId, Long userId, boolean isPositive) {
+        return opinionRepository.deleteCommentPinion(commentId, userId, isPositive) > 0;
+    }
+
+    @Override
+    public boolean deletePostOpinion(Long postId, Long userId, boolean isPositive) {
+        return opinionRepository.deletePostPinion(postId, userId, isPositive) > 0;
+    }
+
+    @Override
     @Transactional
     public boolean upsertOpinion(Opinion opinion) {
         var tp = opinion.getFields();

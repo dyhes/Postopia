@@ -5,8 +5,6 @@ import com.heslin.postopia.dto.PageResult;
 import com.heslin.postopia.dto.response.ApiResponseEntity;
 import com.heslin.postopia.dto.response.BasicApiResponseEntity;
 import com.heslin.postopia.elasticsearch.dto.SearchedCommentInfo;
-import com.heslin.postopia.elasticsearch.dto.SearchedPostInfo;
-import com.heslin.postopia.exception.BadRequestException;
 import com.heslin.postopia.jpa.model.Comment;
 import com.heslin.postopia.jpa.model.Post;
 import com.heslin.postopia.jpa.model.Space;
@@ -60,22 +58,20 @@ public class CommentController {
         return BasicApiResponseEntity.ok(success);
     }
 
-    @PostMapping("like")
-    public BasicApiResponseEntity likeComment(@RequestBody CommentIdDto dto, @AuthenticationPrincipal User user) {
-        if (dto.id == null) {
-            throw new BadRequestException("commentId is required");
-        }
-        commentService.likeComment(dto.id, user);
-        return BasicApiResponseEntity.ok("comment liked!");
+    public record CommentOpinionDto(Long id, Long postId, String spaceName, boolean isPositive){}
+    @PostMapping("opinion")
+    public BasicApiResponseEntity upsertPostOpinion(@RequestBody CommentOpinionDto request, @AuthenticationPrincipal User user) {
+        Utils.checkRequestBody(request);
+        commentService.upsertCommentOpinion(user, request.id, request.postId, request.spaceName, request.isPositive);
+        return BasicApiResponseEntity.ok("success");
     }
 
-    @PostMapping("dislike")
-    public BasicApiResponseEntity disLikeComment(@RequestBody CommentIdDto dto, @AuthenticationPrincipal User user) {
-        if (dto.id == null) {
-            throw new BadRequestException("commentId is required");
-        }
-        commentService.disLikeComment(dto.id, user);
-        return BasicApiResponseEntity.ok("comment disliked!");
+    public record DeleteCommentOpinionDto(Long id, boolean isPositive){}
+    @PostMapping("opinion-delete")
+    public BasicApiResponseEntity deletePostOpinion(@RequestBody DeleteCommentOpinionDto request, @AuthenticationPrincipal User user) {
+        Utils.checkRequestBody(request);
+        boolean success = commentService.deleteCommentOpinion(user, request.id, request.isPositive);
+        return BasicApiResponseEntity.ok(success);
     }
 
     @GetMapping("list")

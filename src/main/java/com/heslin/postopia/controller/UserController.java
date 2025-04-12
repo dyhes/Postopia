@@ -21,6 +21,7 @@ import com.heslin.postopia.service.comment.CommentService;
 import com.heslin.postopia.service.post.PostService;
 import com.heslin.postopia.service.space.SpaceService;
 import com.heslin.postopia.service.user.UserService;
+import com.heslin.postopia.util.PostopiaFormatter;
 import com.heslin.postopia.util.Utils;
 import jakarta.mail.MessagingException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,6 +57,7 @@ public class UserController {
     @PostMapping("nickname")
     public BasicApiResponseEntity updateNickName(@AuthenticationPrincipal User user, @RequestBody NickNameDto dto) {
         Utils.checkRequestBody(dto);
+        PostopiaFormatter.isValid(dto.nickname);
         userService.updateUserNickName(user, dto.nickname);
         return BasicApiResponseEntity.ok("succeed!");
     }

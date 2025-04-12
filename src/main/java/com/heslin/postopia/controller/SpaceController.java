@@ -13,6 +13,7 @@ import com.heslin.postopia.exception.BadRequestException;
 import com.heslin.postopia.jpa.model.User;
 import com.heslin.postopia.service.space.SpaceService;
 import com.heslin.postopia.util.Pair;
+import com.heslin.postopia.util.PostopiaFormatter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -42,7 +43,7 @@ public class SpaceController {
         if (info.name == null || info.description == null) {
             throw new BadRequestException("space name and description are required");
         }
-
+        PostopiaFormatter.isValid(info.name);
         Pair<ResMessage, Long> pair;
         try {
             pair = spaceService.createSpace(user, info.name, info.description, avatar);

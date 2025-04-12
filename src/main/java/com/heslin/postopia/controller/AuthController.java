@@ -1,5 +1,6 @@
 package com.heslin.postopia.controller;
 
+import com.heslin.postopia.util.PostopiaFormatter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -37,7 +38,7 @@ public class AuthController {
         if (signupDto.username == null || signupDto.password == null) {
             throw new BadRequestException("Username and password are required");
         }
-        
+        PostopiaFormatter.isValid(signupDto.username);
         ResMessage resMessage = signupService.signup(signupDto.username, signupDto.password);
         return BasicApiResponseEntity.ok(resMessage);
     }

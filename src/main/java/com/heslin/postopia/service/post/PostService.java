@@ -1,5 +1,6 @@
 package com.heslin.postopia.service.post;
 
+import com.heslin.postopia.dto.AuthorHint;
 import com.heslin.postopia.dto.ResMessage;
 import com.heslin.postopia.dto.post.PostDraftDto;
 import com.heslin.postopia.dto.post.*;
@@ -25,9 +26,10 @@ public interface PostService {
     boolean updatePost(Long id, Long userId, String spaceName, String subject, String content);
 
     Comment replyPost(Post post, String content, User user, Space space, String replyUser);
-    void checkPostStatus(Long id);
-    void likePost(Long id, @AuthenticationPrincipal User user);
-    void disLikePost(Long id, @AuthenticationPrincipal User user);
+
+    void upsertPostOpinion(User user, Long id, String spaceName, boolean isPositive);
+
+    boolean deletePostOpinion(User user, Long id, boolean isPositive);
 
     PostInfo getPostInfo(Long id, User user);
 
@@ -44,4 +46,6 @@ public interface PostService {
     boolean deleteDraft(Long id, Long userId);
 
     List<SearchedPostInfo> getPostInfosInSearch(List<Long> ids);
+
+    List<AuthorHint> getAuthorHints(List<Long> postIds);
 }

@@ -1,5 +1,6 @@
 package com.heslin.postopia.service.comment;
 
+import com.heslin.postopia.dto.AuthorHint;
 import com.heslin.postopia.dto.comment.CommentInfo;
 import com.heslin.postopia.dto.comment.CommentSummary;
 import com.heslin.postopia.dto.comment.UserOpinionCommentSummary;
@@ -22,12 +23,6 @@ public interface  CommentService {
 
     boolean deleteComment(Long id, Long postId, Long userId, String spaceName);
 
-    void checkAuthority(Long id, @AuthenticationPrincipal User user);
-
-    void likeComment(Long id, @AuthenticationPrincipal User user);
-
-    void disLikeComment(Long id, @AuthenticationPrincipal User user);
-
     Page<CommentSummary> getCommentsByUser(Long queryId, Long selfId, Pageable pageable);
 
     Page<CommentInfo> getCommentsByPost(Long postId, Long userId, Pageable pageable);
@@ -35,4 +30,10 @@ public interface  CommentService {
     Page<UserOpinionCommentSummary> getCommentOpinionsByUser(Long id, OpinionStatus opinionStatus, Pageable pageable);
 
     List<SearchedCommentInfo> getCommentInfosInSearch(List<Long> ids);
+
+    void upsertCommentOpinion(User user, Long id, Long postId, String spaceName, boolean isPositive);
+
+    boolean deleteCommentOpinion(User user, Long id, boolean isPositive);
+
+    List<AuthorHint> getAuthorHints(List<Long> commentIds);
 }

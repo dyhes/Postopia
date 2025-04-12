@@ -2,9 +2,9 @@ package com.heslin.postopia.jpa.model.opinion;
 
 import com.heslin.postopia.jpa.model.Post;
 
+import com.heslin.postopia.jpa.model.User;
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.*;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.apache.commons.lang3.tuple.Triple;
 
