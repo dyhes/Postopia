@@ -23,30 +23,30 @@ public class MessageServiceImpl implements MessageService {
 
     @Override
     public Page<UserMessage> getMessages(User user, Pageable pageable) {
-        return messageRepository.getMessages(user.getId(), pageable);
+        return messageRepository.getMessages(user.getUsername(), pageable);
     }
 
     @Override
     @Transactional
     public void readMessages(User user, List<Long> ids) {
-        messageRepository.readMessages(user.getId(), ids);
+        messageRepository.readMessages(user.getUsername(), ids);
     }
 
     @Override
     @Transactional
     public void deleteMessages(User user, List<Long> ids) {
-        messageRepository.deleteMessages(user.getId(),ids);
+        messageRepository.deleteMessages(user.getUsername(),ids);
     }
 
     @Override
     @Transactional
     public void readAll(User user) {
-        messageRepository.readAll(user.getId());
+        messageRepository.readAll(user.getUsername());
     }
 
     @Override
     public void deleteAllRead(User user) {
-        messageRepository.deleteAllRead(user.getId());
+        messageRepository.deleteAllRead(user.getUsername());
     }
 
     @Override

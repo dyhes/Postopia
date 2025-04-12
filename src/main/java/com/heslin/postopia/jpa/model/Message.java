@@ -34,9 +34,8 @@ public class Message {
     )
     private Long id;
     private String content;
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
-    private User user;
+    @JoinColumn(name = "username", foreignKey = @ForeignKey(name = "fk_message_user", foreignKeyDefinition = "FOREIGN KEY (username) REFERENCES users(username)"))
+    private String username;
     private boolean isRead;
     Instant createdAt;
 }

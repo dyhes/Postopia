@@ -31,6 +31,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import static java.lang.Math.min;
+
 @Service
 public class CommentServiceImpl implements CommentService {
     private final CommentRepository commentRepository;
@@ -45,12 +47,7 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Transactional
-    protected Comment createComment(User user, Post post, Space space, String content) {
-        return createComment(user, post, space, content, null);
-    }
-
-    @Transactional
-    protected Comment createComment(User user, Post post, Space space, String content, Comment parent) {
+    protected Comment createComment(User user, Post post, Space space, String content, Comment parent, String replyUser) {
         Comment comment =
         Comment.builder()
         .user(user)
@@ -68,19 +65,23 @@ public class CommentServiceImpl implements CommentService {
             space.getName(),
             user.getUsername()));
         kafkaService.sendToPost(post.getId(), PostOperation.COMMENT_CREATED);
+        StringBuilder sbuffer = new StringBuilder();
+        sbuffer.append("postopia-user{").append(user.getUsername()).append("} 回复了您：").append(content, 0, min(content.length(), 20))
+        .append("... postopia-comment{").append(space.getName()).append(";").append(post.getId()).append(";").append(comment.getId()).append("}");
+        kafkaService.sendMessage(replyUser, sbuffer.toString());
         return comment;
     }
 
     @Override
     @Transactional
-    public Comment replyToPost(Post post, String content, User user, Space space) {
-        return createComment(user, post, space, content);
+    public Comment replyToPost(Post post, String content, User user, Space space, String replyUser) {
+        return createComment(user, post, space, content, null, replyUser);
     }
 
     @Override
     @Transactional
-    public Comment reply(Post post, Comment parent, String content, User user, Space space) {
-        return createComment(user, post, space, content, parent);
+    public Comment reply(Post post, Comment parent, String content, User user, Space space, String replyUser) {
+        return createComment(user, post, space, content, parent, replyUser);
     }
 
     @Override

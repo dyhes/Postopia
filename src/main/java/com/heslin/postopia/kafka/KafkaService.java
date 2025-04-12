@@ -63,16 +63,16 @@ public class KafkaService {
         this.messageService = messageService;
     }
 
-    public void sendMessage(Long uid, String content) {
-        lsKafkaTemplate.send("msg", uid, content);
+    public void sendMessage(String username, String content) {
+        ssKafkaTemplate.send("msg", username, content);
     }
 
-    @KafkaListener(topics = "msg", containerFactory = "batchLSFactory")
+    @KafkaListener(topics = "msg", containerFactory = "batchSSFactory")
     @Transactional
-    protected void processMessages(List<ConsumerRecord<Long, String>> records) {
+    protected void processMessages(List<ConsumerRecord<String, String>> records) {
         Instant current = Instant.now();
         List<Message> messages = records.stream().map(record -> {
-            return Message.builder().user(User.builder().id(record.key()).build()).content(record.value()).isRead(false).createdAt(current).build();}
+            return Message.builder().username(record.key()).content(record.value()).isRead(false).createdAt(current).build();}
         ).toList();
         messageService.saveAll(messages);
     }

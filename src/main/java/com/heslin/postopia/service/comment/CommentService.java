@@ -16,9 +16,9 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import java.util.List;
 
 public interface  CommentService {
-    Comment replyToPost(Post post, String content, User user, Space space);
+    Comment replyToPost(Post post, String content, User user, Space space, String replyUser);
 
-    Comment reply(Post post, Comment comment, String content, User user, Space space);
+    Comment reply(Post post, Comment comment, String content, User user, Space space, String replyUser);
 
     boolean deleteComment(Long id, Long postId, Long userId, String spaceName);
 

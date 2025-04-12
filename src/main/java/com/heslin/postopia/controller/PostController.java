@@ -128,7 +128,7 @@ public class PostController {
         return BasicApiResponseEntity.ok(success);
     }
 
-    public record ReplyPostDto(Long postId, String content, String spaceName) {}
+    public record ReplyPostDto(Long postId, String content, String spaceName, String replyUser) {}
     
     @PostMapping("reply")
     public ApiResponseEntity<Long> replyPost(@AuthenticationPrincipal User user, @RequestBody ReplyPostDto request) {
@@ -138,7 +138,7 @@ public class PostController {
         Post post = Post.builder().id(request.postId).build();
         Space space = Space.builder().name(request.spaceName).build();
         //postService.checkPostStatus(request.id);
-        Comment comment = postService.replyPost(post, request.content, user, space);
+        Comment comment = postService.replyPost(post, request.content, user, space, request.replyUser);
         return BasicApiResponseEntity.ok(comment.getId(), "回复成功", true);
     }
 

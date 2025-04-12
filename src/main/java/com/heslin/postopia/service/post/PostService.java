@@ -24,7 +24,7 @@ public interface PostService {
     void unarchivedPost(Long id);
     boolean updatePost(Long id, Long userId, String spaceName, String subject, String content);
 
-    Comment replyPost(Post post, String content, User user, Space space);
+    Comment replyPost(Post post, String content, User user, Space space, String replyUser);
     void checkPostStatus(Long id);
     void likePost(Long id, @AuthenticationPrincipal User user);
     void disLikePost(Long id, @AuthenticationPrincipal User user);

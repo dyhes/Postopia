@@ -34,7 +34,7 @@ public class CommentController {
         this.commentService = commentService;
     }
 
-    public record CommentReplyDto(String content, Long commentId, Long postId, String spaceName) {}
+    public record CommentReplyDto(String content, Long commentId, Long postId, String spaceName, String replyUser) {}
 
     @PostMapping("reply")
     public BasicApiResponseEntity reply(@RequestBody CommentReplyDto dto, @AuthenticationPrincipal User user) {
@@ -43,7 +43,7 @@ public class CommentController {
         Comment comment = new Comment();
         comment.setId(dto.commentId());
         Space space = Space.builder().name(dto.spaceName).build();
-        commentService.reply(post, comment, dto.content(), user, space);
+        commentService.reply(post, comment, dto.content(), user, space, dto.replyUser());
         return BasicApiResponseEntity.ok("回复成功");
     }
 

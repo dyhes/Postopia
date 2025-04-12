@@ -139,8 +139,8 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public Comment replyPost(Post post, String content, User user, Space space) {
-        return commentService.replyToPost(post, content, user, space);
+    public Comment replyPost(Post post, String content, User user, Space space, String replyUser) {
+        return commentService.replyToPost(post, content, user, space, replyUser);
     }
 
     @Override
