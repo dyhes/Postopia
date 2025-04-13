@@ -18,7 +18,6 @@ public class OpinionAggregation {
     private String positiveUser;
     private long positiveCount = 0;
     private long negativeCount = 0;
-    @TimeToLive private final Long expiration = (long) -1;
 
     public OpinionAggregation(String id, String spaceName, Long postId, Long commentId) {
         this.id = id;

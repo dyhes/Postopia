@@ -17,7 +17,7 @@ import java.time.Instant;
     indexes = {
         @Index(
         name = "idx_message_user_read_time",
-        columnList = "user_id, is_read, created_at DESC"
+        columnList = "username, is_read, created_at DESC"
         )
     }
 )

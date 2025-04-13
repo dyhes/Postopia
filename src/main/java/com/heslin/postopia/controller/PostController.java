@@ -133,9 +133,7 @@ public class PostController {
     
     @PostMapping("reply")
     public ApiResponseEntity<Long> replyPost(@AuthenticationPrincipal User user, @RequestBody ReplyPostDto request) {
-        if (!Utils.allFieldsNonNull(request)) {
-            throw new BadRequestException("postId and content are required");
-        }
+        Utils.checkRequestBody(request);
         Post post = Post.builder().id(request.postId).build();
         Space space = Space.builder().name(request.spaceName).build();
         //postService.checkPostStatus(request.id);
