@@ -87,8 +87,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserInfo getUserInfo(Long id) {
-        return userRepository.findUserInfoById(id);
+    public UserInfo getUserInfo(String username) {
+        return userRepository.findUserInfoByUsername(username);
     }
 
     @Override

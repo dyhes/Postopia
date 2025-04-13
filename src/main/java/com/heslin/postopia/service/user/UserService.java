@@ -22,7 +22,7 @@ public interface UserService {
 
     String updateUserAvatar(UserId id, MultipartFile avatar) throws IOException;
 
-    UserInfo getUserInfo(Long id);
+    UserInfo getUserInfo(String username);
 
     void updateShowEmail(boolean show, Long id);
 

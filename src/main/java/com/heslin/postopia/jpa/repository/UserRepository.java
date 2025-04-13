@@ -31,7 +31,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query("UPDATE User u SET u.avatar = :avatar WHERE u.id = :id")
     void updateAvatar(@Param("id") Long id, @Param("avatar") String url);
 
-    UserInfo findUserInfoById(Long id);
+    UserInfo findUserInfoByUsername(String username);
 
     @Transactional
     @Modifying

@@ -112,9 +112,9 @@ public class UserController {
         }
     }
 
-    @GetMapping("info/{userId}")
-    public ApiResponseEntity<UserInfo> getUserInfo(@PathVariable UserId userId) {
-        return ApiResponseEntity.ok(userService.getUserInfo(userId.getId()), "success");
+    @GetMapping("info/{username}")
+    public ApiResponseEntity<UserInfo> getUserInfo(@PathVariable String username) {
+        return ApiResponseEntity.ok(userService.getUserInfo(username), "success");
     }
 
     @GetMapping("spaces")
