@@ -45,19 +45,6 @@ public class CommentController {
         return BasicApiResponseEntity.ok("回复成功");
     }
 
-    public record CommentIdDto(Long id) {
-    };
-
-    public record DeleteDto(Long commentId, Long postId, String spaceName) {
-    }
-
-    @PostMapping("delete")
-    public BasicApiResponseEntity delete(@RequestBody DeleteDto dto, @AuthenticationPrincipal User user) {
-        Utils.checkRequestBody(dto);
-        boolean success = commentService.deleteComment(dto.commentId(), dto.postId(), user.getId(), dto.spaceName);
-        return BasicApiResponseEntity.ok(success);
-    }
-
     public record CommentOpinionDto(Long id, Long postId, String spaceName, boolean isPositive){}
     @PostMapping("opinion")
     public BasicApiResponseEntity upsertPostOpinion(@RequestBody CommentOpinionDto request, @AuthenticationPrincipal User user) {

@@ -21,4 +21,6 @@ public interface MessageService {
     void deleteAllRead(User user);
 
     void saveAll(List<Message> messages);
+
+    void batchSave(List<Message> messages);
 }

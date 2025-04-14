@@ -2,6 +2,7 @@ package com.heslin.postopia.service.opinion;
 
 import com.heslin.postopia.dto.comment.UserOpinionCommentSummary;
 import com.heslin.postopia.dto.post.UserOpinionPostSummary;
+import com.heslin.postopia.jpa.model.User;
 import com.heslin.postopia.jpa.model.opinion.Opinion;
 import com.heslin.postopia.jpa.repository.OpinionRepository;
 import jakarta.persistence.EntityManager;
@@ -44,22 +45,23 @@ public class OpinionServiceImpl implements OpinionService {
         return switch (opinion.getDiscriminator()) {
             case "COMMENT" -> upsertCommentOpinion(updateAt, opinion.isPositive(), opinion.getUser().getId(), tp.getLeft());
             case "POST" -> upsertPostOpinion(updateAt, opinion.isPositive(), opinion.getUser().getId(), tp.getMiddle());
-            case "VOTE" -> upsertVoteOpinion(updateAt, opinion.isPositive(), opinion.getUser().getId(), tp.getRight());
+            case "VOTE" -> upsertVoteOpinion(updateAt, opinion.isPositive(), opinion.getUser(), tp.getRight());
             default -> throw new IllegalArgumentException("Unknown opinion type: " + opinion.getDiscriminator());
         };
     }
 
     @Transactional
-    protected boolean upsertVoteOpinion(Instant updatedAt, Boolean isPositive, Long userId, Long voteId) {
-        String sql = "INSERT INTO vote_opinions(updated_at, is_positive, user_id, vote_id) " +
-        "VALUES (:ua, :ip, :uid, :vid) " +
+    protected boolean upsertVoteOpinion(Instant updatedAt, Boolean isPositive, User user, Long voteId) {
+        String sql = "INSERT INTO vote_opinions(updated_at, is_positive, user_id, username, vote_id) " +
+        "VALUES (:ua, :ip, :uid,:un, :vid) " +
         "ON CONFLICT (user_id, vote_id) " +
         "DO UPDATE SET updated_at = EXCLUDED.updated_at, is_positive = EXCLUDED.is_positive " +
         "RETURNING CASE WHEN xmax = 0 THEN true ELSE false END AS is_insert";
         Query query = entityManager.createNativeQuery(sql, Boolean.class);
         query.setParameter("ua", updatedAt);
         query.setParameter("ip", isPositive);
-        query.setParameter("uid", userId);
+        query.setParameter("uid", user.getId());
+        query.setParameter("un", user.getUsername());
         query.setParameter("vid", voteId);
         return (boolean) query.getSingleResult();
     }

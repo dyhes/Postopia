@@ -2,6 +2,9 @@ package com.heslin.postopia.schedule;
 
 import com.heslin.postopia.dto.AuthorHint;
 import com.heslin.postopia.jpa.model.Message;
+import com.heslin.postopia.jpa.model.Vote;
+import com.heslin.postopia.jpa.model.opinion.VoteOpinion;
+import com.heslin.postopia.jpa.repository.VoteRepository;
 import com.heslin.postopia.redis.RedisService;
 import com.heslin.postopia.redis.model.OpinionAggregation;
 import com.heslin.postopia.service.comment.CommentService;
@@ -12,12 +15,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.Cursor;
 import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -27,13 +29,57 @@ public class ScheduleService {
     private final RedisService redisService;
     private final CommentService commentService;
     private final PostService postService;
+    private final ThreadPoolTaskScheduler taskScheduler;
+    private final VoteRepository voteRepository;
 
     @Autowired
-    public ScheduleService(MessageService messageService, RedisService redisService, CommentService commentService, PostService postService) {
+    public ScheduleService(MessageService messageService, RedisService redisService, CommentService commentService, PostService postService, ThreadPoolTaskScheduler taskScheduler, VoteRepository voteRepository) {
         this.messageService = messageService;
         this.redisService = redisService;
         this.commentService = commentService;
         this.postService = postService;
+        this.taskScheduler = taskScheduler;
+        this.voteRepository = voteRepository;
+    }
+
+    public void scheduleDeleteCommentVote(Long voteId, Long postId, String spaceName, String content, Instant endAt) {
+        taskScheduler.schedule(
+        () -> {
+            Vote vote = voteRepository.findById(voteId).orElseThrow();
+            if (vote.isFulfilled()) {
+                commentService.deleteComment(vote.getRelatedId(), postId, spaceName);
+                Set<VoteOpinion> voteOpinions = vote.getOpinions();
+                List<Message> messages = new ArrayList<>();
+                String tail = "的删除评论： %s 的投票已成功通过".formatted(content);
+                messages.add(new Message(vote.getInitiator(), "您发起%s".formatted(tail)));
+                messages.add(new Message(vote.getRelatedUser(), "您的评论：%s 已被投票删除".formatted(content)));
+                voteOpinions.forEach(voteOpinion -> {
+                    messages.add(new Message(voteOpinion.getUsername(), "您%s%s".formatted(voteOpinion.getAltitude(),tail)));
+                });
+                messageService.batchSave(messages);
+            } else {
+                Set<VoteOpinion> voteOpinions = vote.getOpinions();
+                List<Message> messages = new ArrayList<>();
+                String tail = "的删除评论：%s 的投票未通过, 赞成人数 %d，反对人数 %d, 所需最少投票人数 %d".formatted(content, vote.getPositiveCount(), vote.getNegativeCount(), vote.getThreshold());
+                messages.add(new Message(vote.getInitiator(), "您发起%s".formatted(tail)));
+                voteOpinions.forEach(voteOpinion -> {
+                    messages.add(new Message(voteOpinion.getUsername(), "您%s%s".formatted(voteOpinion.getAltitude(), tail)));
+                });
+                messageService.batchSave(messages);
+            }
+            voteRepository.delete(vote);
+        },
+        endAt
+        );
+    }
+
+    public void schedulePinCommentVote(Long id, Instant endAt) {
+        taskScheduler.schedule(
+        () -> {
+            System.out.println("scheduleCommentPinVote");
+        },
+        endAt
+        );
     }
 
     private void buildMessage(String type, long count, String username, StringBuilder messageContent) {

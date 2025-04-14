@@ -1,6 +1,6 @@
 package com.heslin.postopia.jpa.model.opinion;
 
-import com.heslin.postopia.jpa.model.vote.Vote;
+import com.heslin.postopia.jpa.model.Vote;
 
 import jakarta.persistence.*;
 import lombok.Data;
@@ -16,8 +16,11 @@ import org.apache.commons.lang3.tuple.Triple;
 })
 public class VoteOpinion extends Opinion {
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "vote_id")
+    @JoinColumn(name = "vote_id", foreignKey = @ForeignKey(name = "fk_vote_opinion_vote",
+    foreignKeyDefinition = "FOREIGN KEY (vote_id) REFERENCES votes(id) ON DELETE CASCADE"))
     private Vote vote;
+
+    private String username;
 
     @Override
     public Triple<Long, Long, Long> getFields() {
@@ -27,5 +30,9 @@ public class VoteOpinion extends Opinion {
     @Override
     public String getDiscriminator() {
         return "VOTE";
+    }
+
+    public String getAltitude() {
+        return isPositive() ? "赞成" : "反对";
     }
 }

@@ -3,18 +3,16 @@ import co.elastic.clients.elasticsearch._types.query_dsl.QueryBuilders;
 import co.elastic.clients.elasticsearch.core.BulkRequest;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.heslin.postopia.dto.diff.*;
 import com.heslin.postopia.elasticsearch.dto.RoutedDocUpdate;
 import com.heslin.postopia.elasticsearch.model.CommentDoc;
 import com.heslin.postopia.elasticsearch.model.PostDoc;
 import com.heslin.postopia.elasticsearch.model.SpaceDoc;
-import com.heslin.postopia.dto.diff.CommentDiff;
-import com.heslin.postopia.dto.diff.Diff;
-import com.heslin.postopia.dto.diff.PostDiff;
-import com.heslin.postopia.dto.diff.SpaceDiff;
 import com.heslin.postopia.elasticsearch.model.UserDoc;
 import com.heslin.postopia.enums.kafka.CommentOperation;
 import com.heslin.postopia.enums.kafka.PostOperation;
 import com.heslin.postopia.enums.kafka.SpaceOperation;
+import com.heslin.postopia.enums.kafka.VoteOperation;
 import com.heslin.postopia.jpa.model.Message;
 import com.heslin.postopia.jpa.model.User;
 import com.heslin.postopia.service.message.MessageService;
@@ -197,6 +195,10 @@ public class KafkaService {
         liKafkaTemplate.send(topic, key, value.ordinal());
     }
 
+    public void sendToVote(Long voteId, VoteOperation operation) {
+        send("vote", voteId, operation);
+    }
+
     public void sendToPost(Long postId, PostOperation value) {
         send("post", postId, value);
     }
@@ -207,6 +209,17 @@ public class KafkaService {
 
     public void sendToSpace(Long spaceId, SpaceOperation value) {
         send("space", spaceId, value);
+    }
+
+    @KafkaListener(topics = "vote", containerFactory = "batchLIFactory")
+    @Transactional
+    protected void processVoteOperations(List<ConsumerRecord<Long, Integer>> records) {
+        var mp = new HashMap<Long, Diff>();
+        records.forEach(record -> {
+            Diff diff = mp.computeIfAbsent(record.key(), k -> new VoteDiff());
+            diff.updateDiff(record.value());
+        });
+        executeBatchDiffOperations(mp, "votes");
     }
 
     @KafkaListener(topics = "post", containerFactory = "batchLIFactory")

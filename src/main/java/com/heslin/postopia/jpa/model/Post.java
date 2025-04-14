@@ -15,7 +15,6 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import com.heslin.postopia.enums.PostStatus;
 import com.heslin.postopia.jpa.model.opinion.PostOpinion;
-import com.heslin.postopia.jpa.model.vote.PostVote;
 
 import lombok.Data;
 
@@ -61,9 +60,6 @@ public class Post {
 
     @OneToMany(mappedBy = "post", cascade = {CascadeType.REMOVE}, orphanRemoval = true)
     private Set<PostOpinion> opinions;
-
-    @OneToMany(mappedBy = "post", cascade = {CascadeType.REMOVE}, orphanRemoval = true)
-    private List<PostVote> votes;
 
     @Enumerated(EnumType.ORDINAL)
     @Column(nullable=false)

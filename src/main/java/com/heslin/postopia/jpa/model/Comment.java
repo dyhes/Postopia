@@ -1,7 +1,6 @@
 package com.heslin.postopia.jpa.model;
 
 import com.heslin.postopia.jpa.model.opinion.CommentOpinion;
-import com.heslin.postopia.jpa.model.vote.CommentVote;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -52,9 +51,6 @@ public class Comment {
 
     @OneToMany(mappedBy = "comment",cascade = {CascadeType.REMOVE}, orphanRemoval = true)
     private Set<CommentOpinion> opinions;
-
-    @OneToMany(mappedBy = "comment", cascade = {CascadeType.REMOVE}, orphanRemoval = true)
-    private List<CommentVote> votes;
 
     private long positiveCount;
 

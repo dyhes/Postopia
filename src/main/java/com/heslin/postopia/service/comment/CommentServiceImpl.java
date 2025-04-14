@@ -91,8 +91,8 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     @Transactional
-    public boolean deleteComment(Long id, Long postId, Long userId, String spaceName) {
-        boolean success = commentRepository.deleteComment(id, postId, userId) > 0;
+    public boolean deleteComment(Long id, Long postId, String spaceName) {
+        boolean success = commentRepository.deleteComment(id) > 0;
         if (success) {
             kafkaService.sendToPost(postId, PostOperation.COMMENT_DELETED);
             kafkaService.sendToDocDelete("comment", id.toString(), spaceName);

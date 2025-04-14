@@ -13,8 +13,6 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import com.heslin.postopia.jpa.model.vote.SpaceVote;
-
 import lombok.Data;
 
 @Data
@@ -51,9 +49,6 @@ public class Space {
 
     @OneToMany(mappedBy="space")
     private List<Post> posts;
-
-    @OneToMany(mappedBy="space")
-    private List<SpaceVote> votes;
 
     private long memberCount;
 }

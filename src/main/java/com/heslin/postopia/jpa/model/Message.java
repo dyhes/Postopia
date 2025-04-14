@@ -38,4 +38,11 @@ public class Message {
     private String username;
     private boolean isRead;
     Instant createdAt;
+
+    public Message(String username, String content) {
+        this.content = content;
+        this.username = username;
+        this.isRead = false;
+        this.createdAt = Instant.now();
+    }
 }

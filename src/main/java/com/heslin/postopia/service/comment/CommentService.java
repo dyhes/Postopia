@@ -21,7 +21,7 @@ public interface  CommentService {
 
     Comment reply(Post post, Comment comment, String content, User user, Space space, String replyUser);
 
-    boolean deleteComment(Long id, Long postId, Long userId, String spaceName);
+    boolean deleteComment(Long id, Long postId, String spaceName);
 
     Page<CommentSummary> getCommentsByUser(Long queryId, Long selfId, Pageable pageable);
 

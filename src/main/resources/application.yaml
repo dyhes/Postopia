@@ -74,6 +74,11 @@ spring:
 
 # 自定义 JWT 配置
 postopia:
+  vote:
+    comment:
+      threshold: 1
+      duration: 1
+
   jwt:
     secret: ${JWT_SECRET}
     expiration: 86400000

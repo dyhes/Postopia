@@ -26,8 +26,8 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
 
     @Modifying
     @Transactional
-    @Query("delete Comment c where c.id = :id and c.post.id = :pid and c.user.id = :uid")
-    int deleteComment(@Param("id") Long id, @Param("pid") Long pid, @Param("uid") Long uid);
+    @Query("delete Comment c where c.id = :id")
+    int deleteComment(@Param("id") Long id);
 
     @Query("""
                 select new com.heslin.postopia.dto.comment.CommentInfo(c.id, null, c.content, c.createdAt, u.username, u.nickname, u.avatar,
