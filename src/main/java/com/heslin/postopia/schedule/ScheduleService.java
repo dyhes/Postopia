@@ -4,6 +4,7 @@ import com.heslin.postopia.dto.AuthorHint;
 import com.heslin.postopia.jpa.model.Message;
 import com.heslin.postopia.jpa.model.Vote;
 import com.heslin.postopia.jpa.model.opinion.VoteOpinion;
+import com.heslin.postopia.jpa.repository.OpinionRepository;
 import com.heslin.postopia.jpa.repository.VoteRepository;
 import com.heslin.postopia.redis.RedisService;
 import com.heslin.postopia.redis.model.OpinionAggregation;
@@ -31,42 +32,46 @@ public class ScheduleService {
     private final PostService postService;
     private final ThreadPoolTaskScheduler taskScheduler;
     private final VoteRepository voteRepository;
+    private final OpinionRepository opinionRepository;
 
     @Autowired
-    public ScheduleService(MessageService messageService, RedisService redisService, CommentService commentService, PostService postService, ThreadPoolTaskScheduler taskScheduler, VoteRepository voteRepository) {
+    public ScheduleService(MessageService messageService, RedisService redisService, CommentService commentService, PostService postService, ThreadPoolTaskScheduler taskScheduler, VoteRepository voteRepository, OpinionRepository opinionRepository) {
         this.messageService = messageService;
         this.redisService = redisService;
         this.commentService = commentService;
         this.postService = postService;
         this.taskScheduler = taskScheduler;
         this.voteRepository = voteRepository;
+        this.opinionRepository = opinionRepository;
     }
 
     public void scheduleDeleteCommentVote(Long voteId, Long postId, String spaceName, String content, Instant endAt) {
         taskScheduler.schedule(
         () -> {
             Vote vote = voteRepository.findById(voteId).orElseThrow();
+            System.out.println("scheduleDeleteCommentVote");
+            List<VoteOpinion> voteOpinions = opinionRepository.findVoteOpinionsByVoteId(voteId);
+            System.out.println("voteOpinions");
+            voteOpinions.forEach(voteOpinion -> {
+                System.out.println("username");
+                System.out.println(voteOpinion.getUsername());
+                System.out.println("altitude");
+                System.out.println(voteOpinion.getAltitude());
+            });
+            List<Message> messages = new ArrayList<>();
+            String tail;
             if (vote.isFulfilled()) {
                 commentService.deleteComment(vote.getRelatedId(), postId, spaceName);
-                Set<VoteOpinion> voteOpinions = vote.getOpinions();
-                List<Message> messages = new ArrayList<>();
-                String tail = "的删除评论： %s 的投票已成功通过".formatted(content);
-                messages.add(new Message(vote.getInitiator(), "您发起%s".formatted(tail)));
+                tail = "的删除评论： %s 的投票已成功通过".formatted(content);
                 messages.add(new Message(vote.getRelatedUser(), "您的评论：%s 已被投票删除".formatted(content)));
-                voteOpinions.forEach(voteOpinion -> {
-                    messages.add(new Message(voteOpinion.getUsername(), "您%s%s".formatted(voteOpinion.getAltitude(),tail)));
-                });
-                messageService.batchSave(messages);
             } else {
-                Set<VoteOpinion> voteOpinions = vote.getOpinions();
-                List<Message> messages = new ArrayList<>();
-                String tail = "的删除评论：%s 的投票未通过, 赞成人数 %d，反对人数 %d, 所需最少投票人数 %d".formatted(content, vote.getPositiveCount(), vote.getNegativeCount(), vote.getThreshold());
-                messages.add(new Message(vote.getInitiator(), "您发起%s".formatted(tail)));
-                voteOpinions.forEach(voteOpinion -> {
-                    messages.add(new Message(voteOpinion.getUsername(), "您%s%s".formatted(voteOpinion.getAltitude(), tail)));
-                });
-                messageService.batchSave(messages);
+                tail = "的删除评论：%s 的投票未通过, 赞成人数 %d，反对人数 %d, 所需最少投票人数 %d".formatted(content, vote.getPositiveCount(), vote.getNegativeCount(), vote.getThreshold());
             }
+            messages.add(new Message(vote.getInitiator(), "您发起%s".formatted(tail)));
+            voteOpinions.forEach(voteOpinion -> {
+                messages.add(new Message(voteOpinion.getUsername(), "您%s%s".formatted(voteOpinion.getAltitude(),tail)));
+            });
+            messageService.batchSave(messages);
             voteRepository.delete(vote);
         },
         endAt

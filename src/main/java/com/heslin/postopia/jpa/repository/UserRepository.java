@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -31,7 +32,10 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query("UPDATE User u SET u.avatar = :avatar WHERE u.id = :id")
     void updateAvatar(@Param("id") Long id, @Param("avatar") String url);
 
-    UserInfo findUserInfoByUsername(String username);
+    @Transactional
+    @Modifying
+    @Query("select new com.heslin.postopia.dto.user.UserInfo(new com.heslin.postopia.dto.user.UserId(u.id), u.username, u.nickname, u.avatar, u.email, u.showEmail) from User u WHERE u.username = :un")
+    UserInfo findUserInfoByUsername(@Param("un") String username);
 
     @Transactional
     @Modifying

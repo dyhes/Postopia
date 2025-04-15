@@ -5,7 +5,6 @@ import com.heslin.postopia.jpa.model.Message;
 import com.heslin.postopia.jpa.model.User;
 import com.heslin.postopia.jpa.repository.MessageRepository;
 import jakarta.transaction.Transactional;
-import org.assertj.core.util.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

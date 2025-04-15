@@ -35,4 +35,12 @@ public class VoteOpinion extends Opinion {
     public String getAltitude() {
         return isPositive() ? "赞成" : "反对";
     }
+
+    @Override
+    public String toString() {
+        return "VoteOpinion{" +
+        "vote=" + vote +
+        ", username='" + username + '\'' +
+        '}';
+    }
 }

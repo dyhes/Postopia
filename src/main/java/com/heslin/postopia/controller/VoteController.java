@@ -24,8 +24,8 @@ public class VoteController {
     }
 
     @GetMapping("comment")
-    public List<CommentVote> getCommentVotes(@RequestParam List<Long> commentIds) {
-        return voteService.getCommentVotes(commentIds);
+    public ApiResponseEntity<List<CommentVote>> getCommentVotes(@RequestParam List<Long> ids) {
+        return ApiResponseEntity.ok(voteService.getCommentVotes(ids), "success");
     }
 
     public record OpinionRequest(
@@ -48,7 +48,7 @@ public class VoteController {
         String spaceName
     ){}
 
-    @PostMapping("delete-comment")
+    @PostMapping("comment-delete")
     public ApiResponseEntity<Long> deleteCommentVote(@RequestBody DeleteCommentVoteRequest request, @AuthenticationPrincipal User user) {
         Utils.checkRequestBody(request);
         Long id;

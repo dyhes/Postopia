@@ -3,6 +3,7 @@ package com.heslin.postopia.jpa.repository;
 import com.heslin.postopia.dto.comment.UserOpinionCommentSummary;
 import com.heslin.postopia.dto.post.UserOpinionPostSummary;
 import com.heslin.postopia.jpa.model.opinion.Opinion;
+import com.heslin.postopia.jpa.model.opinion.VoteOpinion;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -74,4 +75,6 @@ public interface OpinionRepository extends JpaRepository<Opinion, Long> {
     @Transactional
     @Query("delete CommentOpinion co where co.comment.id = :cid and co.user.id = :uid and co.isPositive = :ip")
     int deleteCommentPinion(@Param("cid") Long commentId, @Param("uid") Long userId, @Param("ip") boolean isPositive);
+
+    List<VoteOpinion> findVoteOpinionsByVoteId(Long voteId);
 }

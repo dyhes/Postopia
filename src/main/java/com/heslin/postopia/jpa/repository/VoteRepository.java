@@ -22,7 +22,7 @@ public interface VoteRepository extends JpaRepository<Vote, Long> {
             v.negativeCount,
             v.startAt,
             v.endAt
-        ) from Vote v where v.voteType = com.heslin.postopia.enums.VoteType.COMMENT and v.relatedId in :relatedIds
+        ) from Vote v where v.voteType = com.heslin.postopia.enums.VoteType.COMMENT and v.relatedId in :ids
 """)
     List<CommentVote> findCommentVotes(@Param("ids") List<Long> commentIds);
 }
