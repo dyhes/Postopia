@@ -52,7 +52,7 @@ public class Comment {
     @OneToMany(mappedBy = "comment",cascade = {CascadeType.REMOVE}, orphanRemoval = true)
     private Set<CommentOpinion> opinions;
 
-    boolean isPined;
+    private boolean isPined;
 
     private long positiveCount;
 

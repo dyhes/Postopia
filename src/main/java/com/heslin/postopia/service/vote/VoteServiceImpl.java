@@ -3,9 +3,8 @@ package com.heslin.postopia.service.vote;
 import com.heslin.postopia.dto.comment.CommentVote;
 import com.heslin.postopia.enums.DetailVoteType;
 import com.heslin.postopia.enums.VoteType;
-import com.heslin.postopia.enums.kafka.PostOperation;
 import com.heslin.postopia.enums.kafka.VoteOperation;
-import com.heslin.postopia.jpa.model.Post;
+import com.heslin.postopia.exception.BadRequestException;
 import com.heslin.postopia.jpa.model.User;
 import com.heslin.postopia.jpa.model.Vote;
 import com.heslin.postopia.jpa.model.opinion.VoteOpinion;
@@ -14,7 +13,6 @@ import com.heslin.postopia.kafka.KafkaService;
 import com.heslin.postopia.schedule.ScheduleService;
 import com.heslin.postopia.service.comment.CommentService;
 import com.heslin.postopia.service.opinion.OpinionService;
-import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -100,12 +98,12 @@ public class VoteServiceImpl implements VoteService {
     }
 
     @Override
-    public Long pinCommentVote(User user, Long commentId, Long postId, String spaceName, String commentContent, String commentAuthor) {
-        return 0L;
+    public Long pinCommentVote(User user, Long commentId, Long postId, String spaceName, String commentContent, String commentAuthor) throws BadRequestException {
+        return updatePinStatusVote(true, user, commentId, postId, spaceName, commentContent, commentAuthor);
     }
 
     @Override
-    public Long unPinCommentVote(User user, Long commentId, Long postId, String spaceName, String commentContent, String commentAuthor) {
-        return 0L;
+    public Long unPinCommentVote(User user, Long commentId, Long postId, String spaceName, String commentContent, String commentAuthor) throws BadRequestException {
+        return updatePinStatusVote(false, user, commentId, postId, spaceName, commentContent, commentAuthor);
     }
 }

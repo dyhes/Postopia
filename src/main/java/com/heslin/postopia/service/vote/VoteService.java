@@ -1,6 +1,7 @@
 package com.heslin.postopia.service.vote;
 
 import com.heslin.postopia.dto.comment.CommentVote;
+import com.heslin.postopia.exception.BadRequestException;
 import com.heslin.postopia.jpa.model.User;
 
 import java.util.List;
@@ -12,7 +13,7 @@ public interface VoteService {
 
     Long deleteCommentVote(User user, Long commentId, Long postId, String spaceName, String commentContent, String commentAuthor);
 
-    Long pinCommentVote(User user, Long commentId, Long postId, String spaceName, String commentContent, String commentAuthor);
+    Long pinCommentVote(User user, Long commentId, Long postId, String spaceName, String commentContent, String commentAuthor) throws BadRequestException;
 
-    Long unPinCommentVote(User user, Long commentId, Long postId, String spaceName, String commentContent, String commentAuthor);
+    Long unPinCommentVote(User user, Long commentId, Long postId, String spaceName, String commentContent, String commentAuthor) throws BadRequestException;
 }

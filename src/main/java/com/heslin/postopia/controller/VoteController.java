@@ -61,19 +61,21 @@ public class VoteController {
         return ApiResponseEntity.ok(id, "success");
     }
 
-    @PostMapping("comment-delete")
+    @PostMapping("comment-pin")
     public ApiResponseEntity<Long> pinCommentVote(@RequestBody DeleteCommentVoteRequest request, @AuthenticationPrincipal User user) {
         Utils.checkRequestBody(request);
         Long id;
         try {
             id = voteService.pinCommentVote(user, request.commentId, request.postId, request.spaceName, request.commentContent, request.commentAuthor);
+        }catch (BadRequestException e) {
+            return ApiResponseEntity.ok(null, e.getMessage());
         } catch (DataIntegrityViolationException e) {
             return ApiResponseEntity.ok(null, "该评论存在正在进行的投票");
         }
         return ApiResponseEntity.ok(id, "success");
     }
 
-    @PostMapping("comment-delete")
+    @PostMapping("comment-unpin")
     public ApiResponseEntity<Long> unPinCommentVote(@RequestBody DeleteCommentVoteRequest request, @AuthenticationPrincipal User user) {
         Utils.checkRequestBody(request);
         Long id;
