@@ -24,5 +24,6 @@ public class CommentInfo {
     private final OpinionStatus opinion;
     private final long positiveCount;
     private final long negativeCount;
+    private final boolean isPined;
     private final List<CommentInfo> children = new ArrayList<>();
 }

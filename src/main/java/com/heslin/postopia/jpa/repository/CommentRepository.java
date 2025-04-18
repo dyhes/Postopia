@@ -35,10 +35,11 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
                             WHEN o.id IS NULL THEN com.heslin.postopia.enums.OpinionStatus.NIL
                             WHEN o.isPositive = true THEN com.heslin.postopia.enums.OpinionStatus.POSITIVE
                             ELSE com.heslin.postopia.enums.OpinionStatus.NEGATIVE
-                            END, c.positiveCount, c.negativeCount) from Comment c
+                            END, c.positiveCount, c.negativeCount, c.isPined) from Comment c
                                    JOIN c.user u
                                    LEFT JOIN CommentOpinion o on o.user.id = :uid and o.comment.id = c.id
                                    where c.post.id = :pid and c.parent IS NULL
+                                    ORDER BY c.isPined DESC, c.createdAt ASC
             """)
     Page<CommentInfo> findByPostId(@Param("pid") Long postId, @Param("uid") Long userId, Pageable pageable);
 
@@ -61,7 +62,8 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
                            ELSE 'NEGATIVE'
                        END AS opinion_status,
                        c.positive_count,
-                       c.negative_count
+                       c.negative_count,
+                       c.is_pined
                    FROM
                        comments c
                    JOIN
@@ -70,9 +72,9 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
                        comment_opinions o ON o.comment_id = c.id AND o.user_id = :uid
                    WHERE
                        c.parent_id IN (:cids)
-        
+
                    UNION ALL
-            
+
                    -- 递归查询：逐层获取嵌套子评论
                    SELECT
                        child.id,
@@ -88,7 +90,8 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
                            ELSE 'NEGATIVE'
                        END AS opinion_status,
                        child.positive_count,
-                       child.negative_count
+                       child.negative_count,
+                       child.is_pined
                    FROM
                        comments child
                    JOIN
@@ -108,10 +111,11 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
                    avatar,
                    opinion_status,
                    positive_count,
-                   negative_count
+                   negative_count,
+                   is_pined
                FROM comment_tree
-               ORDER BY created_at ASC;
-                                """, nativeQuery = true)
+               ORDER BY is_pined DESC, created_at ASC;
+    """, nativeQuery = true)
     List<Object[]> findChildrenByCommentIds(@Param("cids") List<Long> commentIds, @Param("uid") Long userId);
 
     @Query("""
@@ -154,4 +158,12 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
 
     @Query("select new com.heslin.postopia.dto.AuthorHint(c.id, c.user.username, SUBSTRING(c.content, 20)) from Comment c where c.id in :ids")
     List<AuthorHint> getAuthorHints(@Param("ids") List<Long> commentIds);
+
+    @Query("select count(*) from Comment c where c.id = :cid and c.isPined = :isPined")
+    int checkCommentPinStatus(@Param("cid") Long commentId,@Param("isPined") boolean isPined);
+
+    @Modifying
+    @Transactional
+    @Query("update Comment c set c.isPined = :isPined where c.id = :cid")
+    void updatePinStatus(@Param("cid") Long commentId,@Param("isPined") boolean isPined);
 }

@@ -20,6 +20,7 @@ import com.heslin.postopia.redis.RedisService;
 import com.heslin.postopia.service.opinion.OpinionService;
 import com.heslin.postopia.util.PostopiaFormatter;
 import jakarta.transaction.Transactional;
+import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -54,6 +55,7 @@ public class CommentServiceImpl implements CommentService {
         Comment.builder()
         .user(user)
         .post(post)
+        .isPined(false)
         .content(content)
         .parent(parent)
         .build();
@@ -122,7 +124,7 @@ public class CommentServiceImpl implements CommentService {
                 (Instant) arr[3],
                 (String) arr[4], (String) arr[5], (String) arr[6],
                 OpinionStatus.valueOf((String) arr[7]),
-                (long) arr[8], (long) arr[9]
+                (long) arr[8], (long) arr[9], (boolean) arr[10]
         )).toList();
         for (CommentInfo commentInfo : flattenChildren) {
             mp.put(commentInfo.getId(), commentInfo);
@@ -170,5 +172,15 @@ public class CommentServiceImpl implements CommentService {
     @Override
     public List<AuthorHint> getAuthorHints(List<Long> commentIds) {
         return commentRepository.getAuthorHints(commentIds);
+    }
+
+    @Override
+    public boolean checkCommentPinStatus(Long commentId, boolean isPined) {
+        return commentRepository.checkCommentPinStatus(commentId, isPined) == 0;
+    }
+
+    @Override
+    public void updatePinStatus(Long commentId, boolean isPined) {
+        commentRepository.updatePinStatus(commentId, isPined);
     }
 }

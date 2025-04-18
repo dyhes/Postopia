@@ -3,6 +3,7 @@ package com.heslin.postopia.controller;
 import com.heslin.postopia.dto.comment.CommentVote;
 import com.heslin.postopia.dto.response.ApiResponseEntity;
 import com.heslin.postopia.dto.response.BasicApiResponseEntity;
+import com.heslin.postopia.exception.BadRequestException;
 import com.heslin.postopia.jpa.model.User;
 import com.heslin.postopia.service.vote.VoteService;
 import com.heslin.postopia.util.Utils;
@@ -54,6 +55,32 @@ public class VoteController {
         Long id;
         try {
             id = voteService.deleteCommentVote(user, request.commentId, request.postId, request.spaceName, request.commentContent, request.commentAuthor);
+        } catch (DataIntegrityViolationException e) {
+            return ApiResponseEntity.ok(null, "该评论存在正在进行的投票");
+        }
+        return ApiResponseEntity.ok(id, "success");
+    }
+
+    @PostMapping("comment-delete")
+    public ApiResponseEntity<Long> pinCommentVote(@RequestBody DeleteCommentVoteRequest request, @AuthenticationPrincipal User user) {
+        Utils.checkRequestBody(request);
+        Long id;
+        try {
+            id = voteService.pinCommentVote(user, request.commentId, request.postId, request.spaceName, request.commentContent, request.commentAuthor);
+        } catch (DataIntegrityViolationException e) {
+            return ApiResponseEntity.ok(null, "该评论存在正在进行的投票");
+        }
+        return ApiResponseEntity.ok(id, "success");
+    }
+
+    @PostMapping("comment-delete")
+    public ApiResponseEntity<Long> unPinCommentVote(@RequestBody DeleteCommentVoteRequest request, @AuthenticationPrincipal User user) {
+        Utils.checkRequestBody(request);
+        Long id;
+        try {
+            id = voteService.unPinCommentVote(user, request.commentId, request.postId, request.spaceName, request.commentContent, request.commentAuthor);
+        } catch (BadRequestException e) {
+            return ApiResponseEntity.ok(null, e.getMessage());
         } catch (DataIntegrityViolationException e) {
             return ApiResponseEntity.ok(null, "该评论存在正在进行的投票");
         }

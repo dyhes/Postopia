@@ -36,4 +36,8 @@ public interface  CommentService {
     boolean deleteCommentOpinion(User user, Long id, boolean isPositive);
 
     List<AuthorHint> getAuthorHints(List<Long> commentIds);
+
+    boolean checkCommentPinStatus(Long commentId, boolean isPined);
+
+    void updatePinStatus(Long commentId, boolean isPined);
 }
