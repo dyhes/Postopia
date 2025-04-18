@@ -7,7 +7,6 @@ import com.heslin.postopia.dto.post.*;
 import com.heslin.postopia.elasticsearch.dto.SearchedPostInfo;
 import com.heslin.postopia.elasticsearch.model.PostDoc;
 import com.heslin.postopia.enums.OpinionStatus;
-import com.heslin.postopia.enums.PostStatus;
 import com.heslin.postopia.enums.kafka.PostOperation;
 import com.heslin.postopia.exception.ForbiddenException;
 import com.heslin.postopia.exception.ResourceNotFoundException;
@@ -64,7 +63,7 @@ public class PostServiceImpl implements PostService {
         post.setUser(user);
         post.setSubject(subject);
         post.setContent(content);
-        post.setStatus(PostStatus.PUBLISHED);
+        post.setArchived(false);
         post = postRepository.save(post);
 
         kafkaService.sendToDocCreate("post", post.getId().toString(), new PostDoc(post.getId(), post.getSubject(), post.getContent(), space.getName(), user.getUsername()));
@@ -72,12 +71,11 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public boolean deletePost(Long id, Long userId, String spaceName) {
-        boolean success = postRepository.deletePost(id, userId) > 0;
+    public void deletePost(Long id, String spaceName) {
+        boolean success = postRepository.deletePost(id) > 0;
         if (success) {
             kafkaService.sendToDocDelete("post", id.toString(), spaceName);
         }
-        return success;
     }
 
     @Override
@@ -86,16 +84,6 @@ public class PostServiceImpl implements PostService {
         if (!uid.equals(user.getId())) {
             throw new ForbiddenException();
         }
-    }
-
-    @Override
-    public void archivePost(Long id) {
-        postRepository.updateStatus(id, PostStatus.ARCHIVED);
-    }
-
-    @Override
-    public void unarchivedPost(Long id) {
-        postRepository.updateStatus(id, PostStatus.PUBLISHED);
     }
 
     @Override
@@ -201,5 +189,15 @@ public class PostServiceImpl implements PostService {
     @Override
     public List<AuthorHint> getAuthorHints(List<Long> postIds) {
         return postRepository.getAuthorHints(postIds);
+    }
+
+    @Override
+    public boolean checkPostArchiveStatus(Long postId, boolean isArchived) {
+        return postRepository.checkPostArchiveStatus(postId, isArchived) == 0;
+    }
+
+    @Override
+    public void updateArchiveStatus(Long postId, boolean isArchived) {
+        postRepository.updateArchiveStatus(postId, isArchived);
     }
 }

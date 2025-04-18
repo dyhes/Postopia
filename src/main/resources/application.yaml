@@ -78,6 +78,12 @@ postopia:
     comment:
       threshold: 1
       duration: 1
+    post:
+      threshold: 1
+      duration: 1
+    space:
+      threshold: 1
+      duration: 1
 
   jwt:
     secret: ${JWT_SECRET}

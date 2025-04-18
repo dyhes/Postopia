@@ -55,7 +55,8 @@ public interface OpinionRepository extends JpaRepository<Opinion, Long> {
                 u.nickname,
                 u.avatar,
                 o.updatedAt,
-                p.createdAt
+                p.createdAt,
+                p.isArchived
                 ) from PostOpinion o
                 JOIN o.post p
                 JOIN p.user u

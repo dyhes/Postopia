@@ -5,7 +5,6 @@ import com.heslin.postopia.dto.post.PostInfo;
 import com.heslin.postopia.elasticsearch.dto.SearchedPostInfo;
 import com.heslin.postopia.dto.post.PostSummary;
 import com.heslin.postopia.dto.post.SpacePostSummary;
-import com.heslin.postopia.enums.PostStatus;
 import com.heslin.postopia.jpa.model.Post;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
@@ -26,16 +25,9 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
     @Modifying
     @Transactional
-    @Query("update Post p set p.status = :status where p.id = :id")
-    void updateStatus(@Param("id")Long id, @Param("status")PostStatus status);
-
-    @Modifying
-    @Transactional
-    @Query("update Post p set p.subject = :subject, p.content = :content where p.id = :id and p.user.id = :uid and p.status != com.heslin.postopia.enums.PostStatus.ARCHIVED")
+    @Query("update Post p set p.subject = :subject, p.content = :content where p.id = :id and p.user.id = :uid and p.isArchived = false ")
     int updateSubjectAndContent(@Param("id")Long id, @Param("uid")Long uid, @Param("subject")String subject, @Param("content")String content);
 
-
-    Optional<PostStatus> findStatusById(Long id);
 
     @Query("""
              select
@@ -44,7 +36,7 @@ public interface PostRepository extends JpaRepository<Post, Long> {
                          WHEN o.id IS NULL THEN com.heslin.postopia.enums.OpinionStatus.NIL
                          WHEN o.isPositive = true THEN com.heslin.postopia.enums.OpinionStatus.POSITIVE
                          ELSE com.heslin.postopia.enums.OpinionStatus.NEGATIVE
-                     END)
+                     END, p.isArchived)
             from Post p
             JOIN p.user u
             LEFT JOIN PostOpinion o on o.user.id = :uid and o.post.id = :id
@@ -60,7 +52,7 @@ public interface PostRepository extends JpaRepository<Post, Long> {
                         WHEN o.id IS NULL THEN com.heslin.postopia.enums.OpinionStatus.NIL
                         WHEN o.isPositive = true THEN com.heslin.postopia.enums.OpinionStatus.POSITIVE
                         ELSE com.heslin.postopia.enums.OpinionStatus.NEGATIVE
-                    END, p.createdAt)
+                    END, p.createdAt, p.isArchived)
                     from Post p
                     JOIN p.user u
                     LEFT JOIN PostOpinion o on o.post.id = p.id and o.user.id = :uid
@@ -70,7 +62,7 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
 
     @Query("""
-            select new com.heslin.postopia.dto.post.PostSummary(s.name, p.id, p.subject, SUBSTRING(p.content, 1, 100), p.positiveCount, p.negativeCount, p.commentCount, p.createdAt)
+            select new com.heslin.postopia.dto.post.PostSummary(s.name, p.id, p.subject, SUBSTRING(p.content, 1, 100), p.positiveCount, p.negativeCount, p.commentCount, p.createdAt, p.isArchived)
                 from Post p
                 join p.user u
                 join p.space s
@@ -86,7 +78,7 @@ public interface PostRepository extends JpaRepository<Post, Long> {
                         WHEN o.id IS NULL THEN com.heslin.postopia.enums.OpinionStatus.NIL
                         WHEN o.isPositive = true THEN com.heslin.postopia.enums.OpinionStatus.POSITIVE
                         ELSE com.heslin.postopia.enums.OpinionStatus.NEGATIVE
-                    END, p.createdAt)
+                    END, p.createdAt, p.isArchived)
                 from Post p
                 join p.user u
                 join p.space s
@@ -100,9 +92,17 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
     @Transactional
     @Modifying
-    @Query("delete from Post p where p.id = :id and p.user.id = :uid")
-    int deletePost(@Param("id") Long id,@Param("uid") Long userId);
+    @Query("delete from Post p where p.id = :id")
+    int deletePost(@Param("id") Long id);
 
     @Query("select new com.heslin.postopia.dto.AuthorHint(p.id, p.user.username, p.subject) from Post p where p.id in :ids")
     List<AuthorHint> getAuthorHints(@Param("ids") List<Long> postIds);
+
+    @Query("select count(*) from Post p where p.id = :pid and p.isArchived = :isArchived")
+    int checkPostArchiveStatus(@Param("pid") Long postId, @Param("isArchived") boolean isArchived);
+
+    @Modifying
+    @Transactional
+    @Query("update Post p set p.isArchived = :isArchived where p.id = :pid")
+    void updateArchiveStatus(@Param("pid") Long postId, @Param("isArchived") boolean isArchived);
 }

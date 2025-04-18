@@ -21,4 +21,5 @@ public class PostSummary {
     private final long negativeCount;
     private final long commentCount;
     private final Instant createdAt;
+    private final boolean isArchived;
 }

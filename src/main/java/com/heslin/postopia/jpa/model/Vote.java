@@ -53,7 +53,7 @@ public class Vote {
     private long threshold;
 
     @OneToMany(mappedBy = "vote", cascade = {CascadeType.REMOVE}, orphanRemoval = true)
-    private Set<VoteOpinion> opinions = new HashSet<>();
+    private Set<VoteOpinion> opinions;
 
     public boolean isFulfilled() {
         return positiveCount > negativeCount && positiveCount + negativeCount >= threshold;

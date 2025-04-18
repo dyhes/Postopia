@@ -13,8 +13,8 @@ import java.time.Instant;
 public class UserPostSummary extends PostSummary{
     private final OpinionStatus opinionStatus;
 
-    public UserPostSummary(String spaceName, Long postId, String subject, String subContent, long positiveCount, long negativeCount, long commentCount, OpinionStatus opinionStatus, Instant createdAt) {
-        super(spaceName, postId, subject, subContent, positiveCount, negativeCount, commentCount, createdAt);
+    public UserPostSummary(String spaceName, Long postId, String subject, String subContent, long positiveCount, long negativeCount, long commentCount, OpinionStatus opinionStatus, Instant createdAt, boolean isArchived) {
+        super(spaceName, postId, subject, subContent, positiveCount, negativeCount, commentCount, createdAt, isArchived);
         this.opinionStatus = opinionStatus;
     }
 }

@@ -1,19 +1,15 @@
 package com.heslin.postopia.jpa.model;
 
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import com.heslin.postopia.enums.PostStatus;
 import com.heslin.postopia.jpa.model.opinion.PostOpinion;
 
 import lombok.Data;
@@ -61,9 +57,7 @@ public class Post {
     @OneToMany(mappedBy = "post", cascade = {CascadeType.REMOVE}, orphanRemoval = true)
     private Set<PostOpinion> opinions;
 
-    @Enumerated(EnumType.ORDINAL)
-    @Column(nullable=false)
-    private PostStatus status;
+    private boolean isArchived;
 
     private long positiveCount;
 

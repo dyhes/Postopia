@@ -20,9 +20,7 @@ import java.util.List;
 public interface PostService {
     Pair<Long, ResMessage> createPost(Space space, User user, String subject, String content);
     void authorize(User user, Long postId);
-    boolean deletePost(Long id, Long userId, String spaceName);
-    void archivePost(Long id);
-    void unarchivedPost(Long id);
+    void deletePost(Long id, String spaceName);
     boolean updatePost(Long id, Long userId, String spaceName, String subject, String content);
 
     Comment replyPost(Post post, String content, User user, Space space, String replyUser);
@@ -48,4 +46,8 @@ public interface PostService {
     List<SearchedPostInfo> getPostInfosInSearch(List<Long> ids);
 
     List<AuthorHint> getAuthorHints(List<Long> postIds);
+
+    boolean checkPostArchiveStatus(Long postId, boolean isArchived);
+
+    void updateArchiveStatus(Long postId, boolean isArchived);
 }

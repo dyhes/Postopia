@@ -13,8 +13,8 @@ public class UserOpinionPostSummary extends UserPostSummary{
     private final String userAvatar;
     private final Instant updatedAt;
 
-    public UserOpinionPostSummary(String spaceName, Long postId, String subject, String subContent, long positiveCount, long negativeCount, long commentCount, OpinionStatus opinionStatus, String username, String nickname, String userAvatar, Instant updatedAt, Instant createdAt) {
-        super(spaceName, postId, subject, subContent, positiveCount, negativeCount, commentCount, opinionStatus, createdAt);
+    public UserOpinionPostSummary(String spaceName, Long postId, String subject, String subContent, long positiveCount, long negativeCount, long commentCount, OpinionStatus opinionStatus, String username, String nickname, String userAvatar, Instant updatedAt, Instant createdAt, boolean isArchived) {
+        super(spaceName, postId, subject, subContent, positiveCount, negativeCount, commentCount, opinionStatus, createdAt, isArchived);
         this.username = username;
         this.userAvatar = userAvatar;
         this.nickname = nickname;

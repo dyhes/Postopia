@@ -19,7 +19,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.*;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -72,13 +71,28 @@ public class ScheduleService {
         voteRepository.delete(vote);
     }
 
-    public void scheduleUpdatePinStatusCommentVote(Long voteId, boolean isPined, Long commentId, Long postId, String spaceName, String commentContent, Instant endAt) {
+    public void scheduleUpdatPosteArchiveStatusVote(Long voteId, boolean isArchived, Long postId, String spaceName, String postSubject, String postAuthor, Instant endAt) {
+        String postMessage = "帖子：%s%s".formatted(postSubject, PostopiaFormatter.formatPost(spaceName, postId));
+        String voteActionMessage = "%s归档%s".formatted(isArchived ? "" : "取消", postMessage);
+        String relatedUserMessage = "您的%s已被投票%s归档".formatted(postMessage, isArchived ? "" : "取消");
+        taskScheduler.schedule(
+        () -> {
+            scheduledAction(voteId, voteActionMessage, relatedUserMessage, pid -> {
+                postService.updateArchiveStatus(postId, isArchived);
+                return null;
+            });
+        },
+        endAt
+        );
+    }
+
+    public void scheduleUpdateCommentPinStatusVote(Long voteId, boolean isPined, Long commentId, Long postId, String spaceName, String commentContent, Instant endAt) {
         String commentMessage = "评论：%s%s".formatted(commentContent, PostopiaFormatter.formatComment(spaceName, postId, commentId));
         String voteActionMessage = "%s置顶%s".formatted(isPined ? "" : "取消", commentMessage);
         String relatedUserMessage = "您的%s已被投票%s置顶".formatted(commentMessage, isPined ? "" : "取消");
         taskScheduler.schedule(
         () -> {
-            scheduledAction(voteId, voteActionMessage, relatedUserMessage, cId -> {
+            scheduledAction(voteId, voteActionMessage, relatedUserMessage, cid -> {
                 commentService.updatePinStatus(commentId, isPined);
                 return null;
             });
@@ -92,6 +106,18 @@ public class ScheduleService {
         () -> {
             scheduledAction(voteId, "删除评论 %s".formatted(content), "您的评论：%s 已被投票删除".formatted(content), commentId -> {
                 commentService.deleteComment(commentId, postId, spaceName);
+                return null;
+            });
+        },
+        endAt
+        );
+    }
+
+    public void scheduleDeletePostVote(Long voteId, String spaceName, String postSubject, Instant endAt) {
+        taskScheduler.schedule(
+        () -> {
+            scheduledAction(voteId, "删除帖子 %s".formatted(postSubject), "您的帖子：%s 已被投票删除".formatted(postSubject), postId -> {
+                postService.deletePost(postId, spaceName);
                 return null;
             });
         },
