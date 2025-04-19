@@ -18,11 +18,11 @@ public interface VoteRepository extends JpaRepository<Vote, Long> {
             v.id,
             v.detailVoteType,
             v.initiator,
-            v.relatedUser,
             v.positiveCount,
             v.negativeCount,
             v.startAt,
-            v.endAt
+            v.endAt,
+            null
         ) from Vote v where v.voteType = :voteType and v.relatedId in :ids
 """)
     List<VoteInfo> findVotes(@Param("ids") List<Long> ids, @Param("voteType") VoteType voteType);

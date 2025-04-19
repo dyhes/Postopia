@@ -58,7 +58,7 @@ public class ScheduleService {
             voteAction.apply(vote.getRelatedId());
             tail = "的投票已成功通过";
             if (relatedUserMessage != null) {
-                messages.add(new Message(vote.getRelatedUser(), relatedUserMessage));
+                messages.add(new Message(vote.getAdditional(), relatedUserMessage));
             }
         } else {
             tail = "的投票未通过, 赞成人数 %d，反对人数 %d, 所需最少投票人数 %d".formatted(vote.getPositiveCount(), vote.getNegativeCount(), vote.getThreshold());
@@ -71,7 +71,7 @@ public class ScheduleService {
         voteRepository.delete(vote);
     }
 
-    public void scheduleUpdatPosteArchiveStatusVote(Long voteId, boolean isArchived, Long postId, String spaceName, String postSubject, String postAuthor, Instant endAt) {
+    public void scheduleUpdatePostArchiveStatusVote(Long voteId, boolean isArchived, Long postId, String spaceName, String postSubject, String postAuthor, Instant endAt) {
         String postMessage = "帖子：%s%s".formatted(postSubject, PostopiaFormatter.formatPost(spaceName, postId));
         String voteActionMessage = "%s归档%s".formatted(isArchived ? "" : "取消", postMessage);
         String relatedUserMessage = "您的%s已被投票%s归档".formatted(postMessage, isArchived ? "" : "取消");

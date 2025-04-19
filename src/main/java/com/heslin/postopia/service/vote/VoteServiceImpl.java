@@ -83,7 +83,7 @@ public class VoteServiceImpl implements VoteService {
         return getVotes(ids, VoteType.POST);
     }
 
-    private Vote createVote(User user, Long relatedId, String author,VoteType voteType, DetailVoteType detailVoteType) {
+    private Vote createVote(User user, Long relatedId, String additional, VoteType voteType, DetailVoteType detailVoteType) {
         Instant start = Instant.now();
         Long threshold;
         Instant end;
@@ -103,7 +103,7 @@ public class VoteServiceImpl implements VoteService {
         Vote vote = Vote.builder()
         .initiator(user.getUsername())
         .relatedId(relatedId)
-        .relatedUser(author)
+        .additional(additional)
         .startAt(start)
         .endAt(end)
         .voteType(voteType)
@@ -127,7 +127,7 @@ public class VoteServiceImpl implements VoteService {
             throw new BadRequestException(isArchived? "该评论归档" : "该评论未归档");
         }
         Vote vote = createVote(user, postId, postAuthor, VoteType.POST, isArchived? DetailVoteType.ARCHIVE_POST : DetailVoteType.UNARCHIVE_POST);
-        scheduleService.scheduleUpdatPosteArchiveStatusVote(vote.getId(), isArchived, postId, spaceName, postSubject, postAuthor, vote.getEndAt());
+        scheduleService.scheduleUpdatePostArchiveStatusVote(vote.getId(), isArchived, postId, spaceName, postSubject, postAuthor, vote.getEndAt());
         return vote.getId();
     }
 

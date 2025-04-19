@@ -1,7 +1,6 @@
 package com.heslin.postopia.jpa.model;
 
 import java.time.Instant;
-import java.util.HashSet;
 import java.util.Set;
 
 import com.heslin.postopia.enums.DetailVoteType;
@@ -42,7 +41,7 @@ public class Vote {
     @Enumerated(EnumType.STRING)
     private DetailVoteType detailVoteType;
 
-    private String relatedUser;
+    private String additional;
 
     private String initiator;
 
