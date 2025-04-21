@@ -1,5 +1,7 @@
 package com.heslin.postopia.service.space;
 
+import com.heslin.postopia.dto.user.UserInfo;
+import com.heslin.postopia.dto.user.UserSummary;
 import com.heslin.postopia.elasticsearch.dto.Avatar;
 import com.heslin.postopia.dto.ResMessage;
 import com.heslin.postopia.dto.SpaceInfo;
@@ -11,6 +13,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.Instant;
 import java.util.List;
 
 public interface SpaceService {
@@ -34,4 +37,12 @@ public interface SpaceService {
     void updateSpace(String spaceName, String description, String avatar);
 
     void notifyUsers(String spaceName, String s, String spaceMessage);
+
+    void expelUser(Long spaceId, String spaceName, String username);
+
+    void muteUser(String spaceName, String username);
+
+    Instant getForbidden(Long spaceId, String username);
+
+    Page<UserSummary> searchUserByPrefix(String spaceName, String prefix, Pageable pageable);
 }

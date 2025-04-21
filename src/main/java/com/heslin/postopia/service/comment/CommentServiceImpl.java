@@ -9,6 +9,7 @@ import com.heslin.postopia.elasticsearch.model.CommentDoc;
 import com.heslin.postopia.enums.OpinionStatus;
 import com.heslin.postopia.enums.kafka.CommentOperation;
 import com.heslin.postopia.enums.kafka.PostOperation;
+import com.heslin.postopia.exception.ForbiddenException;
 import com.heslin.postopia.jpa.model.Comment;
 import com.heslin.postopia.jpa.model.Post;
 import com.heslin.postopia.jpa.model.Space;
@@ -18,6 +19,7 @@ import com.heslin.postopia.jpa.repository.CommentRepository;
 import com.heslin.postopia.kafka.KafkaService;
 import com.heslin.postopia.redis.RedisService;
 import com.heslin.postopia.service.opinion.OpinionService;
+import com.heslin.postopia.service.space_user_info.SpaceUserInfoService;
 import com.heslin.postopia.util.PostopiaFormatter;
 import jakarta.transaction.Transactional;
 import org.apache.coyote.BadRequestException;
@@ -40,13 +42,26 @@ public class CommentServiceImpl implements CommentService {
     private final OpinionService opinionService;
     private final KafkaService kafkaService;
     private final RedisService redisService;
+    private final SpaceUserInfoService spaceUserInfoService;
 
     @Autowired
-    public CommentServiceImpl(CommentRepository commentRepository, OpinionService opinionService, KafkaService kafkaService, RedisService redisService) {
+    public CommentServiceImpl(CommentRepository commentRepository, OpinionService opinionService, KafkaService kafkaService, RedisService redisService, SpaceUserInfoService spaceUserInfoService) {
         this.commentRepository = commentRepository;
         this.opinionService = opinionService;
         this.kafkaService = kafkaService;
         this.redisService = redisService;
+        this.spaceUserInfoService = spaceUserInfoService;
+    }
+
+
+    @Override
+    public void validate(User user, String spaceName) {
+        Instant muteUntil = spaceUserInfoService.getMutedUntil(spaceName, user.getUsername());
+        if (muteUntil != null) {
+            if (muteUntil.isAfter(Instant.now())) {
+                throw new ForbiddenException(muteUntil.toString());
+            }
+        }
     }
 
     @Transactional

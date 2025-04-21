@@ -79,10 +79,12 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public void authorize(User user, Long postId) {
-        var uid = postRepository.findUserIdById(postId).orElseThrow(() -> new ResourceNotFoundException("Post not found"));
-        if (!uid.equals(user.getId())) {
-            throw new ForbiddenException();
+    public void validate(User user, String spaceName) {
+        Instant muteUntil = spaceUserInfoService.getMutedUntil(spaceName, user.getUsername());
+        if (muteUntil != null) {
+            if (muteUntil.isAfter(Instant.now())) {
+                throw new ForbiddenException(muteUntil.toString());
+            }
         }
     }
 

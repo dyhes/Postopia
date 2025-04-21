@@ -40,5 +40,5 @@ public interface VoteRepository extends JpaRepository<Vote, Long> {
             v.additional
         ) from Vote v where v.voteType = com.heslin.postopia.enums.VoteType.SPACE and v.relatedId = :id
 """)
-    List<VoteInfo> findSpaceVote(@Param("id") Long id);
+    VoteInfo findSpaceVote(@Param("id") Long id);
 }

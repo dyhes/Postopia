@@ -92,7 +92,7 @@ public class VoteServiceImpl implements VoteService {
     }
 
     @Override
-    public List<VoteInfo> getSpaceVote(Long id) {
+    public VoteInfo getSpaceVote(Long id) {
         return voteRepository.findSpaceVote(id);
     }
 
@@ -149,8 +149,34 @@ public class VoteServiceImpl implements VoteService {
             throw new RuntimeException(e);
         }
         Vote vote = createVote(user, id, info, VoteType.SPACE, DetailVoteType.UPDATE_SPACE, member);
-        scheduleService.scheduleUpdateSpaceVote(vote.getId(), name, info, avatar, description, vote.getEndAt());
-        return 0L;
+        scheduleService.scheduleUpdateSpaceVote(vote.getId(), name, avatar, description, vote.getEndAt());
+        return vote.getId();
+    }
+
+    @Override
+    public Long expelSpaceUserVote(User user, Long spaceId, String spaceName, Long member, String username, String reason) {
+        String info;
+        try {
+            info = objectMapper.writeValueAsString(new UpdateSpaceInfo(username, reason));
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+        Vote vote = createVote(user, spaceId, info, VoteType.SPACE, DetailVoteType.EXPEL_USER, member);
+        scheduleService.scheduleExpelSpaceUserVote(vote.getId(), spaceName, username, reason, vote.getEndAt());
+        return vote.getId();
+    }
+
+    @Override
+    public Long muteSpaceUserVote(User user, Long spaceId, String spaceName, Long member, String username, String reason) {
+        String info;
+        try {
+            info = objectMapper.writeValueAsString(new UpdateSpaceInfo(username, reason));
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+        Vote vote = createVote(user, spaceId, info, VoteType.SPACE, DetailVoteType.MUTE_USER, member);
+        scheduleService.scheduleMuteSpaceUserVote(vote.getId(), spaceName, username, reason, vote.getEndAt());
+        return vote.getId();
     }
 
     @Override

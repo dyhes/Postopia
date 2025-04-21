@@ -69,7 +69,7 @@ public class ScheduleService {
         voteRepository.delete(vote);
     }
 
-    public void scheduleUpdateSpaceVote(Long voteId, String spaceName, String info, String description, String avatar, Instant endAt) {
+    public void scheduleUpdateSpaceVote(Long voteId, String spaceName, String description, String avatar, Instant endAt) {
         String spaceMessage = "空间：%s".formatted(spaceName);
         String voteActionMessage = "修改%s信息".formatted(spaceMessage);
         taskScheduler.schedule(
@@ -77,6 +77,32 @@ public class ScheduleService {
             scheduledAction(voteId, voteActionMessage, null, sid -> {
                 spaceService.updateSpace(spaceName, description, avatar);
                 spaceService.notifyUsers(spaceName, "%s信息已被投票更新", spaceMessage);
+                return null;
+            });
+        },
+        endAt
+        );
+    }
+
+    public void scheduleExpelSpaceUserVote(Long id, String spaceName, String username, String reason, Instant endAt) {
+        String spaceMessage = "空间：%s".formatted(spaceName);
+        taskScheduler.schedule(
+        () -> {
+            scheduledAction(id, "因%s从%s驱逐%s".formatted(reason, spaceMessage, username), "您已因%s被投票从%s驱逐".formatted(reason, spaceMessage), sid -> {
+                spaceService.expelUser(sid, spaceName, username);
+                return null;
+            });
+        },
+        endAt
+        );
+    }
+
+    public void scheduleMuteSpaceUserVote(Long id, String spaceName, String username, String reason, Instant endAt) {
+        String spaceMessage = "空间：%s".formatted(spaceName);
+        taskScheduler.schedule(
+        () -> {
+            scheduledAction(id, "因%s在%s中禁言%s".formatted(reason, spaceMessage, username), "您已因%s被投票在%s中禁言7天".formatted(reason, spaceMessage), sid -> {
+                spaceService.muteUser(spaceName, username);
                 return null;
             });
         },

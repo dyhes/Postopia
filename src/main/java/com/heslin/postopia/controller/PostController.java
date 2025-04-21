@@ -49,6 +49,7 @@ public class PostController {
     @PostMapping("update")
     public BasicApiResponseEntity updatePost(@AuthenticationPrincipal User user, @RequestBody UpdatePostDto request) {
         Utils.checkRequestBody(request);
+        postService.validate(user, request.spaceName);
         boolean success = postService.updatePost(request.id, user.getId(), request.spaceName, request.subject, request.content);
         return BasicApiResponseEntity.ok(success);
     }
@@ -90,6 +91,7 @@ public class PostController {
     @PostMapping("create")
     public ApiResponseEntity<Long> createPost(@AuthenticationPrincipal User user, @RequestBody CreatePostDto request) {
         Utils.checkRequestBody(request);
+        postService.validate(user, request.spaceName);
         Space space = Space.builder()
                     .id(request.spaceId)
                     .name(request.spaceName)
@@ -103,6 +105,7 @@ public class PostController {
     @PostMapping("reply")
     public ApiResponseEntity<Long> replyPost(@AuthenticationPrincipal User user, @RequestBody ReplyPostDto request) {
         Utils.checkRequestBody(request);
+        postService.validate(user, request.spaceName);
         Post post = Post.builder().id(request.postId).build();
         Space space = Space.builder().name(request.spaceName).build();
         //postService.checkPostStatus(request.id);

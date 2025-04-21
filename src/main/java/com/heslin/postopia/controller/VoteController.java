@@ -46,7 +46,7 @@ public class VoteController {
     }
 
     @GetMapping("space")
-    public ApiResponseEntity<List<VoteInfo>> getPostVotes(@RequestParam Long id) {
+    public ApiResponseEntity<VoteInfo> getSpaceVote(@RequestParam Long id) {
         return ApiResponseEntity.ok(voteService.getSpaceVote(id), "success");
     }
 
@@ -62,10 +62,35 @@ public class VoteController {
         return BasicApiResponseEntity.ok("success");
     }
 
-    public record SpaceVoteRequest(
-        Long id,
-        String description
+    public record SpaceUserVoteRequest(
+        Long spaceId,
+        String username,
+        String reason
     ){}
+
+    @PostMapping("expel-user")
+    public ApiResponseEntity<Long> expelSpaceUserVote(@RequestBody SpaceUserVoteRequest request, @AuthenticationPrincipal User user) {
+        Long id;
+        try {
+            SpaceInfo space = spaceService.getSpaceInfo(request.spaceId);
+            id = voteService.expelSpaceUserVote(user, request.spaceId, space.name(), space.memberCount(), request.username, request.reason);
+        } catch (DataIntegrityViolationException e) {
+            return ApiResponseEntity.ok(null, "该空间存在正在进行的投票");
+        }
+        return ApiResponseEntity.ok(id, "success");
+    }
+
+    @PostMapping("mute-user")
+    public ApiResponseEntity<Long> muteSpaceUserVote(@RequestBody SpaceUserVoteRequest request, @AuthenticationPrincipal User user) {
+        Long id;
+        try {
+            SpaceInfo space = spaceService.getSpaceInfo(request.spaceId);
+            id = voteService.muteSpaceUserVote(user, request.spaceId, space.name(), space.memberCount(), request.username, request.reason);
+        } catch (DataIntegrityViolationException e) {
+            return ApiResponseEntity.ok(null, "该空间存在正在进行的投票");
+        }
+        return ApiResponseEntity.ok(id, "success");
+    }
 
     @PostMapping("space-update")
     public ApiResponseEntity<Long> updateSpaceVote(@RequestPart(required = false) MultipartFile file, @RequestParam Long spaceId, @RequestParam(required = false) String description, @AuthenticationPrincipal User user) {

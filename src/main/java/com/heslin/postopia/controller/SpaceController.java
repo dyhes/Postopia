@@ -1,5 +1,8 @@
 package com.heslin.postopia.controller;
 
+import com.heslin.postopia.dto.response.PagedApiResponseEntity;
+import com.heslin.postopia.dto.user.UserInfo;
+import com.heslin.postopia.dto.user.UserSummary;
 import com.heslin.postopia.elasticsearch.dto.Avatar;
 import com.heslin.postopia.dto.ResMessage;
 import com.heslin.postopia.dto.SpaceInfo;
@@ -10,6 +13,8 @@ import com.heslin.postopia.dto.response.BasicApiResponseEntity;
 import com.heslin.postopia.elasticsearch.dto.SearchedSpaceInfo;
 import com.heslin.postopia.enums.PopularSpaceOrder;
 import com.heslin.postopia.exception.BadRequestException;
+import com.heslin.postopia.exception.ForbiddenException;
+import com.heslin.postopia.jpa.model.Forbidden;
 import com.heslin.postopia.jpa.model.User;
 import com.heslin.postopia.service.space.SpaceService;
 import com.heslin.postopia.util.Pair;
@@ -22,6 +27,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.Instant;
 import java.util.List;
 
 
@@ -36,6 +42,20 @@ public class SpaceController {
     }
 
     public record SpaceDto(String name, String description) {
+    }
+
+    @GetMapping("search-user")
+    public PagedApiResponseEntity<UserSummary> searchUserByPrefix(
+            @RequestParam String spaceName,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam String prefix) {
+        if (prefix == null || prefix.isBlank()) {
+            throw new BadRequestException("prefix is required");
+        }
+        Pageable pageable = PageRequest.of(page, size);
+        Page<UserSummary> users = spaceService.searchUserByPrefix(spaceName, prefix, pageable);
+        return PagedApiResponseEntity.ok(users);
     }
 
     @PostMapping("create")
@@ -60,6 +80,11 @@ public class SpaceController {
     public BasicApiResponseEntity joinSpace(@AuthenticationPrincipal User user, @RequestBody SpaceIdDto space) {
         if (space.spaceId == null) {
             return BasicApiResponseEntity.badRequest("spaceId is required");
+        }
+        Instant forbidden = spaceService.getForbidden(space.spaceId, user.getUsername());
+
+        if (forbidden != null) {
+            throw new ForbiddenException(forbidden.toString());
         }
 
         ResMessage resMessage = spaceService.joinSpace(space.spaceId, user);

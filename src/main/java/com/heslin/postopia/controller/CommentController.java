@@ -36,6 +36,7 @@ public class CommentController {
 
     @PostMapping("reply")
     public BasicApiResponseEntity reply(@RequestBody CommentReplyDto dto, @AuthenticationPrincipal User user) {
+        commentService.validate(user, dto.spaceName);
         Utils.checkRequestBody(dto);
         Post post = Post.builder().id(dto.postId()).build();
         Comment comment = new Comment();

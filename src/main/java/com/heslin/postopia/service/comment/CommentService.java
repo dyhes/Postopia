@@ -40,4 +40,6 @@ public interface  CommentService {
     boolean checkCommentPinStatus(Long commentId, boolean isPined);
 
     void updatePinStatus(Long commentId, boolean isPined);
+
+    void validate(User user, String spaceName);
 }
