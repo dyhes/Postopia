@@ -5,6 +5,8 @@ import com.heslin.postopia.jpa.repository.SpaceUserInfoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class SpaceUserInfoServiceImpl implements SpaceUserInfoService {
 
@@ -14,6 +16,11 @@ public class SpaceUserInfoServiceImpl implements SpaceUserInfoService {
     @Override
     public boolean isSpaceMember(Long spaceId, Long userId) {
         return spaceUserInfoRepository.countBySpaceIdAndUserId(spaceId, userId) > 0;
+    }
+
+    @Override
+    public List<String> findUsername(String spaceName) {
+        return spaceUserInfoRepository.findUsernameBySpaceName(spaceName);
     }
 
     @Override

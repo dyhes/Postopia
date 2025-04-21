@@ -5,9 +5,11 @@ import com.heslin.postopia.elasticsearch.dto.SearchedSpaceInfo;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Repository;
 
 import com.heslin.postopia.dto.SpaceInfo;
@@ -36,4 +38,8 @@ public interface SpaceRepository extends PagingAndSortingRepository<Space, Long>
 
     @Query("select new com.heslin.postopia.elasticsearch.dto.SearchedSpaceInfo(s.name, s.avatar, s.memberCount) from Space s where s.name in :names")
     List<SearchedSpaceInfo> findSearchedSpaceInfos(@Param("names") List<String> names);
+
+    @Modifying
+    @Query("update Space s set s.description = :description, s.avatar = :avatar where s.name = :id")
+    void updateSpaceInfo(@Param("id") String id, @Param("description") String description,@Param("avatar") String avatar);
 }

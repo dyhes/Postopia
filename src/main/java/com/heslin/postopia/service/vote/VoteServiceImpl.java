@@ -1,5 +1,7 @@
 package com.heslin.postopia.service.vote;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.heslin.postopia.dto.VoteInfo;
 import com.heslin.postopia.enums.DetailVoteType;
 import com.heslin.postopia.enums.VoteType;
@@ -30,6 +32,7 @@ public class VoteServiceImpl implements VoteService {
     private final ScheduleService scheduleService;
     private final CommentService commentService;
     private final PostService postService;
+    private final ObjectMapper objectMapper;
 
     @Value("${postopia.vote.comment.duration}")
     private Long commentDuration;
@@ -41,17 +44,22 @@ public class VoteServiceImpl implements VoteService {
     private Long postThreshold;
     @Value("${postopia.vote.space.duration}")
     private Long spaceDuration;
-    @Value("${postopia.vote.space.threshold}")
-    private Long spaceThreshold;
+    @Value("${postopia.vote.space.large}")
+    private float spaceLarge;
+    @Value("${postopia.vote.space.medium}")
+    private float spaceMedium;
+    @Value("${postopia.vote.space.small}")
+    private float spaceSmall;
 
     @Autowired
-    public VoteServiceImpl(VoteRepository voteRepository, OpinionService opinionService, KafkaService kafkaService, ScheduleService scheduleService, CommentService commentService, PostService postService) {
+    public VoteServiceImpl(VoteRepository voteRepository, OpinionService opinionService, KafkaService kafkaService, ScheduleService scheduleService, CommentService commentService, PostService postService, ObjectMapper objectMapper) {
         this.voteRepository = voteRepository;
         this.opinionService = opinionService;
         this.kafkaService = kafkaService;
         this.scheduleService = scheduleService;
         this.commentService = commentService;
         this.postService = postService;
+        this.objectMapper = objectMapper;
     }
 
     @Override
@@ -83,7 +91,16 @@ public class VoteServiceImpl implements VoteService {
         return getVotes(ids, VoteType.POST);
     }
 
+    @Override
+    public List<VoteInfo> getSpaceVote(Long id) {
+        return voteRepository.findSpaceVote(id);
+    }
+
     private Vote createVote(User user, Long relatedId, String additional, VoteType voteType, DetailVoteType detailVoteType) {
+        return createVote(user, relatedId, additional, voteType, detailVoteType, null);
+    }
+
+    private Vote createVote(User user, Long relatedId, String additional, VoteType voteType, DetailVoteType detailVoteType, Long spaceMember) {
         Instant start = Instant.now();
         Long threshold;
         Instant end;
@@ -96,7 +113,13 @@ public class VoteServiceImpl implements VoteService {
                 threshold = postThreshold;
                 end = start.plus(postDuration, ChronoUnit.MINUTES);
             } case SPACE -> {
-                threshold = spaceThreshold;
+                if (spaceMember < 100) {
+                    threshold = (long) (spaceMember * spaceSmall);
+                } else if (spaceMember < 1000) {
+                    threshold = (long) (spaceMember * spaceMedium);
+                } else {
+                    threshold = (long) (spaceMember * spaceLarge);
+                }
                 end = start.plus(spaceDuration, ChronoUnit.MINUTES);
             }default -> throw new IllegalStateException("Unexpected value: " + voteType);
         }
@@ -113,6 +136,21 @@ public class VoteServiceImpl implements VoteService {
         .threshold(threshold)
         .build();
         return voteRepository.save(vote);
+    }
+
+    record UpdateSpaceInfo(String avatar, String description) {}
+
+    @Override
+    public Long updateSpaceVote(User user, Long id, String name, Long member, String avatar, String description) {
+        String info;
+        try {
+            info = objectMapper.writeValueAsString(new UpdateSpaceInfo(avatar, description));
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+        Vote vote = createVote(user, id, info, VoteType.SPACE, DetailVoteType.UPDATE_SPACE, member);
+        scheduleService.scheduleUpdateSpaceVote(vote.getId(), name, info, avatar, description, vote.getEndAt());
+        return 0L;
     }
 
     @Override

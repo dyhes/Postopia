@@ -24,4 +24,8 @@ public interface VoteService {
     Long unArchivePostVote(User user, Long postId, String postSubject, String postAuthor, String spaceName) throws BadRequestException;
 
     Long archivePostVote(User user, Long postId, String postSubject, String postAuthor, String spaceName) throws BadRequestException;
+
+    List<VoteInfo> getSpaceVote(Long id);
+
+    Long updateSpaceVote(User user, Long id, String name, Long member, String avatar, String description);
 }

@@ -30,4 +30,8 @@ public interface SpaceService {
     public List<Avatar> getSpaceAvatars(List<String> names);
 
     public List<SearchedSpaceInfo> getSearchedSpaceInfos(List<String> names);
+
+    void updateSpace(String spaceName, String description, String avatar);
+
+    void notifyUsers(String spaceName, String s, String spaceMessage);
 }

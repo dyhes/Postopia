@@ -11,6 +11,7 @@ import com.heslin.postopia.redis.model.OpinionAggregation;
 import com.heslin.postopia.service.comment.CommentService;
 import com.heslin.postopia.service.message.MessageService;
 import com.heslin.postopia.service.post.PostService;
+import com.heslin.postopia.service.space.SpaceService;
 import com.heslin.postopia.util.PostopiaFormatter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -32,9 +33,10 @@ public class ScheduleService {
     private final ThreadPoolTaskScheduler taskScheduler;
     private final VoteRepository voteRepository;
     private final OpinionRepository opinionRepository;
+    private final SpaceService spaceService;
 
     @Autowired
-    public ScheduleService(MessageService messageService, RedisService redisService, CommentService commentService, PostService postService, ThreadPoolTaskScheduler taskScheduler, VoteRepository voteRepository, OpinionRepository opinionRepository) {
+    public ScheduleService(MessageService messageService, RedisService redisService, CommentService commentService, PostService postService, ThreadPoolTaskScheduler taskScheduler, VoteRepository voteRepository, OpinionRepository opinionRepository, SpaceService spaceService) {
         this.messageService = messageService;
         this.redisService = redisService;
         this.commentService = commentService;
@@ -42,12 +44,8 @@ public class ScheduleService {
         this.taskScheduler = taskScheduler;
         this.voteRepository = voteRepository;
         this.opinionRepository = opinionRepository;
+        this.spaceService = spaceService;
     }
-
-    private record VoteMessage(
-        String voteAction,
-        String relatedUserMessage
-    ){}
 
     private void scheduledAction(Long voteId, String voteActionMessage, String relatedUserMessage, Function<Long, Void> voteAction) {
         Vote vote = voteRepository.findById(voteId).orElseThrow();
@@ -69,6 +67,21 @@ public class ScheduleService {
         });
         messageService.batchSave(messages);
         voteRepository.delete(vote);
+    }
+
+    public void scheduleUpdateSpaceVote(Long voteId, String spaceName, String info, String description, String avatar, Instant endAt) {
+        String spaceMessage = "空间：%s".formatted(spaceName);
+        String voteActionMessage = "修改%s信息".formatted(spaceMessage);
+        taskScheduler.schedule(
+        () -> {
+            scheduledAction(voteId, voteActionMessage, null, sid -> {
+                spaceService.updateSpace(spaceName, description, avatar);
+                spaceService.notifyUsers(spaceName, "%s信息已被投票更新", spaceMessage);
+                return null;
+            });
+        },
+        endAt
+        );
     }
 
     public void scheduleUpdatePostArchiveStatusVote(Long voteId, boolean isArchived, Long postId, String spaceName, String postSubject, String postAuthor, Instant endAt) {

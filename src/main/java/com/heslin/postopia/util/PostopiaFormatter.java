@@ -12,6 +12,10 @@ public class PostopiaFormatter {
         return String.format(" postopia-user{%s} ", username);
     }
 
+    public static String formatSpace(String spaceName) {
+        return String.format(" postopia-space{%s} ", spaceName);
+    }
+
     public static String formatPost(String spaceName, Long postId, String content) {
         return String.format(" postopia-post{%s;%d;%s} ", spaceName, postId, content);
     }

@@ -7,7 +7,7 @@ public enum DetailVoteType {
     ARCHIVE_POST,
     UNARCHIVE_POST,
     DELETE_POST,
-    UPDATE_SPACE_INFO,
+    UPDATE_SPACE,
     EXPEL_USER,
     MUTE_USER
 }

@@ -124,6 +124,12 @@ public class KafkaService {
         elasticsearchOperations.bulkUpdate(queries, documentClass);
     }
 
+    @KafkaListener(topics = "space_update", containerFactory = "batchSSFactory")
+    @Transactional
+    protected void processSpaceUpdate(List<ConsumerRecord<String, String>> records) {
+        processDocUpdate(records, SpaceDoc.class);
+    }
+
     @KafkaListener(topics = "user_update", containerFactory = "batchSSFactory")
     @Transactional
     protected void processUserUpdate(List<ConsumerRecord<String, String>> records) {

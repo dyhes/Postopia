@@ -7,11 +7,13 @@ import com.heslin.postopia.dto.ResMessage;
 import com.heslin.postopia.dto.SpaceInfo;
 import com.heslin.postopia.enums.PopularSpaceOrder;
 import com.heslin.postopia.enums.kafka.SpaceOperation;
+import com.heslin.postopia.jpa.model.Message;
 import com.heslin.postopia.jpa.model.Space;
 import com.heslin.postopia.jpa.model.SpaceUserInfo;
 import com.heslin.postopia.jpa.model.User;
 import com.heslin.postopia.jpa.repository.SpaceRepository;
 import com.heslin.postopia.kafka.KafkaService;
+import com.heslin.postopia.service.message.MessageService;
 import com.heslin.postopia.service.os.OSService;
 import com.heslin.postopia.service.space_user_info.SpaceUserInfoService;
 import com.heslin.postopia.util.Pair;
@@ -26,7 +28,10 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class SpaceServiceImpl implements SpaceService {
@@ -35,14 +40,31 @@ public class SpaceServiceImpl implements SpaceService {
     private final OSService osService;
     private final String defaultSpaceAvatar;
     private final KafkaService kafkaService;
+    private final MessageService messageService;
 
     @Autowired
-    public SpaceServiceImpl(@Value("${postopia.avatar.space}") String defaultSpaceAvatar, OSService osService, SpaceRepository spaceRepository, SpaceUserInfoService spaceUserInfoService, KafkaService kafkaService) {
+    public SpaceServiceImpl(@Value("${postopia.avatar.space}") String defaultSpaceAvatar, OSService osService, SpaceRepository spaceRepository, SpaceUserInfoService spaceUserInfoService, KafkaService kafkaService, MessageService messageService) {
         this.osService = osService;
         this.spaceRepository = spaceRepository;
         this.spaceUserInfoService = spaceUserInfoService;
         this.defaultSpaceAvatar = defaultSpaceAvatar;
         this.kafkaService = kafkaService;
+        this.messageService = messageService;
+    }
+
+    @Override
+    public void updateSpace(String spaceName, String description, String avatar) {
+        spaceRepository.updateSpaceInfo(spaceName, description, avatar);
+        Map<String, Object> mp = new HashMap<>();
+        mp.put("description", description);
+        kafkaService.sendToDocUpdate("space", spaceName, spaceName, mp);
+    }
+
+    @Override
+    public void notifyUsers(String spaceName, String s, String spaceMessage) {
+        List<String> users = spaceUserInfoService.findUsername(spaceName);
+        List<Message> messages = users.stream().map(u -> new Message(u, spaceMessage)).toList();
+        messageService.batchSave(messages);
     }
 
     @Override
@@ -69,10 +91,7 @@ public class SpaceServiceImpl implements SpaceService {
             return new ResMessage("已经加入过该空间", false);
         }
 
-        SpaceUserInfo spaceUserInfo = new SpaceUserInfo();
-        spaceUserInfo.setSpace(space);
-        spaceUserInfo.setUser(user);
-        spaceUserInfo.setLastActiveAt(LocalDate.now());
+        SpaceUserInfo spaceUserInfo = SpaceUserInfo.builder().space(space).user(user).spaceName(space.getName()).username(user.getUsername()).lastActiveAt(LocalDate.now()).build();
         spaceUserInfoService.joinSpace(spaceUserInfo);
         kafkaService.sendToSpace(space.getId(), SpaceOperation.MEMBER_JOINED);
         return new ResMessage("加入成功", true);

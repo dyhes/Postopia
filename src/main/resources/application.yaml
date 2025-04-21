@@ -82,7 +82,9 @@ postopia:
       threshold: 1
       duration: 1
     space:
-      threshold: 1
+      large: 0.1
+      medium: 0.25
+      small: 0.5
       duration: 1
 
   jwt:
