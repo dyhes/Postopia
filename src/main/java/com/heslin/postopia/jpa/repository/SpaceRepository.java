@@ -40,6 +40,6 @@ public interface SpaceRepository extends PagingAndSortingRepository<Space, Long>
     List<SearchedSpaceInfo> findSearchedSpaceInfos(@Param("names") List<String> names);
 
     @Modifying
-    @Query("update Space s set s.description = :description, s.avatar = :avatar where s.name = :id")
-    void updateSpaceInfo(@Param("id") String id, @Param("description") String description,@Param("avatar") String avatar);
+    @Query("update Space s set s.description = :description, s.avatar = :avatar where s.name = :name")
+    void updateSpaceInfo(@Param("name") String name, @Param("description") String description, @Param("avatar") String avatar);
 }

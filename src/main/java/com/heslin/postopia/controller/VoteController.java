@@ -68,7 +68,7 @@ public class VoteController {
         String reason
     ){}
 
-    @PostMapping("expel-user")
+    @PostMapping("user-expel")
     public ApiResponseEntity<Long> expelSpaceUserVote(@RequestBody SpaceUserVoteRequest request, @AuthenticationPrincipal User user) {
         Long id;
         try {
@@ -80,7 +80,7 @@ public class VoteController {
         return ApiResponseEntity.ok(id, "success");
     }
 
-    @PostMapping("mute-user")
+    @PostMapping("user-mute")
     public ApiResponseEntity<Long> muteSpaceUserVote(@RequestBody SpaceUserVoteRequest request, @AuthenticationPrincipal User user) {
         Long id;
         try {
@@ -93,7 +93,7 @@ public class VoteController {
     }
 
     @PostMapping("space-update")
-    public ApiResponseEntity<Long> updateSpaceVote(@RequestPart(required = false) MultipartFile file, @RequestParam Long spaceId, @RequestParam(required = false) String description, @AuthenticationPrincipal User user) {
+    public ApiResponseEntity<Long> updateSpaceVote(@RequestPart(required = false, name = "avatar") MultipartFile file, @RequestParam Long spaceId, @RequestParam(required = false) String description, @AuthenticationPrincipal User user) {
         String avatar;
         if (file != null) {
             try {
@@ -109,6 +109,8 @@ public class VoteController {
         try {
             id = voteService.updateSpaceVote(user, spaceId, space.name(), space.memberCount(), avatar == null? space.avatar(): avatar, description == null? space.description(): description);
         } catch (DataIntegrityViolationException e) {
+            System.out.println("e.getMessage()");
+            System.out.println(e.getMessage());
             return ApiResponseEntity.ok(null, "该空间存在正在进行的投票");
         }
         return ApiResponseEntity.ok(id, "success");

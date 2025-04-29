@@ -60,6 +60,7 @@ public class SpaceServiceImpl implements SpaceService {
     }
 
     @Override
+    @Transactional
     public void updateSpace(String spaceName, String description, String avatar) {
         spaceRepository.updateSpaceInfo(spaceName, description, avatar);
         Map<String, Object> mp = new HashMap<>();

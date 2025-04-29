@@ -56,7 +56,7 @@ public class SpaceUserInfoServiceImpl implements SpaceUserInfoService {
 
     @Override
     public void muteUser(String spaceName, String username) {
-        Instant muteUntil = Instant.now().plus(1, ChronoUnit.WEEKS);
+        Instant muteUntil = Instant.now().plus(7, ChronoUnit.DAYS);
         spaceUserInfoRepository.muteUser(spaceName, username, muteUntil);
     }
 }

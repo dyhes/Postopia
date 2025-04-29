@@ -140,6 +140,8 @@ public class VoteServiceImpl implements VoteService {
 
     record UpdateSpaceInfo(String avatar, String description) {}
 
+    record SpaceUserOpInfo(String username, String reason) {}
+
     @Override
     public Long updateSpaceVote(User user, Long id, String name, Long member, String avatar, String description) {
         String info;
@@ -149,7 +151,7 @@ public class VoteServiceImpl implements VoteService {
             throw new RuntimeException(e);
         }
         Vote vote = createVote(user, id, info, VoteType.SPACE, DetailVoteType.UPDATE_SPACE, member);
-        scheduleService.scheduleUpdateSpaceVote(vote.getId(), name, avatar, description, vote.getEndAt());
+        scheduleService.scheduleUpdateSpaceVote(vote.getId(), name, description, avatar, vote.getEndAt());
         return vote.getId();
     }
 
@@ -157,7 +159,7 @@ public class VoteServiceImpl implements VoteService {
     public Long expelSpaceUserVote(User user, Long spaceId, String spaceName, Long member, String username, String reason) {
         String info;
         try {
-            info = objectMapper.writeValueAsString(new UpdateSpaceInfo(username, reason));
+            info = objectMapper.writeValueAsString(new SpaceUserOpInfo(username, reason));
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
@@ -170,7 +172,7 @@ public class VoteServiceImpl implements VoteService {
     public Long muteSpaceUserVote(User user, Long spaceId, String spaceName, Long member, String username, String reason) {
         String info;
         try {
-            info = objectMapper.writeValueAsString(new UpdateSpaceInfo(username, reason));
+            info = objectMapper.writeValueAsString(new SpaceUserOpInfo(username, reason));
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }

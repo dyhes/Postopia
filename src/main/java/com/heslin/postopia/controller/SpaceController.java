@@ -44,7 +44,7 @@ public class SpaceController {
     public record SpaceDto(String name, String description) {
     }
 
-    @GetMapping("search-user")
+    @GetMapping("user-search")
     public PagedApiResponseEntity<UserSummary> searchUserByPrefix(
             @RequestParam String spaceName,
             @RequestParam(defaultValue = "0") int page,
