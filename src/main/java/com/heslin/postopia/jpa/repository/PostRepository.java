@@ -1,11 +1,8 @@
 package com.heslin.postopia.jpa.repository;
 
 import com.heslin.postopia.dto.AuthorHint;
-import com.heslin.postopia.dto.post.IntelligentPost;
-import com.heslin.postopia.dto.post.PostInfo;
+import com.heslin.postopia.dto.post.*;
 import com.heslin.postopia.elasticsearch.dto.SearchedPostInfo;
-import com.heslin.postopia.dto.post.PostSummary;
-import com.heslin.postopia.dto.post.SpacePostSummary;
 import com.heslin.postopia.jpa.model.Post;
 import com.heslin.postopia.util.Pair;
 import jakarta.transaction.Transactional;
@@ -115,4 +112,19 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     """
     )
     Pair<String, String> getBasicInfo(@Param("postId") Long postId);
+
+    @Query("""
+            select
+            new com.heslin.postopia.dto.post.SpacePostSummary(p.id, p.subject, SUBSTRING(p.content, 1, 100), p.positiveCount, p.negativeCount, p.commentCount, u.username, u.nickname, u.avatar,
+                    CASE
+                        WHEN o.id IS NULL THEN com.heslin.postopia.enums.OpinionStatus.NIL
+                        WHEN o.isPositive = true THEN com.heslin.postopia.enums.OpinionStatus.POSITIVE
+                        ELSE com.heslin.postopia.enums.OpinionStatus.NEGATIVE
+                    END, p.createdAt, p.isArchived)
+                    from Post p
+                    JOIN p.user u
+                    LEFT JOIN PostOpinion o on o.post.id = p.id and o.user.id = :uid
+                    where p.commentCount + p.positiveCount + p.negativeCount > :t order by p.createdAt asc
+            """)
+    Page<FeedPostSummary> findPopularPostSummaries(@Param("t") Long popularThreshold, @Param("uid") Long userId, Pageable pageable);
 }

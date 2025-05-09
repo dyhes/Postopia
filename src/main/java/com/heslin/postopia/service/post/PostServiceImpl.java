@@ -47,6 +47,7 @@ public class PostServiceImpl implements PostService {
     private final SpaceUserInfoService spaceUserInfoService;
     private final RedisService redisService;
     private final ObjectMapper objectMapper;
+    private Long popularThreshold = 1L;
 
     @Autowired
     public PostServiceImpl(PostRepository postRepository, CommentService commentService, OpinionService opinionService, KafkaService kafkaService, PostDraftRepository postDraftRepository, SpaceUserInfoService spaceUserInfoService, RedisService redisService, ObjectMapper objectMapper) {
@@ -117,6 +118,11 @@ public class PostServiceImpl implements PostService {
     @Override
     public Page<SpacePostSummary> getPosts(Long id, Pageable pageable, @AuthenticationPrincipal User user) {
         return postRepository.findPostSummariesBySpaceId(id, user.getId(), pageable);
+    }
+
+    @Override
+    public Page<FeedPostSummary> getPopularPosts(Pageable pageable, User user) {
+        return postRepository.findPopularPostSummaries(popularThreshold, user.getId(), pageable);
     }
 
     @Override

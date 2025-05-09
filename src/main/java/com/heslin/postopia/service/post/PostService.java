@@ -52,4 +52,6 @@ public interface PostService {
     void updateArchiveStatus(Long postId, boolean isArchived);
 
     String getPostForSummary(Long postId);
+
+    Page<FeedPostSummary> getPopularPosts(Pageable pageable, User user);
 }
