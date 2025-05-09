@@ -50,4 +50,6 @@ public interface PostService {
     boolean checkPostArchiveStatus(Long postId, boolean isArchived);
 
     void updateArchiveStatus(Long postId, boolean isArchived);
+
+    String getPostForSummary(Long postId);
 }

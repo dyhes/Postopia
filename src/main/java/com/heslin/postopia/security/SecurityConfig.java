@@ -24,6 +24,7 @@ public class SecurityConfig {
         .authorizeHttpRequests(
             authorize -> authorize
             .requestMatchers( "/auth/**").permitAll()
+            .requestMatchers( "/intelligence/**").permitAll()
             .anyRequest().authenticated()
         )
         .addFilter(postopiaAuthenticationFilter)

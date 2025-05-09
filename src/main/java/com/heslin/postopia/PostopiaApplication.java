@@ -19,6 +19,7 @@ public class PostopiaApplication {
         System.setProperty("MAIL_USERNAME", dotenv.get("MAIL_USERNAME"));
         System.setProperty("MAIL_PASSWORD", dotenv.get("MAIL_PASSWORD"));
         System.setProperty("CLOUDINARY_URL", dotenv.get("CLOUDINARY_URL"));
+        System.setProperty("SILICON_API_KEY", dotenv.get("SILICON_API_KEY"));
         SpringApplication.run(PostopiaApplication.class, args);
     }
 

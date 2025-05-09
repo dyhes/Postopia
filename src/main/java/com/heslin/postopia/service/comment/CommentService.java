@@ -42,4 +42,6 @@ public interface  CommentService {
     void updatePinStatus(Long commentId, boolean isPined);
 
     void validate(User user, String spaceName);
+
+    List<String> getCommentContents(Long postId);
 }

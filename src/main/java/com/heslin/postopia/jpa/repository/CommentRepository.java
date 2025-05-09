@@ -166,4 +166,7 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
     @Transactional
     @Query("update Comment c set c.isPined = :isPined where c.id = :cid")
     void updatePinStatus(@Param("cid") Long commentId,@Param("isPined") boolean isPined);
+
+    @Query(value = "select c.content from comments c where c.post_id = :pid LIMIT 500", nativeQuery = true)
+    List<String> getCommentContents(@Param("pid") Long postId);
 }

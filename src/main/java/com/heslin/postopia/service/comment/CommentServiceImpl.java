@@ -198,4 +198,9 @@ public class CommentServiceImpl implements CommentService {
     public void updatePinStatus(Long commentId, boolean isPined) {
         commentRepository.updatePinStatus(commentId, isPined);
     }
+
+    @Override
+    public List<String> getCommentContents(Long postId) {
+        return commentRepository.getCommentContents(postId);
+    }
 }

@@ -74,6 +74,18 @@ spring:
 
 # 自定义 JWT 配置
 postopia:
+  silicon:
+    key: ${SILICON_API_KEY}
+    model: Qwen/Qwen3-8B
+    prompt:
+      system: |
+        假设你是一个论坛帖子内容总结助手，用户将会以形如
+        {\"subject\":\"帖子名\",\"contents\":[\"内容1\",\"内容2\"]}
+        的序列化JSON形式发送帖子，请你帮助总结帖子内容的情感态度（如开心，平淡，疑惑等），并给出各态度的百分比，请以形如
+        {\"altitudes\":[{\"altitude\":\"开心\",\"percentage\":\"50%\"},{\"altitude\":\"愤怒\",\"percentage\":\"20%\"},{\"altitude\":\"悲伤\",\"percentage\":\"30%\"}]}
+        的序列化JSON格式返回情感态度总结内容
+      summary:
+        情感态度总结结束，现在请总结整个帖子的具体内容，生成内容摘要（如“这篇帖子讨论了...”），以TEXT而非序列化JSON格式返回总结内容
   vote:
     comment:
       threshold: 1

@@ -1,5 +1,7 @@
 package com.heslin.postopia.service.post;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.heslin.postopia.dto.AuthorHint;
 import com.heslin.postopia.dto.ResMessage;
 import com.heslin.postopia.dto.post.PostDraftDto;
@@ -44,9 +46,10 @@ public class PostServiceImpl implements PostService {
     private final PostDraftRepository postDraftRepository;
     private final SpaceUserInfoService spaceUserInfoService;
     private final RedisService redisService;
+    private final ObjectMapper objectMapper;
 
     @Autowired
-    public PostServiceImpl(PostRepository postRepository, CommentService commentService, OpinionService opinionService, KafkaService kafkaService, PostDraftRepository postDraftRepository, SpaceUserInfoService spaceUserInfoService, RedisService redisService) {
+    public PostServiceImpl(PostRepository postRepository, CommentService commentService, OpinionService opinionService, KafkaService kafkaService, PostDraftRepository postDraftRepository, SpaceUserInfoService spaceUserInfoService, RedisService redisService, ObjectMapper objectMapper) {
         this.postRepository = postRepository;
         this.commentService = commentService;
         this.opinionService = opinionService;
@@ -54,6 +57,7 @@ public class PostServiceImpl implements PostService {
         this.postDraftRepository = postDraftRepository;
         this.spaceUserInfoService = spaceUserInfoService;
         this.redisService = redisService;
+        this.objectMapper = objectMapper;
     }
 
     @Override
@@ -201,5 +205,19 @@ public class PostServiceImpl implements PostService {
     @Override
     public void updateArchiveStatus(Long postId, boolean isArchived) {
         postRepository.updateArchiveStatus(postId, isArchived);
+    }
+
+    @Override
+    public String getPostForSummary(Long postId) {
+        Pair<String, String> pair = postRepository.getBasicInfo(postId);
+        List<String> contents = commentService.getCommentContents(postId);
+        contents.add(0, pair.second());
+        IntelligentPost post = new IntelligentPost(pair.first(), contents);
+        try {
+            return objectMapper.writeValueAsString(post);
+        } catch (JsonProcessingException e) {
+            System.out.println("Error serializing post: " + e.getMessage());
+        }
+        return null;
     }
 }
