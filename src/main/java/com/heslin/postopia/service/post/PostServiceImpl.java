@@ -121,15 +121,17 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public Page<PostSummary> getPostsByUser(boolean isSelf, Long queryId, Long selfId, Pageable pageable) {
-        if (isSelf) {
-            return postRepository.findPostSummariesBySelf(queryId, pageable);
-        } else {
-            return postRepository.findPostSummariesByUserId(queryId, selfId, pageable);
-        }
+        // 改为用户可以点赞自己的帖子
+        return postRepository.findPostSummariesByUserId(queryId, selfId, pageable);
+//        if (isSelf) {
+//            return postRepository.findPostSummariesBySelf(queryId, pageable);
+//        } else {
+//            return postRepository.findPostSummariesByUserId(queryId, selfId, pageable);
+//        }
     }
 
     @Override
-    public Page<UserOpinionPostSummary> getPostOpinionsByUser(Long id, OpinionStatus opinionStatus, Pageable pageable) {
+    public Page<FeedPostSummary> getPostOpinionsByUser(Long id, OpinionStatus opinionStatus, Pageable pageable) {
         List<Boolean> statuses = opinionStatus == OpinionStatus.NIL ? List.of(true, false) : opinionStatus == OpinionStatus.POSITIVE ? List.of(true) : List.of(false);
         return opinionService.getPostOpinionsByUser(id, statuses, pageable);
     }

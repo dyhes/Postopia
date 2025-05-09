@@ -7,7 +7,7 @@ import lombok.Getter;
 import java.time.Instant;
 
 @Getter
-public class UserOpinionCommentSummary extends UserCommentSummary{
+public class UserOpinionCommentSummary extends CommentSummary{
     private final String username;
     private final String nickname;
     private final String userAvatar;

@@ -4,7 +4,7 @@ import com.heslin.postopia.elasticsearch.dto.Avatar;
 import com.heslin.postopia.dto.ResMessage;
 import com.heslin.postopia.dto.SpaceInfo;
 import com.heslin.postopia.dto.comment.UserOpinionCommentSummary;
-import com.heslin.postopia.dto.post.UserOpinionPostSummary;
+import com.heslin.postopia.dto.post.FeedPostSummary;
 import com.heslin.postopia.dto.user.UserId;
 import com.heslin.postopia.dto.user.UserInfo;
 import com.heslin.postopia.dto.comment.CommentSummary;
@@ -172,7 +172,7 @@ public class UserController {
     }
 
     @GetMapping("post_opinions")
-    public ApiResponseEntity<PageResult<UserOpinionPostSummary>> getPostOpinions(
+    public ApiResponseEntity<PageResult<FeedPostSummary>> getPostOpinions(
     @AuthenticationPrincipal User user,
     @RequestParam int page,
     @RequestParam(required = false) UserId userId,

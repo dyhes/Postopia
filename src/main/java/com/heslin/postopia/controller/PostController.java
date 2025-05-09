@@ -121,6 +121,14 @@ public class PostController {
         return ApiResponseEntity.ok(new ApiResponse<>("获取帖子信息成功", postService.getPostInfo(id, user)));
     }
 
+//    @GetMapping("popular")
+//    public ApiResponseEntity<PageResult<SpacePostSummary>> getPopularPosts(
+//    @AuthenticationPrincipal User user,
+//    @RequestParam int page,
+//    @RequestParam(defaultValue = "50") int size) {
+//        Pageable pageable = PageRequest.of(page, size);
+//        return ApiResponseEntity.ok(new ApiResponse<>("获取帖子列表成功", new PageResult<>(postService.getPosts(spaceId, pageable, user))));
+//    }
 
     @GetMapping("list")
     public ApiResponseEntity<PageResult<SpacePostSummary>> getPosts(

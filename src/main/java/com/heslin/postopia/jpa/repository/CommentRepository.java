@@ -119,7 +119,7 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
     List<Object[]> findChildrenByCommentIds(@Param("cids") List<Long> commentIds, @Param("uid") Long userId);
 
     @Query("""
-    select new com.heslin.postopia.dto.comment.UserCommentSummary(
+    select new com.heslin.postopia.dto.comment.CommentSummary(
         c.id, s.name, p.id, p.subject,SUBSTRING(c.content, 1, 100),
                 pu.username,
                 pu.nickname,
@@ -139,19 +139,19 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
     """)
     Page<CommentSummary> findCommentsByUser(@Param("qid") Long queryId,@Param("sid") Long selfId, Pageable pageable);
 
-    @Query("""
-                select new com.heslin.postopia.dto.comment.CommentSummary(
-                c.id, s.name, p.id, p.subject, SUBSTRING(c.content, 1, 100),
-                pu.username,
-                pu.nickname,
-                c.createdAt, c.positiveCount, c.negativeCount)
-                from Comment c
-                JOIN c.post p
-                JOIN p.space s
-                LEFT JOIN c.parent.user pu
-                where c.user.id = :uid
-            """)
-    Page<CommentSummary> findCommentsBySelf(@Param("uid") Long id, Pageable pageable);
+//    @Query("""
+//                select new com.heslin.postopia.dto.comment.CommentSummary(
+//                c.id, s.name, p.id, p.subject, SUBSTRING(c.content, 1, 100),
+//                pu.username,
+//                pu.nickname,
+//                c.createdAt, c.positiveCount, c.negativeCount)
+//                from Comment c
+//                JOIN c.post p
+//                JOIN p.space s
+//                LEFT JOIN c.parent.user pu
+//                where c.user.id = :uid
+//            """)
+//    Page<CommentSummary> findCommentsBySelf(@Param("uid") Long id, Pageable pageable);
 
     @Query("select new com.heslin.postopia.elasticsearch.dto.SearchedCommentInfo( c.id, c.user.nickname, c.user.avatar, c.positiveCount, c.negativeCount, c.createdAt) from Comment c where c.id in :ids")
     List<SearchedCommentInfo> getCommentInfosInSearch(List<Long> ids);

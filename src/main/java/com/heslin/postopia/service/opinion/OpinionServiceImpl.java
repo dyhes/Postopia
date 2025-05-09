@@ -1,7 +1,7 @@
 package com.heslin.postopia.service.opinion;
 
 import com.heslin.postopia.dto.comment.UserOpinionCommentSummary;
-import com.heslin.postopia.dto.post.UserOpinionPostSummary;
+import com.heslin.postopia.dto.post.FeedPostSummary;
 import com.heslin.postopia.jpa.model.User;
 import com.heslin.postopia.jpa.model.opinion.Opinion;
 import com.heslin.postopia.jpa.repository.OpinionRepository;
@@ -102,7 +102,7 @@ public class OpinionServiceImpl implements OpinionService {
     }
 
     @Override
-    public Page<UserOpinionPostSummary> getPostOpinionsByUser(Long id, List<Boolean> statuses, Pageable pageable) {
+    public Page<FeedPostSummary> getPostOpinionsByUser(Long id, List<Boolean> statuses, Pageable pageable) {
         return opinionRepository.getPostOpinionsByUser(id, statuses, pageable);
     }
 }

@@ -1,7 +1,7 @@
 package com.heslin.postopia.jpa.repository;
 
 import com.heslin.postopia.dto.comment.UserOpinionCommentSummary;
-import com.heslin.postopia.dto.post.UserOpinionPostSummary;
+import com.heslin.postopia.dto.post.FeedPostSummary;
 import com.heslin.postopia.jpa.model.opinion.Opinion;
 import com.heslin.postopia.jpa.model.opinion.VoteOpinion;
 import jakarta.transaction.Transactional;
@@ -45,7 +45,7 @@ public interface OpinionRepository extends JpaRepository<Opinion, Long> {
 
     @Query(
     """
-    select new com.heslin.postopia.dto.post.UserOpinionPostSummary(
+    select new com.heslin.postopia.dto.post.OpinionFeedPostSummary(
         s.name, p.id, p.subject, SUBSTRING(p.content, 1, 100),
                 p.positiveCount,
                 p.negativeCount,
@@ -54,9 +54,9 @@ public interface OpinionRepository extends JpaRepository<Opinion, Long> {
                 u.username,
                 u.nickname,
                 u.avatar,
-                o.updatedAt,
                 p.createdAt,
-                p.isArchived
+                p.isArchived,
+                o.updatedAt
                 ) from PostOpinion o
                 JOIN o.post p
                 JOIN p.user u
@@ -64,7 +64,7 @@ public interface OpinionRepository extends JpaRepository<Opinion, Long> {
                 where o.user.id = :uid and o.isPositive in :statuses
     """
     )
-    Page<UserOpinionPostSummary> getPostOpinionsByUser(@Param("uid")Long id, @Param("statuses")List<Boolean> statuses, Pageable pageable);
+    Page<FeedPostSummary> getPostOpinionsByUser(@Param("uid")Long id, @Param("statuses")List<Boolean> statuses, Pageable pageable);
 
 
     @Modifying

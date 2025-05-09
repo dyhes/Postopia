@@ -63,19 +63,19 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     Page<SpacePostSummary> findPostSummariesBySpaceId(@Param("id") Long id, @Param("uid") Long userId, Pageable pageable);
 
 
-    @Query("""
-            select new com.heslin.postopia.dto.post.PostSummary(s.name, p.id, p.subject, SUBSTRING(p.content, 1, 100), p.positiveCount, p.negativeCount, p.commentCount, p.createdAt, p.isArchived)
-                from Post p
-                join p.user u
-                join p.space s
-                where u.id = :uid
-            """)
-    Page<PostSummary> findPostSummariesBySelf(@Param("uid") Long id, Pageable pageable);
+//    @Query("""
+//            select new com.heslin.postopia.dto.post.PostSummary(s.name, p.id, p.subject, SUBSTRING(p.content, 1, 100), p.positiveCount, p.negativeCount, p.commentCount, p.createdAt, p.isArchived)
+//                from Post p
+//                join p.user u
+//                join p.space s
+//                where u.id = :uid
+//            """)
+//    Page<PostSummary> findPostSummariesBySelf(@Param("uid") Long id, Pageable pageable);
 
 
 
     @Query("""
-            select new com.heslin.postopia.dto.post.UserPostSummary(s.name, p.id, p.subject, SUBSTRING(p.content, 1, 100), p.positiveCount, p.negativeCount, p.commentCount,
+            select new com.heslin.postopia.dto.post.PostSummary(s.name, p.id, p.subject, SUBSTRING(p.content, 1, 100), p.positiveCount, p.negativeCount, p.commentCount,
                     CASE
                         WHEN o.id IS NULL THEN com.heslin.postopia.enums.OpinionStatus.NIL
                         WHEN o.isPositive = true THEN com.heslin.postopia.enums.OpinionStatus.POSITIVE

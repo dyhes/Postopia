@@ -35,7 +35,7 @@ public interface PostService {
 
     Page<PostSummary> getPostsByUser(boolean isSelf, Long queryId, Long selfId, Pageable pageable);
 
-    Page<UserOpinionPostSummary> getPostOpinionsByUser(Long queryId, OpinionStatus opinion, Pageable pageable);
+    Page<FeedPostSummary> getPostOpinionsByUser(Long queryId, OpinionStatus opinion, Pageable pageable);
 
     boolean draftPost(Space space, User user, String subject, String content, Long id);
 

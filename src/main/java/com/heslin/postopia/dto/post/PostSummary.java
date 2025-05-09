@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 
 import java.time.Instant;
 
-// 用户自身视角的自己的帖子摘要
+// 无需用户信息的帖子摘要
 @Getter
 @AllArgsConstructor
 public class PostSummary {
@@ -20,6 +20,7 @@ public class PostSummary {
     private final long positiveCount;
     private final long negativeCount;
     private final long commentCount;
+    private final OpinionStatus opinionStatus;
     private final Instant createdAt;
     private final boolean isArchived;
 }

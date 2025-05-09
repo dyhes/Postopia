@@ -119,11 +119,12 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     public Page<CommentSummary> getCommentsByUser(Long queryId, Long selfId, Pageable pageable) {
-        if (Objects.equals(queryId, selfId)) {
-            return commentRepository.findCommentsBySelf(selfId, pageable);
-        } else {
-            return commentRepository.findCommentsByUser(queryId, selfId, pageable);
-        }
+        return commentRepository.findCommentsByUser(queryId, selfId, pageable);
+//        if (Objects.equals(queryId, selfId)) {
+//            return commentRepository.findCommentsBySelf(selfId, pageable);
+//        } else {
+//            return commentRepository.findCommentsByUser(queryId, selfId, pageable);
+//        }
     }
 
     @Override
