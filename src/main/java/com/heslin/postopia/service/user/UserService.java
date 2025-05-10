@@ -4,6 +4,7 @@ import com.heslin.postopia.elasticsearch.dto.Avatar;
 import com.heslin.postopia.dto.ResMessage;
 import com.heslin.postopia.dto.user.UserId;
 import com.heslin.postopia.dto.user.UserInfo;
+import com.heslin.postopia.elasticsearch.dto.SearchedUserInfo;
 import com.heslin.postopia.jpa.model.User;
 import jakarta.mail.MessagingException;
 import org.springframework.web.multipart.MultipartFile;
@@ -29,4 +30,6 @@ public interface UserService {
     String uploadFile(UserId userId, MultipartFile img, boolean isVideo) throws IOException;
 
     List<Avatar> getUserAvatars(List<String> names);
+
+    List<SearchedUserInfo> getSearchedUserInfos(List<String> names);
 }

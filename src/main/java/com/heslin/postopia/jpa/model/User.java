@@ -63,8 +63,16 @@ public class User {
     @OneToMany(mappedBy= "user")
     private List<Post> posts;
 
+    @Column()
+    private Long postCount;
+
     @OneToMany(mappedBy = "user")
     private List<Comment> comments;
+
+    private String introduction;
+
+    @Column()
+    private Long commentCount;
 
     @OneToMany(mappedBy = "user")
     private List<PostOpinion> postOpinions;
@@ -75,6 +83,8 @@ public class User {
     @OneToMany(mappedBy = "user")
     private List<VoteOpinion> voteOpinions;
 
+    @Column()
+    private Long credit;
 
     @Override
     public String toString() {

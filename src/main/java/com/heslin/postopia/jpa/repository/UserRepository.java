@@ -2,6 +2,7 @@ package com.heslin.postopia.jpa.repository;
 
 import com.heslin.postopia.elasticsearch.dto.Avatar;
 import com.heslin.postopia.dto.user.UserInfo;
+import com.heslin.postopia.elasticsearch.dto.SearchedUserInfo;
 import com.heslin.postopia.jpa.model.User;
 import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -34,7 +35,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     @Transactional
     @Modifying
-    @Query("select new com.heslin.postopia.dto.user.UserInfo(new com.heslin.postopia.dto.user.UserId(u.id), u.username, u.nickname, u.avatar, u.email, u.showEmail) from User u WHERE u.username = :un")
+    @Query("select new com.heslin.postopia.dto.user.UserInfo(new com.heslin.postopia.dto.user.UserId(u.id), u.username, u.nickname, u.avatar, u.postCount, u.commentCount, u.credit, u.introduction, u.email, u.showEmail) from User u WHERE u.username = :un")
     UserInfo findUserInfoByUsername(@Param("un") String username);
 
     @Transactional
@@ -44,4 +45,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     @Query("select new com.heslin.postopia.elasticsearch.dto.Avatar(u.username, u.avatar) from User u where u.username in ?1")
     List<Avatar> findUserAvatars(List<String> names);
+
+
+    @Query("select new com.heslin.postopia.elasticsearch.dto.SearchedUserInfo(u.username, u.avatar, u.introduction, u.postCount, u.commentCount, u.credit) from User u where u.username in ?1")
+    List<SearchedUserInfo> findSearchedUserInfos(List<String> names);
 }

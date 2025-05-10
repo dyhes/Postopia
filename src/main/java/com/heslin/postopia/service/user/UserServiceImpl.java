@@ -4,6 +4,7 @@ import com.heslin.postopia.elasticsearch.dto.Avatar;
 import com.heslin.postopia.dto.ResMessage;
 import com.heslin.postopia.dto.user.UserId;
 import com.heslin.postopia.dto.user.UserInfo;
+import com.heslin.postopia.elasticsearch.dto.SearchedUserInfo;
 import com.heslin.postopia.jpa.model.User;
 import com.heslin.postopia.jpa.repository.UserRepository;
 import com.heslin.postopia.kafka.KafkaService;
@@ -98,11 +99,11 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<Avatar> getUserAvatars(List<String> names) {
-        System.out.println("names");
-        System.out.println(names);
-        var ret =  userRepository.findUserAvatars(names);
-        System.out.println("ret");
-        System.out.println(ret);
-        return ret;
+        return userRepository.findUserAvatars(names);
+    }
+
+    @Override
+    public List<SearchedUserInfo> getSearchedUserInfos(List<String> names) {
+        return userRepository.findSearchedUserInfos(names);
     }
 }

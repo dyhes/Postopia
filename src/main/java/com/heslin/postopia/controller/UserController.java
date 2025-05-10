@@ -13,6 +13,7 @@ import com.heslin.postopia.dto.post.PostSummary;
 import com.heslin.postopia.dto.response.ApiResponse;
 import com.heslin.postopia.dto.response.ApiResponseEntity;
 import com.heslin.postopia.dto.response.BasicApiResponseEntity;
+import com.heslin.postopia.elasticsearch.dto.SearchedUserInfo;
 import com.heslin.postopia.enums.JoinedSpaceOrder;
 import com.heslin.postopia.enums.OpinionStatus;
 import com.heslin.postopia.exception.BadRequestException;
@@ -187,6 +188,12 @@ public class UserController {
     @GetMapping("avatars")
     public ApiResponseEntity<List<Avatar>> getUserAvatar(@RequestParam List<String> names) {
         var ret = userService.getUserAvatars(names);
+        return ApiResponseEntity.ok(ret, "success");
+    }
+
+    @GetMapping("search-infos")
+    public ApiResponseEntity<List<SearchedUserInfo>> getSearchedUserInfos(@RequestParam List<String> names) {
+        var ret = userService.getSearchedUserInfos(names);
         return ApiResponseEntity.ok(ret, "success");
     }
 }

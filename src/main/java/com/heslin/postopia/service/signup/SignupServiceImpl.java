@@ -28,19 +28,20 @@ public class SignupServiceImpl implements SignupService {
 
     @Override
     public ResMessage signup(String username, String password) {
-        User user = new User();
         try {
-            user.setUsername(username);
-            user.setNickname(username);
-            user.setAvatar(defaultUserAvatar);
-            user.setShowEmail(false);
-            user.setPassword(passwordEncoder.encode(password));
-            user = userRepository.save(user);
+            User user = User.builder().username(username).nickname(username).avatar(defaultUserAvatar)
+            .postCount(0L)
+            .commentCount(0L)
+            .credit(0L)
+            .password(passwordEncoder.encode(password))
+            .showEmail(false)
+            .build();
+            userRepository.save(user);
+            kafkaService.sendToDocCreate("user", user.getUsername(), new UserDoc(user.getUsername(), user.getUsername(), user.getNickname()));
+            return new ResMessage("用户 @" + username + " 注册成功", true);
         } catch (DataIntegrityViolationException e) {
             System.out.println("DataIntegrityViolationException: " + e);
             return new ResMessage("用户 @" + username + " 已存在", false);
         }
-        kafkaService.sendToDocCreate("user", user.getUsername(), new UserDoc(user.getUsername(), user.getUsername(), user.getNickname()));
-        return new ResMessage("用户 @" + username + " 注册成功", true);
     }
 }
