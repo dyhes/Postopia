@@ -53,18 +53,6 @@ public class UserController {
         this.commentService = commentService;
     }
 
-    public record NickNameDto(String nickname) {}
-
-    @PostMapping("nickname")
-    public BasicApiResponseEntity updateNickName(@AuthenticationPrincipal User user, @RequestBody NickNameDto dto) {
-        Utils.checkRequestBody(dto);
-        PostopiaFormatter.isValid(dto.nickname);
-        userService.updateUserNickName(user, dto.nickname);
-        return BasicApiResponseEntity.ok("succeed!");
-    }
-
-    public record EmailDto(String email) {}
-
     @PostMapping("email/request/{email}")
     public BasicApiResponseEntity updateEmail(@PathVariable String email, @AuthenticationPrincipal User user) {
         if (email == null) {
@@ -101,6 +89,25 @@ public class UserController {
         } catch (IOException e) {
             return ApiResponseEntity.ok(new ApiResponse<>(e.getMessage(), false, null));
         }
+    }
+
+    public record NickNameDto(String nickname) {}
+
+    @PostMapping("nickname")
+    public BasicApiResponseEntity updateNickName(@AuthenticationPrincipal User user, @RequestBody NickNameDto dto) {
+        Utils.checkRequestBody(dto);
+        PostopiaFormatter.isValid(dto.nickname);
+        userService.updateUserNickName(user, dto.nickname);
+        return BasicApiResponseEntity.ok("succeed!");
+    }
+
+    public record IntroDto(String introduction) {}
+
+    @PostMapping("introduction")
+    public BasicApiResponseEntity updateIntroduction(@AuthenticationPrincipal User user, @RequestBody IntroDto dto) {
+        Utils.checkRequestBody(dto);
+        userService.updateUserIntroduction(user, dto.introduction);
+        return BasicApiResponseEntity.ok("succeed!");
     }
 
     @PostMapping("upload")

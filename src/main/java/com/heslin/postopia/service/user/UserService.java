@@ -32,4 +32,6 @@ public interface UserService {
     List<Avatar> getUserAvatars(List<String> names);
 
     List<SearchedUserInfo> getSearchedUserInfos(List<String> names);
+
+    void updateUserIntroduction(User user, String introduction);
 }

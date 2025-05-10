@@ -56,6 +56,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public void updateUserIntroduction(User user, String introduction) {
+        userRepository.updateIntroduction(user.getId(), introduction);
+    }
+
+    @Override
     public void updateUserEmail(String email, User user) throws MessagingException {
         mailService.sendAuthenticationCode(email, findUserById(user.getId()));
     }
