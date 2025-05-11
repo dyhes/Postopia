@@ -18,9 +18,9 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import java.util.List;
 
 public interface  CommentService {
-    Comment replyToPost(Post post, String content, User user, Space space, String replyUser);
+    Comment replyToPost(Post post, String content, User user, Space space, Long replyUserId, String replyUser);
 
-    void reply(Post post, Comment comment, String content, User user, Space space, String replyUser);
+    void reply(Post post, Comment comment, String content, User user, Space space, Long replyUserId, String replyUser);
 
     void deleteComment(Long id, Long postId, Long userId, String spaceName);
 
@@ -32,7 +32,7 @@ public interface  CommentService {
 
     List<SearchedCommentInfo> getCommentInfosInSearch(List<Long> ids);
 
-    void upsertCommentOpinion(User user, Long id, Long postId, String spaceName, boolean isPositive);
+    void upsertCommentOpinion(User user, Long id, Long postId, Long userId, String spaceName, boolean isPositive);
 
     boolean deleteCommentOpinion(User user, Long id, boolean isPositive);
 

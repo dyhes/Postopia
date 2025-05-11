@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.heslin.postopia.dto.VoteInfo;
 import com.heslin.postopia.enums.DetailVoteType;
 import com.heslin.postopia.enums.VoteType;
+import com.heslin.postopia.enums.kafka.UserOperation;
 import com.heslin.postopia.enums.kafka.VoteOperation;
 import com.heslin.postopia.exception.BadRequestException;
 import com.heslin.postopia.jpa.model.User;
@@ -72,6 +73,7 @@ public class VoteServiceImpl implements VoteService {
         boolean isInsert = opinionService.upsertOpinion(voteOpinion);
         if (isInsert) {
             kafkaService.sendToVote(id, isPositive? VoteOperation.AGREED : VoteOperation.DISAGREED);
+            kafkaService.sendToUser(user.getId(), UserOperation.CREDIT_EARNED);
         } else {
             kafkaService.sendToVote(id, isPositive? VoteOperation.SWITCH_TO_AGREE : VoteOperation.SWITCH_TO_DISAGREE);
         }

@@ -4,6 +4,7 @@ import com.heslin.postopia.dto.PageResult;
 import com.heslin.postopia.dto.post.FeedPostSummary;
 import com.heslin.postopia.dto.post.PostDraftDto;
 import com.heslin.postopia.dto.post.PostInfo;
+import com.heslin.postopia.dto.user.UserId;
 import com.heslin.postopia.elasticsearch.dto.SearchedPostInfo;
 import com.heslin.postopia.dto.post.SpacePostSummary;
 import com.heslin.postopia.dto.response.ApiResponse;
@@ -102,7 +103,7 @@ public class PostController {
         return ApiResponseEntity.ok(new ApiResponse<>(pair.first(), pair.second()));
     }
 
-    public record ReplyPostDto(Long postId, String content, String spaceName, String replyUser) {}
+    public record ReplyPostDto(Long postId, String content, String spaceName, UserId replyUserId, String replyUser) {}
     
     @PostMapping("reply")
     public ApiResponseEntity<Long> replyPost(@AuthenticationPrincipal User user, @RequestBody ReplyPostDto request) {
@@ -112,7 +113,7 @@ public class PostController {
         Post post = Post.builder().id(request.postId).build();
         Space space = Space.builder().name(request.spaceName).build();
         //postService.checkPostStatus(request.id);
-        Comment comment = postService.replyPost(post, request.content, user, space, request.replyUser);
+        Comment comment = postService.replyPost(post, request.content, user, space, request.replyUserId.getId(), request.replyUser);
         return BasicApiResponseEntity.ok(comment.getId(), "回复成功", true);
     }
 
@@ -148,11 +149,11 @@ public class PostController {
     }
 
     // 非幂等！！！
-    public record PostOpinionDto(Long id, String spaceName, boolean isPositive){}
+    public record PostOpinionDto(Long id, UserId opinionedUserId, String spaceName, boolean isPositive){}
     @PostMapping("opinion")
     public BasicApiResponseEntity upsertPostOpinion(@RequestBody PostOpinionDto request, @AuthenticationPrincipal User user) {
         Utils.checkRequestBody(request);
-        postService.upsertPostOpinion(user, request.id, request.spaceName, request.isPositive);
+        postService.upsertPostOpinion(user, request.id, request.opinionedUserId.getId(), request.spaceName, request.isPositive);
         return BasicApiResponseEntity.ok("success");
     }
 

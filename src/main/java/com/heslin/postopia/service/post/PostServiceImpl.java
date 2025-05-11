@@ -117,8 +117,8 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public Comment replyPost(Post post, String content, User user, Space space, String replyUser) {
-        return commentService.replyToPost(post, content, user, space, replyUser);
+    public Comment replyPost(Post post, String content, User user, Space space, Long replyUserId, String replyUser) {
+        return commentService.replyToPost(post, content, user, space, replyUserId, replyUser);
     }
 
     @Override
@@ -188,7 +188,7 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public void upsertPostOpinion(User user, Long id, String spaceName, boolean isPositive) {
+    public void upsertPostOpinion(User user, Long id, Long userId, String spaceName, boolean isPositive) {
         PostOpinion postOpinion = new PostOpinion();
         postOpinion.setUser(user);
         postOpinion.setPost(new Post(id));
@@ -196,6 +196,10 @@ public class PostServiceImpl implements PostService {
         boolean isInsert = opinionService.upsertOpinion(postOpinion);
         if (isInsert) {
             kafkaService.sendToPost(id, isPositive? PostOperation.LIKED : PostOperation.DISLIKED);
+            kafkaService.sendToUser(user.getId(), UserOperation.CREDIT_EARNED);
+            if (isPositive) {
+                kafkaService.sendToUser(userId, UserOperation.CREDIT_EARNED);
+            }
         } else {
             kafkaService.sendToPost(id, isPositive? PostOperation.SWITCH_TO_LIKE : PostOperation.SWITCH_TO_DISLIKE);
         }

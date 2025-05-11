@@ -26,9 +26,9 @@ public interface PostService {
 
     boolean updatePost(Long id, Long userId, String spaceName, String subject, String content);
 
-    Comment replyPost(Post post, String content, User user, Space space, String replyUser);
+    Comment replyPost(Post post, String content, User user, Space space, Long replyUserId, String replyUser);
 
-    void upsertPostOpinion(User user, Long id, String spaceName, boolean isPositive);
+    void upsertPostOpinion(User user, Long id, Long userId, String spaceName, boolean isPositive);
 
     boolean deletePostOpinion(User user, Long id, boolean isPositive);
 

@@ -299,12 +299,16 @@ public class KafkaService {
         boolean shouldUpdateComment = mp.values().stream().anyMatch(Diff::shouldUpdateComment);
         boolean shouldUpdateMember = mp.values().stream().anyMatch(Diff::shouldUpdateMember);
         boolean shouldUpdatePost = mp.values().stream().anyMatch(Diff::shouldUpdatePost);
+        boolean shouldUpdateCredit = mp.values().stream().anyMatch(Diff::shouldUpdateCredit);
 
         // positive_count
         buildSql(sql, params, mp, shouldUpdatePositive, Diff::shouldUpdatePositive, Diff::getPositiveDiff, "positive_count");
 
         // negative_count
         buildSql(sql, params, mp, shouldUpdateNegative, Diff::shouldUpdateNegative, Diff::getNegativeDiff, "negative_count");
+
+        // credit_count
+        buildSql(sql, params, mp, shouldUpdateCredit, Diff::shouldUpdateCredit, Diff::getCreditDiff, "credit");
 
         // post_count
         buildSql(sql, params, mp, shouldUpdatePost, Diff::shouldUpdatePost, Diff::getPostDiff, "post_count");

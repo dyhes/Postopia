@@ -21,6 +21,10 @@ public abstract class Diff {
         return false;
     }
 
+    public boolean shouldUpdateCredit() {
+        return false;
+    }
+
     abstract public void updateDiff(int ordinal);
 
     public long getPositiveDiff() {
@@ -40,6 +44,10 @@ public abstract class Diff {
     }
 
     public long getPostDiff() {
+        return 0;
+    }
+
+    public long getCreditDiff() {
         return 0;
     }
 }

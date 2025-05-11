@@ -29,6 +29,11 @@ public class SpaceDiff extends Diff {
     }
 
     @Override
+    public long getPostDiff() {
+        return postDiff;
+    }
+
+    @Override
     public boolean shouldUpdatePost() {
         return postDiff != 0;
     }

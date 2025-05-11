@@ -67,7 +67,7 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Transactional
-    protected Comment createComment(User user, Post post, Space space, String content, Comment parent, String replyUser) {
+    protected Comment createComment(User user, Post post, Space space, String content, Comment parent, Long replyUserId, String replyUser) {
         Comment comment =
         Comment.builder()
         .user(user)
@@ -87,6 +87,7 @@ public class CommentServiceImpl implements CommentService {
             user.getUsername()));
         kafkaService.sendToPost(post.getId(), PostOperation.COMMENT_CREATED);
         kafkaService.sendToUser(user.getId(), UserOperation.COMMENT_CREATED);
+        kafkaService.sendToUser(replyUserId, UserOperation.CREDIT_EARNED);
 
         StringBuilder messageContent = new StringBuilder();
         messageContent
@@ -100,14 +101,14 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     @Transactional
-    public Comment replyToPost(Post post, String content, User user, Space space, String replyUser) {
-        return createComment(user, post, space, content, null, replyUser);
+    public Comment replyToPost(Post post, String content, User user, Space space, Long replyUserId, String replyUser) {
+        return createComment(user, post, space, content, null, replyUserId, replyUser);
     }
 
     @Override
     @Transactional
-    public void reply(Post post, Comment parent, String content, User user, Space space, String replyUser) {
-        createComment(user, post, space, content, parent, replyUser);
+    public void reply(Post post, Comment parent, String content, User user, Space space, Long replyUserId, String replyUser) {
+        createComment(user, post, space, content, parent, replyUserId, replyUser);
     }
 
     @Override
@@ -171,7 +172,7 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    public void upsertCommentOpinion(User user, Long id, Long postId, String spaceName, boolean isPositive) {
+    public void upsertCommentOpinion(User user, Long id, Long postId, Long userId, String spaceName, boolean isPositive) {
         CommentOpinion postOpinion = new CommentOpinion();
         postOpinion.setUser(user);
         postOpinion.setComment(Comment.builder().id(id).build());
@@ -179,6 +180,10 @@ public class CommentServiceImpl implements CommentService {
         boolean isInsert = opinionService.upsertOpinion(postOpinion);
         if (isInsert) {
             kafkaService.sendToComment(id, isPositive? CommentOperation.LIKED : CommentOperation.DISLIKED );
+            kafkaService.sendToUser(user.getId(), UserOperation.CREDIT_EARNED);
+            if (isPositive) {
+                kafkaService.sendToUser(userId, UserOperation.CREDIT_EARNED);
+            }
         } else {
             kafkaService.sendToComment(id, isPositive? CommentOperation.SWITCH_TO_LIKE : CommentOperation.SWITCH_TO_DISLIKE );
         }
