@@ -21,13 +21,11 @@ import java.util.stream.Collectors;
 @Service
 public class RedisService {
     private final RedisTemplate<String, Object> redisTemplate;
-    private final RedisTemplate<String, OpinionAggregation> oaRedisTemplate;
     private final OpinionAggregationRepository opinionAggregationRepository;
 
     @Autowired
-    public RedisService(RedisTemplate<String, Object> redisTemplate, RedisTemplate<String, OpinionAggregation> oaRedisTemplate, OpinionAggregationRepository opinionAggregationRepository) {
+    public RedisService(RedisTemplate<String, Object> redisTemplate, OpinionAggregationRepository opinionAggregationRepository) {
         this.redisTemplate = redisTemplate;
-        this.oaRedisTemplate = oaRedisTemplate;
         this.opinionAggregationRepository = opinionAggregationRepository;
     }
 

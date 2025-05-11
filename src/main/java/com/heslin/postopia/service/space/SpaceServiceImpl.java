@@ -143,6 +143,7 @@ public class SpaceServiceImpl implements SpaceService {
         space.setDescription(description);
         space.setAvatar(avatarUrl);
         space.setMemberCount(0);
+        space.setPostCount(0);
         try {
             space = spaceRepository.save(space);
         } catch (DataIntegrityViolationException exception) {

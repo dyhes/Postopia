@@ -55,11 +55,6 @@ public class PostDiff extends Diff {
     }
 
     @Override
-    public String tableName() {
-        return "posts";
-    }
-
-    @Override
     public long getPositiveDiff() {
         return positiveDiff;
     }

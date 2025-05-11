@@ -182,9 +182,9 @@ public class VoteServiceImpl implements VoteService {
     }
 
     @Override
-    public Long deletePostVote(User user, Long postId, String postSubject, String postAuthor, String spaceName) {
+    public Long deletePostVote(User user, Long postId, String postSubject, String postAuthor, Long spaceId, String spaceName, Long userId) {
         Vote vote = createVote(user, postId, postAuthor, VoteType.POST, DetailVoteType.DELETE_POST);
-        scheduleService.scheduleDeletePostVote(vote.getId(), spaceName, postSubject, vote.getEndAt());
+        scheduleService.scheduleDeletePostVote(vote.getId(), spaceId, spaceName, userId, postSubject, vote.getEndAt());
         return vote.getId();
     }
 
@@ -208,9 +208,9 @@ public class VoteServiceImpl implements VoteService {
     }
 
     @Override
-    public Long deleteCommentVote(User user, Long commentId, Long postId, String spaceName, String commentContent, String commentAuthor) {
+    public Long deleteCommentVote(User user, Long commentId, Long postId, Long userId, String spaceName, String commentContent, String commentAuthor) {
         Vote vote = createVote(user, commentId, commentAuthor, VoteType.COMMENT, DetailVoteType.DELETE_COMMENT);
-        scheduleService.scheduleDeleteCommentVote(vote.getId(), postId, spaceName, commentContent, vote.getEndAt());
+        scheduleService.scheduleDeleteCommentVote(vote.getId(), postId, userId, spaceName, commentContent, vote.getEndAt());
         return vote.getId();
     }
 

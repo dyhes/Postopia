@@ -9,6 +9,7 @@ import com.heslin.postopia.elasticsearch.model.CommentDoc;
 import com.heslin.postopia.enums.OpinionStatus;
 import com.heslin.postopia.enums.kafka.CommentOperation;
 import com.heslin.postopia.enums.kafka.PostOperation;
+import com.heslin.postopia.enums.kafka.UserOperation;
 import com.heslin.postopia.exception.ForbiddenException;
 import com.heslin.postopia.jpa.model.Comment;
 import com.heslin.postopia.jpa.model.Post;
@@ -20,6 +21,7 @@ import com.heslin.postopia.kafka.KafkaService;
 import com.heslin.postopia.redis.RedisService;
 import com.heslin.postopia.service.opinion.OpinionService;
 import com.heslin.postopia.service.space_user_info.SpaceUserInfoService;
+import com.heslin.postopia.util.Pair;
 import com.heslin.postopia.util.PostopiaFormatter;
 import jakarta.transaction.Transactional;
 import org.apache.coyote.BadRequestException;
@@ -84,6 +86,8 @@ public class CommentServiceImpl implements CommentService {
             space.getName(),
             user.getUsername()));
         kafkaService.sendToPost(post.getId(), PostOperation.COMMENT_CREATED);
+        kafkaService.sendToUser(user.getId(), UserOperation.COMMENT_CREATED);
+
         StringBuilder messageContent = new StringBuilder();
         messageContent
         .append(PostopiaFormatter.formatUser(user.getUsername()))
@@ -102,19 +106,24 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     @Transactional
-    public Comment reply(Post post, Comment parent, String content, User user, Space space, String replyUser) {
-        return createComment(user, post, space, content, parent, replyUser);
+    public void reply(Post post, Comment parent, String content, User user, Space space, String replyUser) {
+        createComment(user, post, space, content, parent, replyUser);
+    }
+
+    @Override
+    public List<Pair<Long, Long>> getDeleteCommentInfosByPost(Long postId) {
+        return commentRepository.getDeleteCommentInfosByPost(postId);
     }
 
     @Override
     @Transactional
-    public boolean deleteComment(Long id, Long postId, String spaceName) {
+    public void deleteComment(Long id, Long postId, Long userId, String spaceName) {
         boolean success = commentRepository.deleteComment(id) > 0;
         if (success) {
             kafkaService.sendToPost(postId, PostOperation.COMMENT_DELETED);
+            kafkaService.sendToUser(userId, UserOperation.COMMENT_DELETED);
             kafkaService.sendToDocDelete("comment", id.toString(), spaceName);
         }
-        return success;
     }
 
     @Override

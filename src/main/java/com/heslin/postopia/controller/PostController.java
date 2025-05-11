@@ -17,6 +17,7 @@ import com.heslin.postopia.jpa.model.Post;
 import com.heslin.postopia.jpa.model.Space;
 import com.heslin.postopia.jpa.model.User;
 import com.heslin.postopia.service.post.PostService;
+import com.heslin.postopia.util.PostopiaFormatter;
 import com.heslin.postopia.util.Utils;
 import jdk.jshell.execution.Util;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -105,6 +106,7 @@ public class PostController {
     
     @PostMapping("reply")
     public ApiResponseEntity<Long> replyPost(@AuthenticationPrincipal User user, @RequestBody ReplyPostDto request) {
+        PostopiaFormatter.isValidComment(request.content);
         Utils.checkRequestBody(request);
         postService.validate(user, request.spaceName);
         Post post = Post.builder().id(request.postId).build();

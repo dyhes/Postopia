@@ -120,7 +120,9 @@ public class VoteController {
         Long postId,
         String postSubject,
         String postAuthor,
-        String spaceName
+        Long spaceId,
+        String spaceName,
+        UserId userId
     ){}
 
     @PostMapping("post-delete")
@@ -128,7 +130,7 @@ public class VoteController {
         Utils.checkRequestBody(request);
         Long id;
         try {
-            id = voteService.deletePostVote(user, request.postId, request.postSubject, request.postAuthor, request.spaceName);
+            id = voteService.deletePostVote(user, request.postId, request.postSubject, request.postAuthor, request.spaceId, request.spaceName, request.userId().getId());
         } catch (DataIntegrityViolationException e) {
             return ApiResponseEntity.ok(null, "该帖子存在正在进行的投票");
         }
@@ -171,12 +173,21 @@ public class VoteController {
         String spaceName
     ){}
 
+    public record DeleteCommentVoteRequest(
+    Long commentId,
+    String commentContent,
+    String commentAuthor,
+    Long postId,
+    UserId userId,
+    String spaceName
+    ){}
+
     @PostMapping("comment-delete")
-    public ApiResponseEntity<Long> deleteCommentVote(@RequestBody CommentVoteRequest request, @AuthenticationPrincipal User user) {
+    public ApiResponseEntity<Long> deleteCommentVote(@RequestBody DeleteCommentVoteRequest request, @AuthenticationPrincipal User user) {
         Utils.checkRequestBody(request);
         Long id;
         try {
-            id = voteService.deleteCommentVote(user, request.commentId, request.postId, request.spaceName, request.commentContent, request.commentAuthor);
+            id = voteService.deleteCommentVote(user, request.commentId, request.postId, request.userId.getId(), request.spaceName, request.commentContent, request.commentAuthor);
         } catch (DataIntegrityViolationException e) {
             return ApiResponseEntity.ok(null, "该评论存在正在进行的投票");
         }

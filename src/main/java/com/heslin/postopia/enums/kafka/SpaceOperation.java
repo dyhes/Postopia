@@ -5,4 +5,6 @@ package com.heslin.postopia.enums.kafka;
 public enum SpaceOperation {
     MEMBER_JOINED,
     MEMBER_LEFT,
+    POST_CREATED,
+    POST_DELETED
 }

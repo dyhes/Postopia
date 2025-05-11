@@ -13,13 +13,13 @@ public interface VoteService {
 
     void upsertVoteOpinion(User user, Long id, boolean isPositive);
 
-    Long deleteCommentVote(User user, Long commentId, Long postId, String spaceName, String commentContent, String commentAuthor);
+    Long deleteCommentVote(User user, Long commentId, Long postId, Long userId, String spaceName, String commentContent, String commentAuthor);
 
     Long pinCommentVote(User user, Long commentId, Long postId, String spaceName, String commentContent, String commentAuthor) throws BadRequestException;
 
     Long unPinCommentVote(User user, Long commentId, Long postId, String spaceName, String commentContent, String commentAuthor) throws BadRequestException;
 
-    Long deletePostVote(User user, Long postId, String postSubject, String postAuthor, String spaceName);
+    Long deletePostVote(User user, Long postId, String postSubject, String postAuthor, Long spaceId, String spaceName, Long userId);
 
     Long unArchivePostVote(User user, Long postId, String postSubject, String postAuthor, String spaceName) throws BadRequestException;
 

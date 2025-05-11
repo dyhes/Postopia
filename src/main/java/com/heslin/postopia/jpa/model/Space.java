@@ -51,4 +51,7 @@ public class Space {
     private List<Post> posts;
 
     private long memberCount;
+
+    @Column()
+    private long postCount;
 }

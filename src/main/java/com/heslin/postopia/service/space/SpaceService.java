@@ -18,21 +18,21 @@ import java.util.List;
 
 public interface SpaceService {
 
-    public ResMessage joinSpace(Long spaceId, User user);
+    ResMessage joinSpace(Long spaceId, User user);
     
-    public ResMessage leaveSpace(Long spaceId, User user);
+    ResMessage leaveSpace(Long spaceId, User user);
 
-    public Pair<ResMessage, Long> createSpace(User user, String name, String description, MultipartFile avatar);
+    Pair<ResMessage, Long> createSpace(User user, String name, String description, MultipartFile avatar);
 
-    public Page<SpaceInfo> getSpacesByUserId(Long userId, Pageable pageable);
+    Page<SpaceInfo> getSpacesByUserId(Long userId, Pageable pageable);
 
-    public Page<SpaceInfo> getPopularSpaces(PopularSpaceOrder order, Pageable pageable);
+    Page<SpaceInfo> getPopularSpaces(PopularSpaceOrder order, Pageable pageable);
 
-    public SpaceInfo getSpaceInfo(Long spaceId);
+    SpaceInfo getSpaceInfo(Long spaceId);
 
-    public List<Avatar> getSpaceAvatars(List<String> names);
+    List<Avatar> getSpaceAvatars(List<String> names);
 
-    public List<SearchedSpaceInfo> getSearchedSpaceInfos(List<String> names);
+    List<SearchedSpaceInfo> getSearchedSpaceInfos(List<String> names);
 
     void updateSpace(String spaceName, String description, String avatar);
 

@@ -52,9 +52,4 @@ public class CommentDiff extends Diff {
             case CANCEL_LIKE -> positiveDiff--;
         }
     }
-
-    @Override
-    public String tableName() {
-        return "comments";
-    }
 }

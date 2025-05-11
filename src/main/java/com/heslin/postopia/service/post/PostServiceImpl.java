@@ -10,6 +10,8 @@ import com.heslin.postopia.elasticsearch.dto.SearchedPostInfo;
 import com.heslin.postopia.elasticsearch.model.PostDoc;
 import com.heslin.postopia.enums.OpinionStatus;
 import com.heslin.postopia.enums.kafka.PostOperation;
+import com.heslin.postopia.enums.kafka.SpaceOperation;
+import com.heslin.postopia.enums.kafka.UserOperation;
 import com.heslin.postopia.exception.ForbiddenException;
 import com.heslin.postopia.exception.ResourceNotFoundException;
 import com.heslin.postopia.jpa.model.*;
@@ -71,15 +73,24 @@ public class PostServiceImpl implements PostService {
         post.setArchived(false);
         post = postRepository.save(post);
 
+        kafkaService.sendToSpace(space.getId(), SpaceOperation.POST_CREATED);
+        kafkaService.sendToUser(user.getId(), UserOperation.POST_CREATED);
         kafkaService.sendToDocCreate("post", post.getId().toString(), new PostDoc(post.getId(), post.getSubject(), post.getContent(), space.getName(), user.getUsername()));
         return new Pair<>(post.getId(), new ResMessage("Post created successfully", true));
     }
 
     @Override
-    public void deletePost(Long id, String spaceName) {
+    public void deletePost(Long id, Long spaceId, Long userId, String spaceName){
+        List<Pair<Long, Long>> infos = commentService.getDeleteCommentInfosByPost(id);
         boolean success = postRepository.deletePost(id) > 0;
         if (success) {
+            kafkaService.sendToUser(userId, UserOperation.POST_DELETED);
+            kafkaService.sendToSpace(spaceId, SpaceOperation.POST_DELETED);
             kafkaService.sendToDocDelete("post", id.toString(), spaceName);
+            infos.forEach(pair -> {
+                kafkaService.sendToDocDelete("comment", pair.first().toString(), spaceName);
+                kafkaService.sendToUser(pair.second(), UserOperation.COMMENT_DELETED);
+            });
         }
     }
 

@@ -8,6 +8,13 @@ public class PostopiaFormatter {
             throw new BadRequestException("; is not allowed");
         }
     }
+
+    public static void isValidComment(String content) {
+        if (content.contains("POSTOPIA-COMMENT[DELETED]")) {
+            throw new BadRequestException("Invalid Content");
+        }
+    }
+
     public static String formatUser(String username) {
         return String.format(" postopia-user{%s} ", username);
     }

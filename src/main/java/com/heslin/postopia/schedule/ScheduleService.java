@@ -140,11 +140,11 @@ public class ScheduleService {
         );
     }
 
-    public void scheduleDeleteCommentVote(Long voteId, Long postId, String spaceName, String content, Instant endAt) {
+    public void scheduleDeleteCommentVote(Long voteId, Long postId, Long userId, String spaceName, String content, Instant endAt) {
         taskScheduler.schedule(
         () -> {
             scheduledAction(voteId, "删除评论 %s".formatted(content), "您的评论：%s 已被投票删除".formatted(content), commentId -> {
-                commentService.deleteComment(commentId, postId, spaceName);
+                commentService.deleteComment(commentId, postId, userId, spaceName);
                 return null;
             });
         },
@@ -152,11 +152,11 @@ public class ScheduleService {
         );
     }
 
-    public void scheduleDeletePostVote(Long voteId, String spaceName, String postSubject, Instant endAt) {
+    public void scheduleDeletePostVote(Long voteId, Long spaceId, String spaceName, Long userId, String postSubject, Instant endAt) {
         taskScheduler.schedule(
         () -> {
             scheduledAction(voteId, "删除帖子 %s".formatted(postSubject), "您的帖子：%s 已被投票删除".formatted(postSubject), postId -> {
-                postService.deletePost(postId, spaceName);
+                postService.deletePost(postId, spaceId, userId, spaceName);
                 return null;
             });
         },

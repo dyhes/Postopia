@@ -10,6 +10,7 @@ import com.heslin.postopia.jpa.model.Comment;
 import com.heslin.postopia.jpa.model.Post;
 import com.heslin.postopia.jpa.model.Space;
 import com.heslin.postopia.jpa.model.User;
+import com.heslin.postopia.util.Pair;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -19,9 +20,9 @@ import java.util.List;
 public interface  CommentService {
     Comment replyToPost(Post post, String content, User user, Space space, String replyUser);
 
-    Comment reply(Post post, Comment comment, String content, User user, Space space, String replyUser);
+    void reply(Post post, Comment comment, String content, User user, Space space, String replyUser);
 
-    boolean deleteComment(Long id, Long postId, String spaceName);
+    void deleteComment(Long id, Long postId, Long userId, String spaceName);
 
     Page<CommentSummary> getCommentsByUser(Long queryId, Long selfId, Pageable pageable);
 
@@ -44,4 +45,6 @@ public interface  CommentService {
     void validate(User user, String spaceName);
 
     List<String> getCommentContents(Long postId);
+
+    List<Pair<Long, Long>> getDeleteCommentInfosByPost(Long postId);
 }

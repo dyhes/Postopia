@@ -9,6 +9,10 @@ public abstract class Diff {
         return false;
     }
 
+    public boolean shouldUpdatePost() {
+        return false;
+    }
+
     public boolean shouldUpdateComment() {
         return false;
     }
@@ -18,8 +22,6 @@ public abstract class Diff {
     }
 
     abstract public void updateDiff(int ordinal);
-
-    abstract public String tableName();
 
     public long getPositiveDiff() {
         return 0;
@@ -34,6 +36,10 @@ public abstract class Diff {
     }
 
     public long getMemberDiff() {
+        return 0;
+    }
+
+    public long getPostDiff() {
         return 0;
     }
 }

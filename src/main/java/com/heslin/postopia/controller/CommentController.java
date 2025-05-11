@@ -10,6 +10,7 @@ import com.heslin.postopia.jpa.model.Post;
 import com.heslin.postopia.jpa.model.Space;
 import com.heslin.postopia.jpa.model.User;
 import com.heslin.postopia.service.comment.CommentService;
+import com.heslin.postopia.util.PostopiaFormatter;
 import com.heslin.postopia.util.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -37,6 +38,7 @@ public class CommentController {
     @PostMapping("reply")
     public BasicApiResponseEntity reply(@RequestBody CommentReplyDto dto, @AuthenticationPrincipal User user) {
         commentService.validate(user, dto.spaceName);
+        PostopiaFormatter.isValidComment(dto.content);
         Utils.checkRequestBody(dto);
         Post post = Post.builder().id(dto.postId()).build();
         Comment comment = new Comment();

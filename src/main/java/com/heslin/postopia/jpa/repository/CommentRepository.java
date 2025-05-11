@@ -5,6 +5,7 @@ import com.heslin.postopia.dto.comment.CommentInfo;
 import com.heslin.postopia.dto.comment.CommentSummary;
 import com.heslin.postopia.elasticsearch.dto.SearchedCommentInfo;
 import com.heslin.postopia.jpa.model.Comment;
+import com.heslin.postopia.util.Pair;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -26,7 +27,9 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
 
     @Modifying
     @Transactional
-    @Query("delete Comment c where c.id = :id")
+    @Query("""
+        update Comment c set c.content = "POSTOPIA-COMMENT[DELETED]" where c.id = :id
+        """)
     int deleteComment(@Param("id") Long id);
 
     @Query("""
@@ -169,4 +172,7 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
 
     @Query(value = "select c.content from comments c where c.post_id = :pid LIMIT 500", nativeQuery = true)
     List<String> getCommentContents(@Param("pid") Long postId);
+
+    @Query("select new com.heslin.postopia.util.Pair(c.id, c.user.id) from Comment c where c.post.id = :postId")
+    List<Pair<Long, Long>> getDeleteCommentInfosByPost(@Param("postId") Long postId);
 }

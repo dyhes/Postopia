@@ -47,9 +47,4 @@ public class VoteDiff extends Diff{
     public boolean shouldUpdateNegative() {
         return negativeDiff != 0;
     }
-
-    @Override
-    public String tableName() {
-        return "votes";
-    }
 }

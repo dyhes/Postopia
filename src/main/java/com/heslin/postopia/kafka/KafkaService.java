@@ -9,10 +9,7 @@ import com.heslin.postopia.elasticsearch.model.CommentDoc;
 import com.heslin.postopia.elasticsearch.model.PostDoc;
 import com.heslin.postopia.elasticsearch.model.SpaceDoc;
 import com.heslin.postopia.elasticsearch.model.UserDoc;
-import com.heslin.postopia.enums.kafka.CommentOperation;
-import com.heslin.postopia.enums.kafka.PostOperation;
-import com.heslin.postopia.enums.kafka.SpaceOperation;
-import com.heslin.postopia.enums.kafka.VoteOperation;
+import com.heslin.postopia.enums.kafka.*;
 import com.heslin.postopia.jpa.model.Message;
 import com.heslin.postopia.jpa.model.User;
 import com.heslin.postopia.service.message.MessageService;
@@ -201,6 +198,10 @@ public class KafkaService {
         liKafkaTemplate.send(topic, key, value.ordinal());
     }
 
+    public void sendToUser(Long userId, UserOperation operation) {
+        send("user", userId, operation);
+    }
+
     public void sendToVote(Long voteId, VoteOperation operation) {
         send("vote", voteId, operation);
     }
@@ -215,6 +216,17 @@ public class KafkaService {
 
     public void sendToSpace(Long spaceId, SpaceOperation value) {
         send("space", spaceId, value);
+    }
+
+    @KafkaListener(topics = "user", containerFactory = "batchLIFactory")
+    @Transactional
+    protected void processUserOperations(List<ConsumerRecord<Long, Integer>> records) {
+        var mp = new HashMap<Long, Diff>();
+        records.forEach(record -> {
+            Diff diff = mp.computeIfAbsent(record.key(), k -> new VoteDiff());
+            diff.updateDiff(record.value());
+        });
+        executeBatchDiffOperations(mp, "users");
     }
 
     @KafkaListener(topics = "vote", containerFactory = "batchLIFactory")
@@ -286,6 +298,7 @@ public class KafkaService {
         boolean shouldUpdateNegative = mp.values().stream().anyMatch(Diff::shouldUpdateNegative);
         boolean shouldUpdateComment = mp.values().stream().anyMatch(Diff::shouldUpdateComment);
         boolean shouldUpdateMember = mp.values().stream().anyMatch(Diff::shouldUpdateMember);
+        boolean shouldUpdatePost = mp.values().stream().anyMatch(Diff::shouldUpdatePost);
 
         // positive_count
         buildSql(sql, params, mp, shouldUpdatePositive, Diff::shouldUpdatePositive, Diff::getPositiveDiff, "positive_count");
@@ -293,9 +306,13 @@ public class KafkaService {
         // negative_count
         buildSql(sql, params, mp, shouldUpdateNegative, Diff::shouldUpdateNegative, Diff::getNegativeDiff, "negative_count");
 
+        // post_count
+        buildSql(sql, params, mp, shouldUpdatePost, Diff::shouldUpdatePost, Diff::getPostDiff, "post_count");
+
         // comment_count
         buildSql(sql, params, mp, shouldUpdateComment, Diff::shouldUpdateComment, Diff::getCommentDiff, "comment_count");
 
+        // member_count
         buildSql(sql, params, mp, shouldUpdateMember, Diff::shouldUpdateMember, Diff::getMemberDiff, "member_count");
 
         sql.delete(sql.length() - 2, sql.length());
