@@ -9,3 +9,4 @@ spring:
         file-extension: yaml
         shared-configs:
           - data-id: shared.yaml
+            refresh: true

@@ -1,6 +1,7 @@
 package com.heslin.postopia.user.service;
 
 import com.heslin.postopia.common.dto.response.ResMessage;
+import com.heslin.postopia.common.jwt.JWTService;
 import com.heslin.postopia.user.Repository.UserRepository;
 import com.heslin.postopia.user.dto.Credential;
 import com.heslin.postopia.user.model.User;
@@ -20,7 +21,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JWTService jwtService;
-    @Value("{postopia.avatar.user}")
+    @Value("${postopia.avatar.user}")
     private String defaultUserAvatar;
 
     @Autowired
@@ -60,7 +61,7 @@ public class UserService {
         if (!passwordEncoder.matches(password, user.getPassword())) {
             throw new RuntimeException("用户 @" + username + "密码错误");
         }
-        String refreshToken = jwtService.generateRefreshToken(user);
+        String refreshToken = jwtService.generateRefreshToken(user.getId(), username);
         String accessToken = jwtService.refresh(refreshToken);
         return new Credential(refreshToken, accessToken);
     }

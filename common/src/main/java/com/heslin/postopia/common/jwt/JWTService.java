@@ -1,6 +1,4 @@
-package com.heslin.postopia.user.service;
-
-import com.heslin.postopia.user.model.User;
+package com.heslin.postopia.common.jwt;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -57,25 +55,24 @@ public class JWTService {
         return extractExpiration(token).after(new Date());
     }
 
-    private String generateAccessToken(User user) {
-        return createToken(user.getId().toString(), user.getUsername(), jwtExpiration);
+    private String generateAccessToken(Long userId, String username) {
+        return createToken(userId, username, jwtExpiration);
     }
 
-    public String generateRefreshToken(User user) {
-        return createToken(user.getId().toString(), user.getUsername(), refreshExpiration);
+    public String generateRefreshToken(Long userId, String username) {
+        return createToken(userId, username, refreshExpiration);
     }
 
     public String refresh(String token) {
         if (validateToken(token)) {
-            User user = User.builder().id(extractUserId(token)).username(extractUsername(token)).build();
-            return generateAccessToken(user);
+            return generateAccessToken(extractUserId(token), extractUsername(token));
         }
         return null;
     }
 
-    private String createToken(String id, String subject, Long expiration) {
+    private String createToken(Long id, String subject, Long expiration) {
         return Jwts.builder()
-        .id(id)
+        .id(id.toString())
         .subject(subject)
         .issuedAt(new Date(System.currentTimeMillis()))
         .expiration(new Date(System.currentTimeMillis() + expiration))
@@ -83,5 +80,4 @@ public class JWTService {
         .signWith(getSigningKey(), Jwts.SIG.HS256)
         .compact();
     }
-
 }

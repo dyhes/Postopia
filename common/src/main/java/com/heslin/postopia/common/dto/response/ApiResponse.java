@@ -1,25 +1,18 @@
 package com.heslin.postopia.common.dto.response;
-import lombok.AllArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.io.Serializable;
 
 @Data
-@AllArgsConstructor
-public class ApiResponse<T> {
+@NoArgsConstructor
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
+public class ApiResponse<T> implements Serializable {
+    private static final long serialVersionUID = 1L;
+    private T data;
     private String message;
     private boolean success;
-    private T data;
-
-    public ApiResponse(T data) {
-        this.data = data;
-        this.message = "success";
-        this.success = true;
-    }
-
-    public ApiResponse(T data, String message) {
-        this.message = message;
-        this.data = data;
-        this.success = true;
-    }
 
     public ApiResponse(T data, String message, boolean success) {
         this.message = message;

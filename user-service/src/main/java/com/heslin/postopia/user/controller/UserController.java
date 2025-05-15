@@ -1,5 +1,6 @@
 package com.heslin.postopia.user.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.heslin.postopia.common.dto.response.ApiResponse;
 import com.heslin.postopia.common.dto.response.ApiResponseEntity;
 import com.heslin.postopia.common.dto.response.BasicApiResponseEntity;
@@ -19,22 +20,26 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("user")
 public class UserController {
+
     private final UserService userService;
 
     public UserController(UserService userService) {
         this.userService = userService;
     }
 
-
-    @PostMapping("/auth/signup")
+    @PostMapping("auth/signup")
     public BasicApiResponseEntity signup(@RequestBody SignUpRequest signupRequest) {
         Utils.checkRequestBody(signupRequest);
         PostopiaFormatter.isValid(signupRequest.username());
         ResMessage resMessage = userService.signup(signupRequest);
-        return BasicApiResponseEntity.OK(resMessage);
+        if (resMessage.success()) {
+            return BasicApiResponseEntity.sucess(resMessage.message());
+        } else {
+            return BasicApiResponseEntity.fail(resMessage.message());
+        }
     }
 
-    @PostMapping("/auth/login")
+    @PostMapping("auth/login")
     public ApiResponseEntity<Credential> login(@RequestBody SignInRequest signInRequest) {
         Utils.checkRequestBody(signInRequest);
         try {
@@ -45,7 +50,7 @@ public class UserController {
         }
     }
 
-    @PostMapping("/auth/refresh")
+    @PostMapping("auth/refresh")
     public ApiResponseEntity<String> refresh(@RequestBody RefreshRequest refreshRequest) {
         try {
             String token = userService.refresh(refreshRequest);

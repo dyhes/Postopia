@@ -3,17 +3,17 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 public class ApiResponseEntity<T> extends ResponseEntity<ApiResponse<T>> {
-
+    private static final long serialVersionUID = 1L;
     protected ApiResponseEntity(T data, String message, boolean success) {
         super(new ApiResponse<>(data, message, success), HttpStatus.OK);
     }
 
     protected ApiResponseEntity(T data, String message) {
-        super(new ApiResponse<>(data, message, true), HttpStatus.OK);
+        this(data, message, true);
     }
 
     protected ApiResponseEntity(T data) {
-        super(new ApiResponse<>(data, "成功"), HttpStatus.OK);
+        this(data, "成功", true);
     }
 
     public static <T> ApiResponseEntity<T> success(T data) {

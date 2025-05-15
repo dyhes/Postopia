@@ -1,24 +1,16 @@
 package com.heslin.postopia.common.dto.response;
-import org.springframework.http.HttpStatus;
 
-public class BasicApiResponseEntity extends ApiResponseEntity<EmptyData> {
+public class BasicApiResponseEntity extends ApiResponseEntity<Object> {
+    private static final long serialVersionUID = 1L;
     protected BasicApiResponseEntity(String message, boolean success) {
-        super(new EmptyData(), message, success);
+        super(null, message, success);
     }
 
-    public static BasicApiResponseEntity OK(String message, boolean success) {
-        return new BasicApiResponseEntity(message, success);
+    public static BasicApiResponseEntity sucess(String message) {
+        return new BasicApiResponseEntity(message, true);
     }
 
-    public static BasicApiResponseEntity OK(ResMessage resMessage) {
-        return BasicApiResponseEntity.OK(resMessage.message(), resMessage.success());
+    public static BasicApiResponseEntity fail(String message) {
+        return new BasicApiResponseEntity(message, false);
     }
-
-//    public static BasicApiResponseEntity OK(String message) {
-//        return BasicApiResponseEntity.ok(message, true);
-//    }
-//
-//    public static BasicApiResponseEntity OK(boolean success) {
-//        return BasicApiResponseEntity.ok(success? "success" : "failed", success);
-//    }
 }
