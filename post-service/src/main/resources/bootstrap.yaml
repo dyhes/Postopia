@@ -1,0 +1,11 @@
+spring:
+  application:
+    name: post-service
+  profiles:
+    active: dev
+  cloud:
+    nacos:
+      config:
+        file-extension: yaml
+        shared-configs:
+          - data-id: shared.yaml
