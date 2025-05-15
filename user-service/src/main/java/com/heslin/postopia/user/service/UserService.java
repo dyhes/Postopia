@@ -1,5 +1,7 @@
 package com.heslin.postopia.user.service;
 
+import com.heslin.postopia.common.dto.Avatar;
+import com.heslin.postopia.common.dto.SearchUserInfo;
 import com.heslin.postopia.common.dto.response.ResMessage;
 import com.heslin.postopia.common.jwt.JWTService;
 import com.heslin.postopia.user.Repository.UserRepository;
@@ -15,6 +17,10 @@ import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Service
 @RefreshScope
@@ -74,5 +80,24 @@ public class UserService {
 
     public UserInfo getUserInfo(String username) {
         return userRepository.findUserInfoByUsername(username);
+    }
+
+    public void updateUserNickName(Long userId, String nickname) {
+        userRepository.updateNickname(userId, nickname);
+//        Map<String, Object> mp = new HashMap<>();
+//        mp.put("nickname", nickname);
+//        kafkaService.sendToDocUpdate("user", user.getUsername(), user.getUsername(), mp);
+    }
+
+    public void updateUserIntroduction(Long userId, String introduction) {
+        userRepository.updateIntroduction(userId, introduction);
+    }
+
+    public List<Avatar> getUserAvatars(List<String> names) {
+        return userRepository.findAvatarsByUsernameIn(names);
+    }
+
+    public List<SearchUserInfo> getSearchUserInfos(List<String> names) {
+        return userRepository.findSearchUserInfosByUsernameIn(names);
     }
 }
