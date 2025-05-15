@@ -15,9 +15,6 @@ import java.util.function.Function;
 @Service
 @RefreshScope
 public class JWTService {
-    @Value("${postopia.jwt.secret}")
-    private String secret;
-
     @Value("${postopia.jwt.expiration}")
     private Long jwtExpiration;
 
@@ -26,6 +23,9 @@ public class JWTService {
 
     @Value("${postopia.jwt.issuer}")
     private String issuer;
+
+    @Value("${postopia.jwt.secret}")
+    private String secret;
 
     private SecretKey getSigningKey() {
         byte[] keyBytes = secret.getBytes();
@@ -53,8 +53,8 @@ public class JWTService {
         return Jwts.parser().verifyWith(getSigningKey()).build().parseSignedClaims(token).getPayload();
     }
 
-    private Boolean isTokenExpired(String token) {
-        return extractExpiration(token).before(new Date());
+    public Boolean validateToken(String token) {
+        return extractExpiration(token).after(new Date());
     }
 
     private String generateAccessToken(User user) {
@@ -82,10 +82,6 @@ public class JWTService {
         .issuer(issuer)
         .signWith(getSigningKey(), Jwts.SIG.HS256)
         .compact();
-    }
-
-    public Boolean validateToken(String token) {
-        return !isTokenExpired(token);
     }
 
 }

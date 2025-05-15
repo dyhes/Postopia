@@ -19,14 +19,14 @@ import org.springframework.stereotype.Service;
 public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final String defaultUserAvatar;
     private final JWTService jwtService;
+    @Value("{postopia.avatar.user}")
+    private String defaultUserAvatar;
 
     @Autowired
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, @Value("{postopia.avatar.user}") String defaultUserAvatar, JWTService jwtService) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, JWTService jwtService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
-        this.defaultUserAvatar = defaultUserAvatar;
         this.jwtService = jwtService;
     }
 
