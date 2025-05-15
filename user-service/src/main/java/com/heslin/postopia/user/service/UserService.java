@@ -1,7 +1,9 @@
 package com.heslin.postopia.user.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.heslin.postopia.common.dto.Avatar;
 import com.heslin.postopia.common.dto.SearchUserInfo;
+import com.heslin.postopia.common.dto.UserId;
 import com.heslin.postopia.common.dto.response.ResMessage;
 import com.heslin.postopia.common.jwt.JWTService;
 import com.heslin.postopia.user.Repository.UserRepository;
@@ -17,7 +19,9 @@ import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,14 +32,16 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JWTService jwtService;
+    private final OStorageService oStorageService;
     @Value("${postopia.avatar.user}")
     private String defaultUserAvatar;
 
     @Autowired
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, JWTService jwtService) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, JWTService jwtService, OStorageService oStorageService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
+        this.oStorageService = oStorageService;
     }
 
     public ResMessage signup(SignUpRequest signupRequest) {
@@ -99,5 +105,13 @@ public class UserService {
 
     public List<SearchUserInfo> getSearchUserInfos(List<String> names) {
         return userRepository.findSearchUserInfosByUsernameIn(names);
+    }
+
+    public String uploadAsset(UserId userId, MultipartFile file, boolean isVideo) throws IOException {
+        return oStorageService.uploadAsset(userId.toString(), file.getOriginalFilename(), file, isVideo);
+    }
+
+    public void updateUserAvatar(Long userId, String url) {
+        userRepository.updateAvatar(userId, url);
     }
 }

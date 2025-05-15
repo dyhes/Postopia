@@ -1,0 +1,7 @@
+dependencies {
+    // object storage
+    // https://mvnrepository.com/artifact/com.cloudinary/cloudinary-taglib
+    implementation 'com.cloudinary:cloudinary-taglib:1.39.0'
+    // https://mvnrepository.com/artifact/com.cloudinary/cloudinary-http44
+    implementation 'com.cloudinary:cloudinary-http44:1.39.0'
+}

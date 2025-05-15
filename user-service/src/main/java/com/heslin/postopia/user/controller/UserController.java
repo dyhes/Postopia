@@ -17,7 +17,9 @@ import com.heslin.postopia.user.request.SignInRequest;
 import com.heslin.postopia.user.request.SignUpRequest;
 import com.heslin.postopia.user.service.UserService;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -78,6 +80,27 @@ public class UserController {
     public ApiResponseEntity<List<SearchUserInfo>> getSearchedUserInfos(@RequestParam List<String> names) {
         List<SearchUserInfo> ret = userService.getSearchUserInfos(names);
         return ApiResponseEntity.success(ret);
+    }
+
+    @PostMapping("upload")
+    public ApiResponseEntity<String> uploadAsset(@RequestPart("file") MultipartFile file, @RequestParam(defaultValue = "false") boolean isVideo, @RequestHeader Long userId) {
+        try {
+            String url = userService.uploadAsset(new UserId(userId), file, isVideo);
+            return ApiResponseEntity.success(url);
+        } catch (IOException e) {
+            return ApiResponseEntity.fail(e.getMessage());
+        }
+    }
+
+    @PostMapping("avatar")
+    public ApiResponseEntity<String> updateAvatar(@RequestPart("avatar") MultipartFile avatar, @RequestHeader Long userId) {
+        try {
+            String url = userService.uploadAsset(new UserId(userId), avatar, false);
+            userService.updateUserAvatar(userId, url);
+            return ApiResponseEntity.success(url);
+        } catch (IOException e) {
+            return ApiResponseEntity.fail(e.getMessage());
+        }
     }
 
     public record NickNameRequest(String nickname) {}
