@@ -4,6 +4,7 @@ import com.heslin.postopia.common.dto.response.ResMessage;
 import com.heslin.postopia.common.jwt.JWTService;
 import com.heslin.postopia.user.Repository.UserRepository;
 import com.heslin.postopia.user.dto.Credential;
+import com.heslin.postopia.user.dto.UserInfo;
 import com.heslin.postopia.user.model.User;
 import com.heslin.postopia.user.request.RefreshRequest;
 import com.heslin.postopia.user.request.SignInRequest;
@@ -71,4 +72,7 @@ public class UserService {
     }
 
 
+    public UserInfo getUserInfo(String username) {
+        return userRepository.findUserInfoByUsername(username);
+    }
 }

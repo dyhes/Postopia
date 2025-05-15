@@ -28,6 +28,7 @@ public class JWTFilter implements GlobalFilter {
             return chain.filter(exchange);
         }
         String authorization = exchange.getRequest().getHeaders().getFirst("Authorization");
+        System.out.println("Authorization: " + authorization);
         if (authorization != null && authorization.startsWith("Bearer ")) {
             String token = authorization.substring(7);
             if (jwtService.validateToken(token)) {
@@ -38,6 +39,7 @@ public class JWTFilter implements GlobalFilter {
                 return chain.filter(exchange);
             }
         }
+        System.out.println("unorthorized");
         exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
         return exchange.getResponse().setComplete();
     }

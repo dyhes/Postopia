@@ -1,6 +1,8 @@
 package com.heslin.postopia.user.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.heslin.postopia.common.dto.UserId;
 import com.heslin.postopia.common.dto.response.ApiResponse;
 import com.heslin.postopia.common.dto.response.ApiResponseEntity;
 import com.heslin.postopia.common.dto.response.BasicApiResponseEntity;
@@ -8,14 +10,12 @@ import com.heslin.postopia.common.dto.response.ResMessage;
 import com.heslin.postopia.common.utils.PostopiaFormatter;
 import com.heslin.postopia.common.utils.Utils;
 import com.heslin.postopia.user.dto.Credential;
+import com.heslin.postopia.user.dto.UserInfo;
 import com.heslin.postopia.user.request.RefreshRequest;
 import com.heslin.postopia.user.request.SignInRequest;
 import com.heslin.postopia.user.request.SignUpRequest;
 import com.heslin.postopia.user.service.UserService;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("user")
@@ -58,6 +58,19 @@ public class UserController {
         } catch (RuntimeException e) {
             return ApiResponseEntity.fail();
         }
+    }
+
+    @GetMapping("info/{username}")
+    public ApiResponseEntity<UserInfo> getUserInfo(@PathVariable String username) {
+        System.out.println("username");
+        try {
+            String id = new ObjectMapper().writeValueAsString(new UserId(1L));
+            System.out.println(id);
+        } catch (JsonProcessingException e) {
+            System.out.println(e.getMessage());
+            System.out.println(e.toString());
+        }
+        return ApiResponseEntity.success(userService.getUserInfo(username));
     }
     
 }
