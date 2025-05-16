@@ -2,6 +2,8 @@ package com.heslin.postopia.space.repository;
 
 import com.heslin.postopia.space.model.MemberLog;
 import jakarta.transaction.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -14,4 +16,6 @@ public interface MemberRepository extends JpaRepository<MemberLog, Long> {
     @Modifying
     @Query("delete from MemberLog m where m.spaceId = :spaceId and m.userId = :userId")
     int deleteBySpaceIdAndUserId( @Param("userId") Long userId, @Param("spaceId") Long spaceId);
+
+    Page<MemberLog> findBySpaceIdAndUsernameStartingWith(Long spaceId, String username, Pageable pageable);
 }

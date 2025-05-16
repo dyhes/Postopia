@@ -5,6 +5,8 @@ import com.heslin.postopia.space.repository.ForbiddenRepository;
 import com.heslin.postopia.space.repository.MemberRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -36,5 +38,9 @@ public class MemberService {
 
     public boolean leaveSpace(Long userId, Long spaceId) {
         return memberRepository.deleteBySpaceIdAndUserId(userId, spaceId) > 1;
+    }
+
+    public Page<MemberLog> searchByPrefix(Long spaceId, String prefix, Pageable pageable) {
+        return memberRepository.findBySpaceIdAndUsernameStartingWith(spaceId, prefix, pageable);
     }
 }

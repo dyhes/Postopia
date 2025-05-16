@@ -61,9 +61,9 @@ public class UserController {
         }
     }
 
-    @GetMapping("info/{xUserId}")
-    public ApiResponseEntity<UserInfo> getUserInfo(@PathVariable UserId xUserId) {
-        return ApiResponseEntity.success(userService.getUserInfo(xUserId.getId()));
+    @GetMapping("info/{userId}")
+    public ApiResponseEntity<UserInfo> getUserInfo(@PathVariable UserId userId) {
+        return ApiResponseEntity.success(userService.getUserInfo(userId.getId()));
     }
 
     @GetMapping("avatars")

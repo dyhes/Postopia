@@ -10,5 +10,9 @@ spring:
         shared-configs:
           - data-id: shared-redis.yaml
             refresh: true
+          - data-id: shared-kafka.yaml
+            group: DEFAULT_GROUP
+            refresh: true
           - data-id: shared.yaml
+            group: DEFAULT_GROUP
             refresh: true

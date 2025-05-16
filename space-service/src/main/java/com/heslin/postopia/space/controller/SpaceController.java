@@ -1,4 +1,5 @@
 package com.heslin.postopia.space.controller;
+
 import com.heslin.postopia.common.dto.UserId;
 import com.heslin.postopia.common.dto.response.ApiResponseEntity;
 import com.heslin.postopia.common.dto.response.BasicApiResponseEntity;
@@ -9,9 +10,10 @@ import com.heslin.postopia.common.utils.Utils;
 import com.heslin.postopia.space.dto.SearchSpaceInfo;
 import com.heslin.postopia.space.dto.SpaceAvatar;
 import com.heslin.postopia.space.dto.SpaceInfo;
-import com.heslin.postopia.space.feign.UserClient;
 import com.heslin.postopia.space.service.SpaceService;
+import com.heslin.postopia.user.dto.SearchUserInfo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
@@ -24,12 +26,10 @@ import java.util.Objects;
 @RequestMapping("space")
 public class SpaceController {
     private final SpaceService spaceService;
-    private final UserClient userClient;
 
     @Autowired
-    public SpaceController(SpaceService spaceService, UserClient userClient) {
+    public SpaceController(SpaceService spaceService) {
         this.spaceService = spaceService;
-        this.userClient = userClient;
     }
 
     public record SpaceCreateRequest(String name, String description){}
@@ -40,7 +40,7 @@ public class SpaceController {
         PostopiaFormatter.isValid(info.name);
         String url = null;
         if (avatar != null) {
-            var avatarResponse = userClient.uploadAvatar(avatar, false, xUserId);
+            var avatarResponse = spaceService.uploadAvatar(avatar, xUserId);
             System.out.println("res");
             System.out.println(avatarResponse);
             System.out.println(Objects.requireNonNull(avatarResponse.getBody()).getMessage());
@@ -77,10 +77,9 @@ public class SpaceController {
     public PagedApiResponseEntity<SpaceInfo> getUserSpaces(
         @RequestHeader Long xUserId,
         @RequestParam int page,
-        @RequestParam(required = false)
-        UserId userId,
+        @RequestParam(required = false) UserId userId,
         @RequestParam(required = false, defaultValue = "250") int size) {
-        Long queryId = xUserId == null ? xUserId : userId.getId();
+        Long queryId = xUserId != null ? xUserId : userId.getId();
         Pageable pageable = PageRequest.of(page, size);
         return PagedApiResponseEntity.success(spaceService.getUserSpaces(queryId, pageable));
     }
@@ -111,17 +110,14 @@ public class SpaceController {
         return ApiResponseEntity.success(ret);
     }
 
-//    @GetMapping("")
-//    public PagedApiResponseEntity<UserSummary> searchMemberByPrefix(
-//    @RequestParam String spaceName,
-//    @RequestParam(defaultValue = "0") int page,
-//    @RequestParam(defaultValue = "20") int size,
-//    @RequestParam String prefix) {
-//        if (prefix == null || prefix.isBlank()) {
-//            throw new BadRequestException("prefix is required");
-//        }
-//        Pageable pageable = PageRequest.of(page, size);
-//        Page<UserSummary> users = spaceService.searchUserByPrefix(spaceName, prefix, pageable);
-//        return PagedApiResponseEntity.ok(users);
-//    }
+    @GetMapping("user/prefix")
+    public PagedApiResponseEntity<SearchUserInfo> searchMemberByPrefix(
+        @RequestParam Long spaceId,
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "20") int size,
+        @RequestParam String prefix) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<SearchUserInfo> members = spaceService.searchMemberByPrefix(spaceId, prefix, pageable);
+        return PagedApiResponseEntity.success(members);
+    }
 }
