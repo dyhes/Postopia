@@ -4,7 +4,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.context.annotation.ComponentScan;
 
-@ComponentScan(basePackages = {"com.heslin.postopia.common", "com.heslin.postopia.gateway"})
+@ComponentScan(basePackages = {"com.heslin.postopia.common.jwt", "com.heslin.postopia.gateway"})
 @SpringBootApplication
 @EnableDiscoveryClient
 public class GateWayApplication {
