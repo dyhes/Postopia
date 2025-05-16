@@ -1,5 +1,4 @@
 package com.heslin.postopia.space.controller;
-
 import com.heslin.postopia.common.dto.UserId;
 import com.heslin.postopia.common.dto.response.ApiResponseEntity;
 import com.heslin.postopia.common.dto.response.BasicApiResponseEntity;
@@ -7,6 +6,8 @@ import com.heslin.postopia.common.dto.response.PagedApiResponseEntity;
 import com.heslin.postopia.common.dto.response.ResMessage;
 import com.heslin.postopia.common.utils.PostopiaFormatter;
 import com.heslin.postopia.common.utils.Utils;
+import com.heslin.postopia.space.dto.SearchSpaceInfo;
+import com.heslin.postopia.space.dto.SpaceAvatar;
 import com.heslin.postopia.space.dto.SpaceInfo;
 import com.heslin.postopia.space.feign.UserClient;
 import com.heslin.postopia.space.service.SpaceService;
@@ -16,6 +17,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
 import java.util.Objects;
 
 @RestController
@@ -29,23 +31,6 @@ public class SpaceController {
         this.spaceService = spaceService;
         this.userClient = userClient;
     }
-
-//    public record SpaceDto(String name, String description) {
-//    }
-//
-//    @GetMapping("")
-//    public PagedApiResponseEntity<UserSummary> searchMemberByPrefix(
-//    @RequestParam String spaceName,
-//    @RequestParam(defaultValue = "0") int page,
-//    @RequestParam(defaultValue = "20") int size,
-//    @RequestParam String prefix) {
-//        if (prefix == null || prefix.isBlank()) {
-//            throw new BadRequestException("prefix is required");
-//        }
-//        Pageable pageable = PageRequest.of(page, size);
-//        Page<UserSummary> users = spaceService.searchUserByPrefix(spaceName, prefix, pageable);
-//        return PagedApiResponseEntity.ok(users);
-//    }
 
     public record SpaceCreateRequest(String name, String description){}
 
@@ -113,16 +98,30 @@ public class SpaceController {
         SpaceInfo space = spaceService.getSpaceInfo(spaceId);
         return ApiResponseEntity.success(space);
     }
-//
-//    @GetMapping("avatars")
-//    public ApiResponseEntity<List<Avatar>> getSpaceAvatar(@RequestParam List<String> names) {
-//        var ret = spaceService.getSpaceAvatars(names);
-//        return ApiResponseEntity.ok(ret, "success");
-//    }
-//
-//    @GetMapping("search-info")
-//    public ApiResponseEntity<List<SearchedSpaceInfo>> getSearchedSpaceInfos(@RequestParam List<String> names) {
-//        var ret = spaceService.getSearchedSpaceInfos(names);
-//        return ApiResponseEntity.ok(ret, "success");
+
+    @GetMapping("avatars")
+    public ApiResponseEntity<List<SpaceAvatar>> getSpaceAvatar(@RequestParam List<Long> ids) {
+        var ret = spaceService.getSpaceAvatars(ids);
+        return ApiResponseEntity.success(ret);
+    }
+
+    @GetMapping("search/infos")
+    public ApiResponseEntity<List<SearchSpaceInfo>> getSearchedSpaceInfos(@RequestParam List<Long> ids) {
+        var ret = spaceService.getSearchSpaceInfos(ids);
+        return ApiResponseEntity.success(ret);
+    }
+
+//    @GetMapping("")
+//    public PagedApiResponseEntity<UserSummary> searchMemberByPrefix(
+//    @RequestParam String spaceName,
+//    @RequestParam(defaultValue = "0") int page,
+//    @RequestParam(defaultValue = "20") int size,
+//    @RequestParam String prefix) {
+//        if (prefix == null || prefix.isBlank()) {
+//            throw new BadRequestException("prefix is required");
+//        }
+//        Pageable pageable = PageRequest.of(page, size);
+//        Page<UserSummary> users = spaceService.searchUserByPrefix(spaceName, prefix, pageable);
+//        return PagedApiResponseEntity.ok(users);
 //    }
 }

@@ -1,5 +1,6 @@
 package com.heslin.postopia.user.controller;
-import com.heslin.postopia.common.dto.xUserId;
+
+import com.heslin.postopia.common.dto.UserId;
 import com.heslin.postopia.common.dto.response.ApiResponseEntity;
 import com.heslin.postopia.common.dto.response.BasicApiResponseEntity;
 import com.heslin.postopia.common.dto.response.ResMessage;
@@ -61,26 +62,26 @@ public class UserController {
     }
 
     @GetMapping("info/{xUserId}")
-    public ApiResponseEntity<UserInfo> getUserInfo(@PathVariable xUserId xUserId) {
+    public ApiResponseEntity<UserInfo> getUserInfo(@PathVariable UserId xUserId) {
         return ApiResponseEntity.success(userService.getUserInfo(xUserId.getId()));
     }
 
     @GetMapping("avatars")
-    public ApiResponseEntity<List<UserAvatar>> getUserAvatar(@RequestParam List<xUserId> ids) {
-        List<UserAvatar> ret = userService.getUserAvatars(ids.stream().map(xUserId::getId).collect(Collectors.toList()));
+    public ApiResponseEntity<List<UserAvatar>> getUserAvatar(@RequestParam List<UserId> ids) {
+        List<UserAvatar> ret = userService.getUserAvatars(ids.stream().map(UserId::getId).collect(Collectors.toList()));
         return ApiResponseEntity.success(ret);
     }
 
     @GetMapping("search/infos")
-    public ApiResponseEntity<List<SearchUserInfo>> getSearchedUserInfos(@RequestParam List<xUserId> ids) {
-        List<SearchUserInfo> ret = userService.getSearchUserInfos(ids.stream().map(xUserId::getId).collect(Collectors.toList()));
+    public ApiResponseEntity<List<SearchUserInfo>> getSearchedUserInfos(@RequestParam List<UserId> ids) {
+        List<SearchUserInfo> ret = userService.getSearchUserInfos(ids.stream().map(UserId::getId).collect(Collectors.toList()));
         return ApiResponseEntity.success(ret);
     }
 
     @PostMapping("upload")
     public ApiResponseEntity<String> uploadAsset(@RequestPart("file") MultipartFile file, @RequestParam(defaultValue = "false") boolean isVideo, @RequestHeader Long xUserId) {
         try {
-            String url = userService.uploadAsset(new xUserId(xUserId), file, isVideo);
+            String url = userService.uploadAsset(new UserId(xUserId), file, isVideo);
             return ApiResponseEntity.success(url);
         } catch (IOException e) {
             return ApiResponseEntity.fail(e.getMessage());
@@ -90,7 +91,7 @@ public class UserController {
     @PostMapping("avatar")
     public ApiResponseEntity<String> updateAvatar(@RequestPart("avatar") MultipartFile avatar, @RequestHeader Long xUserId) {
         try {
-            String url = userService.uploadAsset(new xUserId(xUserId), avatar, false);
+            String url = userService.uploadAsset(new UserId(xUserId), avatar, false);
             userService.updateUserAvatar(xUserId, url);
             return ApiResponseEntity.success(url);
         } catch (IOException e) {

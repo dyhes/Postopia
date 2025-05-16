@@ -1,9 +1,11 @@
 package com.heslin.postopia.space.service;
 
-
 import com.heslin.postopia.common.dto.response.ResMessage;
 import com.heslin.postopia.common.kafka.KafkaService;
 import com.heslin.postopia.common.kafka.enums.SpaceOperation;
+import com.heslin.postopia.search.model.SpaceDoc;
+import com.heslin.postopia.space.dto.SearchSpaceInfo;
+import com.heslin.postopia.space.dto.SpaceAvatar;
 import com.heslin.postopia.space.dto.SpaceInfo;
 import com.heslin.postopia.space.model.Space;
 import com.heslin.postopia.space.repository.SpaceRepository;
@@ -15,6 +17,8 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @RefreshScope
@@ -42,7 +46,7 @@ public class SpaceService {
             throw new DataIntegrityViolationException("空间名称已存在");
         }
         joinSpace(username, userId, space.getId());
-        kafkaService.sendToDocCreate("space", space.getName(), new SpaceDoc(space.getName(),space.getName(),space.getDescription()));
+        kafkaService.sendToDocCreate("space", space.getName(), new SpaceDoc(space.getId().toString(), space.getName(),space.getDescription()));
         return space.getId();
     }
 
@@ -59,14 +63,22 @@ public class SpaceService {
     }
 
     public Page<SpaceInfo> getPopularSpaces(Pageable pageable) {
-        return null;
+        return spaceRepository.findSpaceInfosByPopularity(pageable);
     }
 
     public Page<SpaceInfo> getUserSpaces(Long queryId, Pageable pageable) {
-        return null;
+        return spaceRepository.findSpaceInfosByUserId(queryId, pageable);
     }
 
     public SpaceInfo getSpaceInfo(Long spaceId) {
-        return null;
+        return spaceRepository.findSpaceInfoById(spaceId);
+    }
+
+    public List<SpaceAvatar> getSpaceAvatars(List<Long> ids) {
+        return spaceRepository.findSpaceAvatarsByIdIn(ids);
+    }
+
+    public List<SearchSpaceInfo> getSearchSpaceInfos(List<Long> ids) {
+        return spaceRepository.findSearchSpaceInfosByIdIn(ids);
     }
 }
