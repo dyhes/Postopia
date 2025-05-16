@@ -20,4 +20,15 @@ public class ApiResponse<T> implements Serializable {
         this.success = success;
     }
 
+    public boolean isSuccess() {
+        return success;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public T getData() {
+        return data;
+    }
 }

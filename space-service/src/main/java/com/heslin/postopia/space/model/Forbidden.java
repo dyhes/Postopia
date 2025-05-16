@@ -1,5 +1,6 @@
 package com.heslin.postopia.space.model;
 
+
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -7,38 +8,31 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
 import java.time.Instant;
 
-@Data
 @Entity
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-// 定义索引include
-@Table(name="spaces",
+@Table(name = "forbiddens",
 indexes = {
-    @Index(name = "unique_space_name", columnList = "name", unique = true)
+@Index(name = "idx_space_user_id", columnList = "space_id, user_id", unique = true),
 })
 @EntityListeners(AuditingEntityListener.class)
-public class Space {
+public class Forbidden {
+
     @Id
-    @GeneratedValue(strategy=GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique=true, nullable=false, updatable = false)
-    private String name;
+    @Column
+    @JoinColumn(name = "space_id", foreignKey = @ForeignKey(name = "fk_sui_space", foreignKeyDefinition = "FOREIGN KEY (space_id) REFERENCES spaces(space_id)"))
+    private Long spaceId;
 
-    @Column(nullable=false)
-    private String description;
+    private Long userId;
 
     @CreatedDate
     private Instant createdAt;
-
-    private String avatar;
-
-    @Column(columnDefinition = "bigint default 0")
-    private long memberCount;
-
-    @Column(columnDefinition = "bigint default 0")
-    private long postCount;
 }

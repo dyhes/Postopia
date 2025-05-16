@@ -16,6 +16,10 @@ public class ApiResponseEntity<T> extends ResponseEntity<ApiResponse<T>> {
         this(data, "成功", true);
     }
 
+    public static <T> ApiResponseEntity<T> res(T data, ResMessage message) {
+        return new ApiResponseEntity<>(data, message.message(), message.success());
+    }
+
     public static <T> ApiResponseEntity<T> success(T data) {
         return new ApiResponseEntity<>(data);
     }
