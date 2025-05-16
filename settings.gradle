@@ -12,4 +12,5 @@ include 'common'
 include 'user-service'
 include 'space-service'
 include 'post-service'
+include 'search-service'
 

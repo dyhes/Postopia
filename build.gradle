@@ -45,18 +45,18 @@ subprojects {
         dependencies {
             developmentOnly 'org.springframework.boot:spring-boot-devtools'
             implementation 'org.springframework.boot:spring-boot-starter-web'
-            implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
             implementation 'jakarta.persistence:jakarta.persistence-api'
             // lombok
             compileOnly 'org.projectlombok:lombok'
             annotationProcessor 'org.projectlombok:lombok'
-            // postgres
-            runtimeOnly 'org.postgresql:postgresql'
+            implementation 'org.springframework.cloud:spring-cloud-starter'
+            implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
         }
-        if (it.name != "common") {
+        if (it.name != "search-searvice") {
             dependencies {
-                implementation 'org.springframework.cloud:spring-cloud-starter'
-                implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
+                // postgres
+                implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+                runtimeOnly 'org.postgresql:postgresql'
             }
         }
     }
@@ -64,6 +64,7 @@ subprojects {
     if (it.name != "common") {
         dependencies {
             implementation 'org.springframework.cloud:spring-cloud-starter-bootstrap'
+            implementation 'org.springframework.boot:spring-boot-starter-actuator'
             implementation 'com.alibaba.cloud:spring-cloud-starter-alibaba-nacos-discovery'
             implementation 'org.springframework.cloud:spring-cloud-starter-loadbalancer'
             implementation project(':common')
@@ -72,7 +73,6 @@ subprojects {
 
     dependencies {
         implementation 'com.alibaba.cloud:spring-cloud-starter-alibaba-nacos-config'
-        implementation 'org.springframework.boot:spring-boot-starter-actuator'
     }
 
     dependencyManagement {

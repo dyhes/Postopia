@@ -1,0 +1,16 @@
+spring:
+  application:
+    name: search-service
+  profiles:
+    active: dev
+  cloud:
+    nacos:
+      discovery:
+        server-addr: localhost:8848
+        namespace: public
+        group: DEFAULT_GROUP
+#      config:
+#        file-extension: yaml
+#        shared-configs:
+#          - data-id: shared.yaml
+#            refresh: true
