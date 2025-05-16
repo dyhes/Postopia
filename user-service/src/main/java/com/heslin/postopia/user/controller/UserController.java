@@ -1,5 +1,5 @@
 package com.heslin.postopia.user.controller;
-import com.heslin.postopia.common.dto.UserId;
+import com.heslin.postopia.common.dto.xUserId;
 import com.heslin.postopia.common.dto.response.ApiResponseEntity;
 import com.heslin.postopia.common.dto.response.BasicApiResponseEntity;
 import com.heslin.postopia.common.dto.response.ResMessage;
@@ -60,27 +60,27 @@ public class UserController {
         }
     }
 
-    @GetMapping("info/{userId}")
-    public ApiResponseEntity<UserInfo> getUserInfo(@PathVariable UserId userId) {
-        return ApiResponseEntity.success(userService.getUserInfo(userId.getId()));
+    @GetMapping("info/{xUserId}")
+    public ApiResponseEntity<UserInfo> getUserInfo(@PathVariable xUserId xUserId) {
+        return ApiResponseEntity.success(userService.getUserInfo(xUserId.getId()));
     }
 
     @GetMapping("avatars")
-    public ApiResponseEntity<List<UserAvatar>> getUserAvatar(@RequestParam List<UserId> ids) {
-        List<UserAvatar> ret = userService.getUserAvatars(ids.stream().map(UserId::getId).collect(Collectors.toList()));
+    public ApiResponseEntity<List<UserAvatar>> getUserAvatar(@RequestParam List<xUserId> ids) {
+        List<UserAvatar> ret = userService.getUserAvatars(ids.stream().map(xUserId::getId).collect(Collectors.toList()));
         return ApiResponseEntity.success(ret);
     }
 
     @GetMapping("search/infos")
-    public ApiResponseEntity<List<SearchUserInfo>> getSearchedUserInfos(@RequestParam List<UserId> ids) {
-        List<SearchUserInfo> ret = userService.getSearchUserInfos(ids.stream().map(UserId::getId).collect(Collectors.toList()));
+    public ApiResponseEntity<List<SearchUserInfo>> getSearchedUserInfos(@RequestParam List<xUserId> ids) {
+        List<SearchUserInfo> ret = userService.getSearchUserInfos(ids.stream().map(xUserId::getId).collect(Collectors.toList()));
         return ApiResponseEntity.success(ret);
     }
 
     @PostMapping("upload")
-    public ApiResponseEntity<String> uploadAsset(@RequestPart("file") MultipartFile file, @RequestParam(defaultValue = "false") boolean isVideo, @RequestHeader Long userId) {
+    public ApiResponseEntity<String> uploadAsset(@RequestPart("file") MultipartFile file, @RequestParam(defaultValue = "false") boolean isVideo, @RequestHeader Long xUserId) {
         try {
-            String url = userService.uploadAsset(new UserId(userId), file, isVideo);
+            String url = userService.uploadAsset(new xUserId(xUserId), file, isVideo);
             return ApiResponseEntity.success(url);
         } catch (IOException e) {
             return ApiResponseEntity.fail(e.getMessage());
@@ -88,10 +88,10 @@ public class UserController {
     }
 
     @PostMapping("avatar")
-    public ApiResponseEntity<String> updateAvatar(@RequestPart("avatar") MultipartFile avatar, @RequestHeader Long userId) {
+    public ApiResponseEntity<String> updateAvatar(@RequestPart("avatar") MultipartFile avatar, @RequestHeader Long xUserId) {
         try {
-            String url = userService.uploadAsset(new UserId(userId), avatar, false);
-            userService.updateUserAvatar(userId, url);
+            String url = userService.uploadAsset(new xUserId(xUserId), avatar, false);
+            userService.updateUserAvatar(xUserId, url);
             return ApiResponseEntity.success(url);
         } catch (IOException e) {
             return ApiResponseEntity.fail(e.getMessage());
@@ -101,38 +101,38 @@ public class UserController {
     public record NickNameRequest(String nickname) {}
 
     @PostMapping("nickname")
-    public BasicApiResponseEntity updateNickName(@RequestHeader Long userId, @RequestHeader String username, @RequestBody NickNameRequest request) {
+    public BasicApiResponseEntity updateNickName(@RequestHeader Long xUserId, @RequestHeader String username, @RequestBody NickNameRequest request) {
         Utils.checkRequestBody(request);
         PostopiaFormatter.isValid(request.nickname);
-        userService.updateUserNickName(userId, username, request.nickname);
+        userService.updateUserNickName(xUserId, username, request.nickname);
         return BasicApiResponseEntity.success();
     }
 
     public record IntroRequest(String introduction) {}
 
     @PostMapping("introduction")
-    public BasicApiResponseEntity updateIntroduction(@RequestHeader Long userId, @RequestBody IntroRequest request) {
+    public BasicApiResponseEntity updateIntroduction(@RequestHeader Long xUserId, @RequestBody IntroRequest request) {
         Utils.checkRequestBody(request);
-        userService.updateUserIntroduction(userId, request.introduction);
+        userService.updateUserIntroduction(xUserId, request.introduction);
         return BasicApiResponseEntity.success();
     }
 
     public record ShowEmailRequest(boolean show) {}
 
     @PostMapping("email/show")
-    public BasicApiResponseEntity switchEmailShowingState(@RequestBody ShowEmailRequest showEmailRequest, @RequestHeader Long userId) {
+    public BasicApiResponseEntity switchEmailShowingState(@RequestBody ShowEmailRequest showEmailRequest, @RequestHeader Long xUserId) {
         Utils.checkRequestBody(showEmailRequest);
-        userService.updateUserShowEmail(userId, showEmailRequest.show);
+        userService.updateUserShowEmail(xUserId, showEmailRequest.show);
         return BasicApiResponseEntity.success();
     }
 
     public record EmailRequest(String email) {}
 
     @PostMapping("email")
-    public BasicApiResponseEntity updateEmail(@RequestBody EmailRequest emailRequest, @RequestHeader String username, @RequestHeader Long userId) {
+    public BasicApiResponseEntity updateEmail(@RequestBody EmailRequest emailRequest, @RequestHeader String username, @RequestHeader Long xUserId) {
         Utils.checkRequestBody(emailRequest);
         try {
-            userService.updateUserEmail(userId, username, emailRequest.email);
+            userService.updateUserEmail(xUserId, username, emailRequest.email);
         } catch (MessagingException e) {
             return BasicApiResponseEntity.fail(e.getMessage());
         }
@@ -143,8 +143,8 @@ public class UserController {
     public record VerifyEmailRequest(String email, String authCode){};
 
     @PostMapping("email/verify")
-    public BasicApiResponseEntity verifyEmail(@RequestBody VerifyEmailRequest verifyEmailRequest , @RequestHeader Long userId) {
-        ResMessage verify = userService.verifyUserEmail(userId, verifyEmailRequest.email, verifyEmailRequest.authCode);
+    public BasicApiResponseEntity verifyEmail(@RequestBody VerifyEmailRequest verifyEmailRequest , @RequestHeader Long xUserId) {
+        ResMessage verify = userService.verifyUserEmail(xUserId, verifyEmailRequest.email, verifyEmailRequest.authCode);
         return BasicApiResponseEntity.res(verify);
     }
 

@@ -34,8 +34,7 @@ public class JWTFilter implements GlobalFilter {
             if (jwtService.validateToken(token)) {
                 Long userId = jwtService.extractUserId(token);
                 String username = jwtService.extractUsername(token);
-                // Set the userId and username in the request attributes or headers if needed
-                exchange.getRequest().mutate().header("userId", String.valueOf(userId)).header("username", username).build();
+                exchange.getRequest().mutate().header("xUserId", String.valueOf(userId)).header("xUsername", username).build();
                 return chain.filter(exchange);
             }
         }
