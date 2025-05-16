@@ -2,6 +2,8 @@ package com.heslin.postopia.space.service;
 
 
 import com.heslin.postopia.common.dto.response.ResMessage;
+import com.heslin.postopia.common.kafka.KafkaService;
+import com.heslin.postopia.common.kafka.enums.SpaceOperation;
 import com.heslin.postopia.space.model.Space;
 import com.heslin.postopia.space.repository.SpaceRepository;
 import jakarta.transaction.Transactional;
@@ -16,13 +18,15 @@ import org.springframework.stereotype.Service;
 public class SpaceService {
     private final SpaceRepository spaceRepository;
     private final MemberService memberService;
+    private final KafkaService kafkaService;
     @Value("${postopia.avatar.space}")
     private String defaultSpaceAvatar;
 
     @Autowired
-    public SpaceService(SpaceRepository spaceRepository, MemberService memberService) {
+    public SpaceService(SpaceRepository spaceRepository, MemberService memberService, KafkaService kafkaService) {
         this.spaceRepository = spaceRepository;
         this.memberService = memberService;
+        this.kafkaService = kafkaService;
     }
 
     @Transactional
@@ -35,7 +39,7 @@ public class SpaceService {
             throw new DataIntegrityViolationException("空间名称已存在");
         }
         joinSpace(username, userId, space.getId());
-        //kafkaService.sendToDocCreate("space", space.getName(), new SpaceDoc(space.getName(),space.getName(),space.getDescription()));
+        kafkaService.sendToDocCreate("space", space.getName(), new SpaceDoc(space.getName(),space.getName(),space.getDescription()));
         return space.getId();
     }
 
@@ -46,7 +50,7 @@ public class SpaceService {
     public ResMessage leaveSpace(Long userId, Long spaceId) {
         boolean success = memberService.leaveSpace(userId, spaceId);
         if (success) {
-            // kafkaService.sendToSpace(spaceId, SpaceOperation.MEMBER_LEFT);
+            kafkaService.sendToSpace(spaceId, SpaceOperation.MEMBER_LEFT);
         }
         return new ResMessage(success ? "退出成功" : "退出失败, 请重试", success);
     }

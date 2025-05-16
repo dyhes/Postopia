@@ -48,6 +48,29 @@ services:
       - nacos_data_volume:/home/nacos/data
     restart: always
 
+  zookeeper:
+    image: confluentinc/cp-zookeeper:latest
+    container_name: postopia-zookeeper
+    ports:
+      - "2181:2181"
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+
+  kafka:
+    image: confluentinc/cp-kafka:latest
+    container_name: postopia-kafka
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      ALLOW_PLAINTEXT_LISTENER: yes
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+
   # user-service
   user-postgres:
     image: 'postgres:latest'
@@ -90,6 +113,7 @@ volumes:
   nacos_volume:
   mysql_volume:
   nacos_data_volume:
+
 #  postgres:
 #    image: 'postgres:latest'
 #    container_name: postopia-db
@@ -102,28 +126,7 @@ volumes:
 
 
 #
-#  zookeeper:
-#    image: confluentinc/cp-zookeeper:latest
-#    container_name: postopia-zookeeper
-#    ports:
-#      - "2181:2181"
-#    environment:
-#      ZOOKEEPER_CLIENT_PORT: 2181
-#      ZOOKEEPER_TICK_TIME: 2000
-#
-#  kafka:
-#    image: confluentinc/cp-kafka:latest
-#    container_name: postopia-kafka
-#    depends_on:
-#      - zookeeper
-#    ports:
-#      - "9092:9092"
-#    environment:
-#      KAFKA_BROKER_ID: 1
-#      ALLOW_PLAINTEXT_LISTENER: yes
-#      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-#      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
-#      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+
 #
 #  elasticsearch:
 #    image: 'elasticsearch:8.15.5'
