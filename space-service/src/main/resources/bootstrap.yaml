@@ -8,5 +8,9 @@ spring:
       config:
         file-extension: yaml
         shared-configs:
+          - data-id: shared-kafka.yaml
+            group: DEFAULT_GROUP
+            refresh: true
           - data-id: shared.yaml
+            group: DEFAULT_GROUP
             refresh: true

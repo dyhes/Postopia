@@ -1,4 +1,4 @@
-package com.heslin.postopia.gateway;
+package com.heslin.postopia.gateway.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.client.ServiceInstance;

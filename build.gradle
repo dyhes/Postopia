@@ -49,6 +49,7 @@ subprojects {
             // lombok
             compileOnly 'org.projectlombok:lombok'
             annotationProcessor 'org.projectlombok:lombok'
+            implementation 'org.springframework.kafka:spring-kafka'
             implementation 'org.springframework.cloud:spring-cloud-starter'
             implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
         }
@@ -68,12 +69,6 @@ subprojects {
             implementation 'com.alibaba.cloud:spring-cloud-starter-alibaba-nacos-discovery'
             implementation 'org.springframework.cloud:spring-cloud-starter-loadbalancer'
             implementation project(':common')
-        }
-    }
-
-    if (it.name != "gateway") {
-        dependencies {
-            implementation 'org.springframework.kafka:spring-kafka'
         }
     }
 

@@ -2,7 +2,7 @@ package com.heslin.postopia.user.service;
 
 import com.heslin.postopia.common.dto.UserId;
 import com.heslin.postopia.common.dto.response.ResMessage;
-import com.heslin.postopia.common.jwt.JWTService;
+import com.heslin.postopia.jwt.JWTService;
 import com.heslin.postopia.common.kafka.KafkaService;
 import com.heslin.postopia.common.redis.RedisService;
 import com.heslin.postopia.search.model.UserDoc;

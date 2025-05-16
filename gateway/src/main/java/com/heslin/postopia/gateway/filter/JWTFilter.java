@@ -1,6 +1,6 @@
 package com.heslin.postopia.gateway.filter;
 
-import com.heslin.postopia.common.jwt.JWTService;
+import com.heslin.postopia.jwt.JWTService;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
