@@ -1,8 +1,7 @@
 package com.heslin.postopia.user.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.heslin.postopia.common.dto.Avatar;
-import com.heslin.postopia.common.dto.SearchUserInfo;
+import com.heslin.postopia.user.dto.UserAvatar;
+import com.heslin.postopia.user.dto.SearchUserInfo;
 import com.heslin.postopia.common.dto.UserId;
 import com.heslin.postopia.common.dto.response.ResMessage;
 import com.heslin.postopia.common.jwt.JWTService;
@@ -24,9 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Service
 @RefreshScope
@@ -90,8 +87,8 @@ public class UserService {
     }
 
 
-    public UserInfo getUserInfo(String username) {
-        return userRepository.findUserInfoByUsername(username);
+    public UserInfo getUserInfo(Long userId) {
+        return userRepository.findUserInfoById(userId);
     }
 
     public void updateUserNickName(Long userId, String nickname) {
@@ -105,12 +102,12 @@ public class UserService {
         userRepository.updateIntroduction(userId, introduction);
     }
 
-    public List<Avatar> getUserAvatars(List<String> names) {
-        return userRepository.findAvatarsByUsernameIn(names);
+    public List<UserAvatar> getUserAvatars(List<Long> ids) {
+        return userRepository.findAvatarsByIdIn(ids);
     }
 
-    public List<SearchUserInfo> getSearchUserInfos(List<String> names) {
-        return userRepository.findSearchUserInfosByUsernameIn(names);
+    public List<SearchUserInfo> getSearchUserInfos(List<Long> ids) {
+        return userRepository.findSearchUserInfosByIdIn(ids);
     }
 
     public String uploadAsset(UserId userId, MultipartFile file, boolean isVideo) throws IOException {

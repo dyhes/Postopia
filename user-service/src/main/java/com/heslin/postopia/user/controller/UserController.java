@@ -1,9 +1,5 @@
 package com.heslin.postopia.user.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.heslin.postopia.common.dto.Avatar;
-import com.heslin.postopia.common.dto.SearchUserInfo;
 import com.heslin.postopia.common.dto.UserId;
 import com.heslin.postopia.common.dto.response.ApiResponseEntity;
 import com.heslin.postopia.common.dto.response.BasicApiResponseEntity;
@@ -11,6 +7,8 @@ import com.heslin.postopia.common.dto.response.ResMessage;
 import com.heslin.postopia.common.utils.PostopiaFormatter;
 import com.heslin.postopia.common.utils.Utils;
 import com.heslin.postopia.user.dto.Credential;
+import com.heslin.postopia.user.dto.SearchUserInfo;
+import com.heslin.postopia.user.dto.UserAvatar;
 import com.heslin.postopia.user.dto.UserInfo;
 import com.heslin.postopia.user.request.RefreshRequest;
 import com.heslin.postopia.user.request.SignInRequest;
@@ -22,6 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("user")
@@ -62,20 +61,20 @@ public class UserController {
         }
     }
 
-    @GetMapping("info/{username}")
-    public ApiResponseEntity<UserInfo> getUserInfo(@PathVariable String username) {
-        return ApiResponseEntity.success(userService.getUserInfo(username));
+    @GetMapping("info/{userId}")
+    public ApiResponseEntity<UserInfo> getUserInfo(@PathVariable UserId userId) {
+        return ApiResponseEntity.success(userService.getUserInfo(userId.getId()));
     }
 
     @GetMapping("avatars")
-    public ApiResponseEntity<List<Avatar>> getUserAvatar(@RequestParam List<String> names) {
-        List<Avatar> ret = userService.getUserAvatars(names);
+    public ApiResponseEntity<List<UserAvatar>> getUserAvatar(@RequestParam List<UserId> ids) {
+        List<UserAvatar> ret = userService.getUserAvatars(ids.stream().map(UserId::getId).collect(Collectors.toList()));
         return ApiResponseEntity.success(ret);
     }
 
     @GetMapping("search/infos")
-    public ApiResponseEntity<List<SearchUserInfo>> getSearchedUserInfos(@RequestParam List<String> names) {
-        List<SearchUserInfo> ret = userService.getSearchUserInfos(names);
+    public ApiResponseEntity<List<SearchUserInfo>> getSearchedUserInfos(@RequestParam List<UserId> ids) {
+        List<SearchUserInfo> ret = userService.getSearchUserInfos(ids.stream().map(UserId::getId).collect(Collectors.toList()));
         return ApiResponseEntity.success(ret);
     }
 

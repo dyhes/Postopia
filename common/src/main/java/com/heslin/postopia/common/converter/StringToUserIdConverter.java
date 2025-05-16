@@ -11,6 +11,7 @@ public class StringToUserIdConverter implements Converter<String, UserId> {
     public UserId convert(String source) {
         System.out.println("StringToUserIdConverter convert");
         System.out.println("source = " + source);
+        System.out.println("masked = " + UserId.masked(Long.parseLong(source)));
         return new UserId(UserId.masked(Long.parseLong(source)));
     }
 }

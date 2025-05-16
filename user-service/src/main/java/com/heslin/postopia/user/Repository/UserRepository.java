@@ -1,7 +1,7 @@
 package com.heslin.postopia.user.Repository;
 
-import com.heslin.postopia.common.dto.Avatar;
-import com.heslin.postopia.common.dto.SearchUserInfo;
+import com.heslin.postopia.user.dto.UserAvatar;
+import com.heslin.postopia.user.dto.SearchUserInfo;
 import com.heslin.postopia.user.dto.UserInfo;
 import com.heslin.postopia.user.model.User;
 import jakarta.transaction.Transactional;
@@ -17,14 +17,14 @@ import java.util.List;
 public interface UserRepository extends JpaRepository<User, Long> {
     User findByUsername(String username);
 
-    @Query("select new com.heslin.postopia.user.dto.UserInfo(new com.heslin.postopia.common.dto.UserId(u.id), u.username, u.nickname, u.avatar, u.postCount, u.commentCount, u.credit, u.introduction, u.email, u.showEmail, u.createdAt) from User u WHERE u.username = :username")
-    UserInfo findUserInfoByUsername(@Param("username") String username);
+    @Query("select new com.heslin.postopia.user.dto.SearchUserInfo(new com.heslin.postopia.common.dto.UserId(u.id), u.username, u.nickname, u.avatar, u.introduction, u.postCount, u.commentCount, u.credit) from User u where u.id in ?1")
+    List<SearchUserInfo> findSearchUserInfosByIdIn(List<Long> ids);
 
-    //@Query("select new com.heslin.postopia.user.dto.SearchUserInfo(u.username, u.avatar, u.introduction, u.postCount, u.commentCount, u.credit) from User u where u.username in ?1")
-    List<SearchUserInfo> findSearchUserInfosByUsernameIn(List<String> names);
+    @Query("select new com.heslin.postopia.user.dto.UserAvatar(new com.heslin.postopia.common.dto.UserId(u.id), u.avatar) from User u where u.id in ?1")
+    List<UserAvatar> findAvatarsByIdIn(List<Long> ids);
 
-    @Query("select new com.heslin.postopia.common.dto.Avatar(u.username, u.avatar) from User u where u.username in ?1")
-    List<Avatar> findAvatarsByUsernameIn(List<String> names);
+    @Query("select new com.heslin.postopia.user.dto.UserInfo(new com.heslin.postopia.common.dto.UserId(u.id), u.username, u.nickname, u.avatar, u.postCount, u.commentCount, u.credit, u.introduction, u.email, u.showEmail, u.createdAt) from User u WHERE u.id = ?1")
+    UserInfo findUserInfoById(Long userId);
 
     @Transactional
     @Modifying
