@@ -6,6 +6,7 @@ import com.heslin.postopia.common.dto.SearchUserInfo;
 import com.heslin.postopia.common.dto.UserId;
 import com.heslin.postopia.common.dto.response.ResMessage;
 import com.heslin.postopia.common.jwt.JWTService;
+import com.heslin.postopia.common.redis.RedisService;
 import com.heslin.postopia.user.Repository.UserRepository;
 import com.heslin.postopia.user.dto.Credential;
 import com.heslin.postopia.user.dto.UserInfo;
@@ -13,6 +14,7 @@ import com.heslin.postopia.user.model.User;
 import com.heslin.postopia.user.request.RefreshRequest;
 import com.heslin.postopia.user.request.SignInRequest;
 import com.heslin.postopia.user.request.SignUpRequest;
+import jakarta.mail.MessagingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
@@ -33,15 +35,19 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final JWTService jwtService;
     private final OStorageService oStorageService;
+    private final MailService mailService;
+    private final RedisService redisService;
     @Value("${postopia.avatar.user}")
     private String defaultUserAvatar;
 
     @Autowired
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, JWTService jwtService, OStorageService oStorageService) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, JWTService jwtService, OStorageService oStorageService, MailService mailService, RedisService redisService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
         this.oStorageService = oStorageService;
+        this.mailService = mailService;
+        this.redisService = redisService;
     }
 
     public ResMessage signup(SignUpRequest signupRequest) {
@@ -113,5 +119,27 @@ public class UserService {
 
     public void updateUserAvatar(Long userId, String url) {
         userRepository.updateAvatar(userId, url);
+    }
+
+    public void updateUserShowEmail(Long userId, boolean show) {
+        userRepository.updateShowStatus(show, userId);
+    }
+
+    public void updateUserEmail(Long userId, String username, String email) throws MessagingException {
+        mailService.sendAuthCode(userId, username, email);
+    }
+
+
+    public ResMessage verifyUserEmail(Long userId, String email, String authCode) {
+        String credential = redisService.get(authCode);
+        if (credential != null) {
+            String[] credentials = credential.split(";");
+            if (userId.equals(Long.parseLong(credentials[0])) && email.equals(credentials[1])) {
+                redisService.delete(email);
+                userRepository.updateEmail(userId, email);
+                return new ResMessage("邮箱绑定成功", true);
+            }
+        }
+        return new ResMessage("验证码不存在或已失效", false);
     }
 }

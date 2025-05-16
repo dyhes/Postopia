@@ -4,4 +4,7 @@ dependencies {
     implementation 'com.cloudinary:cloudinary-taglib:1.39.0'
     // https://mvnrepository.com/artifact/com.cloudinary/cloudinary-http44
     implementation 'com.cloudinary:cloudinary-http44:1.39.0'
+
+    //email
+    implementation 'org.springframework.boot:spring-boot-starter-mail'
 }

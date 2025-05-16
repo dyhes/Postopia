@@ -16,6 +16,7 @@ import com.heslin.postopia.user.request.RefreshRequest;
 import com.heslin.postopia.user.request.SignInRequest;
 import com.heslin.postopia.user.request.SignUpRequest;
 import com.heslin.postopia.user.service.UserService;
+import jakarta.mail.MessagingException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -37,11 +38,7 @@ public class UserController {
         Utils.checkRequestBody(signupRequest);
         PostopiaFormatter.isValid(signupRequest.username());
         ResMessage resMessage = userService.signup(signupRequest);
-        if (resMessage.success()) {
-            return BasicApiResponseEntity.success(resMessage.message());
-        } else {
-            return BasicApiResponseEntity.fail(resMessage.message());
-        }
+        return BasicApiResponseEntity.res(resMessage);
     }
 
     @PostMapping("auth/login")
@@ -122,6 +119,35 @@ public class UserController {
         return BasicApiResponseEntity.success();
     }
 
+    public record ShowEmailRequest(boolean show) {}
 
+    @PostMapping("email/show")
+    public BasicApiResponseEntity switchEmailShowingState(@RequestBody ShowEmailRequest showEmailRequest, @RequestHeader Long userId) {
+        Utils.checkRequestBody(showEmailRequest);
+        userService.updateUserShowEmail(userId, showEmailRequest.show);
+        return BasicApiResponseEntity.success();
+    }
+
+    public record EmailRequest(String email) {}
+
+    @PostMapping("email")
+    public BasicApiResponseEntity updateEmail(@RequestBody EmailRequest emailRequest, @RequestHeader String username, @RequestHeader Long userId) {
+        Utils.checkRequestBody(emailRequest);
+        try {
+            userService.updateUserEmail(userId, username, emailRequest.email);
+        } catch (MessagingException e) {
+            return BasicApiResponseEntity.fail(e.getMessage());
+        }
+        ;
+        return BasicApiResponseEntity.success();
+    }
+
+    public record VerifyEmailRequest(String email, String authCode){};
+
+    @PostMapping("email/verify")
+    public BasicApiResponseEntity verifyEmail(@RequestBody VerifyEmailRequest verifyEmailRequest , @RequestHeader Long userId) {
+        ResMessage verify = userService.verifyUserEmail(userId, verifyEmailRequest.email, verifyEmailRequest.authCode);
+        return BasicApiResponseEntity.res(verify);
+    }
 
 }

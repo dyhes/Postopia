@@ -6,6 +6,10 @@ public class BasicApiResponseEntity extends ApiResponseEntity<Object> {
         super(null, message, success);
     }
 
+    public static BasicApiResponseEntity res(ResMessage message) {
+        return new BasicApiResponseEntity(message.message(), message.success());
+    }
+
     public static BasicApiResponseEntity success() {
         return new BasicApiResponseEntity("success", true);
     }

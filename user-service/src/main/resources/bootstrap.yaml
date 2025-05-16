@@ -8,5 +8,7 @@ spring:
       config:
         file-extension: yaml
         shared-configs:
+          - data-id: shared-redis.yaml
+            refresh: true
           - data-id: shared.yaml
             refresh: true
