@@ -17,7 +17,7 @@ import java.util.List;
 public interface UserRepository extends JpaRepository<User, Long> {
     User findByUsername(String username);
 
-    @Query("select new com.heslin.postopia.user.dto.UserInfo(new com.heslin.postopia.common.dto.UserId(u.id), u.username, u.nickname, u.avatar, u.postCount, u.commentCount, u.credit, u.introduction, u.email, u.showEmail) from User u WHERE u.username = :username")
+    @Query("select new com.heslin.postopia.user.dto.UserInfo(new com.heslin.postopia.common.dto.UserId(u.id), u.username, u.nickname, u.avatar, u.postCount, u.commentCount, u.credit, u.introduction, u.email, u.showEmail, u.createdAt) from User u WHERE u.username = :username")
     UserInfo findUserInfoByUsername(@Param("username") String username);
 
     //@Query("select new com.heslin.postopia.user.dto.SearchUserInfo(u.username, u.avatar, u.introduction, u.postCount, u.commentCount, u.credit) from User u where u.username in ?1")

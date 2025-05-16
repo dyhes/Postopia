@@ -27,6 +27,7 @@ public class User {
     private Long id;
 
     @CreatedDate
+    @Column(updatable = false, nullable = false)
     private Instant createdAt;
 
     @Column(nullable = false, unique = true)
