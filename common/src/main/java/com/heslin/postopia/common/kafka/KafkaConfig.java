@@ -17,7 +17,7 @@ import java.util.Map;
 @EnableKafka
 public class KafkaConfig {
     @Bean
-    public ProducerFactory<Long, Integer> liProducerFactory(KafkaProducerProperties kafkaProducerProperties) { // 注入自动配置的 KafkaProperties
+    public ProducerFactory<Long, Integer> liProducerFactory(KafkaProducerProperties kafkaProducerProperties) {
         Map<String, Object> configs = kafkaProducerProperties.buildConfigs();
         configs.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, LongSerializer.class);
         configs.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, IntegerSerializer.class);

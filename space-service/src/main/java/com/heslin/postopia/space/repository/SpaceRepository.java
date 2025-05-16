@@ -17,7 +17,7 @@ public interface SpaceRepository extends JpaRepository<Space, Long> {
     @Query("select new com.heslin.postopia.space.dto.SpaceInfo(s.id, s.name, s.avatar, s.description, s.createdAt, s.postCount, s.memberCount) from Space s order by sum(2 *s.memberCount + 0.5 * s.postCount) desc")
     Page<SpaceInfo> findSpaceInfosByPopularity(Pageable pageable);
 
-    //@Query("select new com.heslin.postopia.space.dto.SpaceInfo(s.id, s.name, s.avatar, s.description, s.createdAt, s.postCount, s.memberCount) from Space s where s.id = ?1 order by s.createdAt asc ")
+    @Query("select new com.heslin.postopia.space.dto.SpaceInfo(s.id, s.name, s.avatar, s.description, s.createdAt, s.postCount, s.memberCount) from Space s where s.id in (select m.spaceId from MemberLog m where m.userId = ?1) order by s.createdAt asc ")
     Page<SpaceInfo> findSpaceInfosByUserId(Long queryId, Pageable pageable);
 
     SpaceInfo findSpaceInfoById(Long id);

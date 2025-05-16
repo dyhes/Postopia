@@ -1,24 +1,25 @@
 package com.heslin.postopia.common.kafka;
 
-import lombok.Data;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
-import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.stereotype.Component;
-import org.springframework.validation.annotation.Validated;
 
 import java.util.HashMap;
 import java.util.Map;
 
 @Component
-@ConfigurationProperties(prefix = "spring.kafka.consumer")
-@Data
-@Validated
+@RefreshScope
 public class KafkaConsumerProperties {
-    // 基础配置
+    @Value("${spring.kafka.consumer.group-id}")
     private String groupId;
+    @Value("${spring.kafka.consumer.max-poll-records}")
     private int maxPollRecords;
+    @Value("${spring.kafka.consumer.fetch-min-size}")
     private int fetchMinSize;
+    @Value("${spring.kafka.consumer.fetch-max-wait}")
     private int fetchMaxWait;
+    @Value("${spring.kafka.consumer.bootstrap-servers}")
     private String bootstrapServers;
 
     public Map<String, Object> buildConfigs() {
