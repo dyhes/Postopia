@@ -1,5 +1,4 @@
 package com.heslin.postopia.user.controller;
-
 import com.heslin.postopia.common.dto.UserId;
 import com.heslin.postopia.common.dto.response.ApiResponseEntity;
 import com.heslin.postopia.common.dto.response.BasicApiResponseEntity;
@@ -102,10 +101,10 @@ public class UserController {
     public record NickNameRequest(String nickname) {}
 
     @PostMapping("nickname")
-    public BasicApiResponseEntity updateNickName(@RequestHeader Long userId, @RequestBody NickNameRequest request) {
+    public BasicApiResponseEntity updateNickName(@RequestHeader Long userId, @RequestHeader String username, @RequestBody NickNameRequest request) {
         Utils.checkRequestBody(request);
         PostopiaFormatter.isValid(request.nickname);
-        userService.updateUserNickName(userId, request.nickname);
+        userService.updateUserNickName(userId, username, request.nickname);
         return BasicApiResponseEntity.success();
     }
 

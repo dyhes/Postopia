@@ -71,6 +71,12 @@ subprojects {
         }
     }
 
+    if (it.name != "gateway") {
+        dependencies {
+            implementation 'org.springframework.kafka:spring-kafka'
+        }
+    }
+
     dependencies {
         implementation 'com.alibaba.cloud:spring-cloud-starter-alibaba-nacos-config'
     }

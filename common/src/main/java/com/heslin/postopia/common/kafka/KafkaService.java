@@ -94,16 +94,6 @@ public class KafkaService {
         send("space", spaceId, value);
     }
 
-//    @KafkaListener(topics = "user", containerFactory = "batchLIFactory")
-//    @Transactional
-//    protected void processUserOperations(List<ConsumerRecord<Long, Integer>> records) {
-//        var mp = new HashMap<Long, Diff>();
-//        records.forEach(record -> {
-//            Diff diff = mp.computeIfAbsent(record.key(), k -> new VoteDiff());
-//            diff.updateDiff(record.value());
-//        });
-//        executeBatchDiffOperations(mp, "users");
-//    }
 //
 //    @KafkaListener(topics = "vote", containerFactory = "batchLIFactory")
 //    @Transactional
@@ -165,7 +155,7 @@ public class KafkaService {
 
     @Retryable
     @Transactional
-    protected void executeBatchDiffOperations(HashMap<Long, Diff> mp, String tableName) {
+    public void executeBatchDiffOperations(HashMap<Long, Diff> mp, String tableName) {
         StringBuilder sql = new StringBuilder("UPDATE " + tableName + " SET ");
         Map<String, Object> params = mp.keySet().stream().collect(Collectors.toMap(k -> "id" + k, k -> k));
         List<Long> ids = new ArrayList<>(mp.keySet());

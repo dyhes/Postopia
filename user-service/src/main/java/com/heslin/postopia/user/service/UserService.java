@@ -1,13 +1,15 @@
 package com.heslin.postopia.user.service;
 
-import com.heslin.postopia.user.dto.UserAvatar;
-import com.heslin.postopia.user.dto.SearchUserInfo;
 import com.heslin.postopia.common.dto.UserId;
 import com.heslin.postopia.common.dto.response.ResMessage;
 import com.heslin.postopia.common.jwt.JWTService;
+import com.heslin.postopia.common.kafka.KafkaService;
 import com.heslin.postopia.common.redis.RedisService;
+import com.heslin.postopia.search.model.UserDoc;
 import com.heslin.postopia.user.Repository.UserRepository;
 import com.heslin.postopia.user.dto.Credential;
+import com.heslin.postopia.user.dto.SearchUserInfo;
+import com.heslin.postopia.user.dto.UserAvatar;
 import com.heslin.postopia.user.dto.UserInfo;
 import com.heslin.postopia.user.model.User;
 import com.heslin.postopia.user.request.RefreshRequest;
@@ -23,7 +25,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RefreshScope
@@ -34,17 +38,19 @@ public class UserService {
     private final OStorageService oStorageService;
     private final MailService mailService;
     private final RedisService redisService;
+    private final KafkaService kafkaService;
     @Value("${postopia.avatar.user}")
     private String defaultUserAvatar;
 
     @Autowired
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, JWTService jwtService, OStorageService oStorageService, MailService mailService, RedisService redisService) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, JWTService jwtService, OStorageService oStorageService, MailService mailService, RedisService redisService, KafkaService kafkaService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
         this.oStorageService = oStorageService;
         this.mailService = mailService;
         this.redisService = redisService;
+        this.kafkaService = kafkaService;
     }
 
     public ResMessage signup(SignUpRequest signupRequest) {
@@ -58,8 +64,8 @@ public class UserService {
             .password(passwordEncoder.encode(password))
             .showEmail(false)
             .build();
-            userRepository.save(user);
-            //kafkaService.sendToDocCreate("user", user.getUsername(), new UserDoc(user.getUsername(), user.getUsername(), user.getNickname()));
+            user = userRepository.save(user);
+            kafkaService.sendToDocCreate("user", user.getUsername(), new UserDoc(UserId.encode(user.getId()), user.getUsername(), user.getNickname()));
             return new ResMessage("用户 @" + username + " 注册成功", true);
         } catch (DataIntegrityViolationException e) {
             System.out.println("DataIntegrityViolationException: " + e);
@@ -91,11 +97,11 @@ public class UserService {
         return userRepository.findUserInfoById(userId);
     }
 
-    public void updateUserNickName(Long userId, String nickname) {
+    public void updateUserNickName(Long userId, String username, String nickname) {
         userRepository.updateNickname(userId, nickname);
-//        Map<String, Object> mp = new HashMap<>();
-//        mp.put("nickname", nickname);
-//        kafkaService.sendToDocUpdate("user", user.getUsername(), user.getUsername(), mp);
+        Map<String, Object> mp = new HashMap<>();
+        mp.put("nickname", nickname);
+        kafkaService.sendToDocUpdate("user", UserId.encode(userId), username, mp);
     }
 
     public void updateUserIntroduction(Long userId, String introduction) {
