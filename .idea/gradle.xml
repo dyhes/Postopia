@@ -9,13 +9,17 @@
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
+            <option value="$PROJECT_DIR$/comment-service" />
             <option value="$PROJECT_DIR$/common" />
             <option value="$PROJECT_DIR$/gateway" />
             <option value="$PROJECT_DIR$/jwt" />
+            <option value="$PROJECT_DIR$/message-service" />
+            <option value="$PROJECT_DIR$/opinion-service" />
             <option value="$PROJECT_DIR$/post-service" />
             <option value="$PROJECT_DIR$/search-service" />
             <option value="$PROJECT_DIR$/space-service" />
             <option value="$PROJECT_DIR$/user-service" />
+            <option value="$PROJECT_DIR$/vote-service" />
           </set>
         </option>
       </GradleProjectSettings>

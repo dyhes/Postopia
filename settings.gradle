@@ -6,4 +6,8 @@ include 'space-service'
 include 'post-service'
 include 'search-service'
 include 'jwt'
+include 'comment-service'
+include 'opinion-service'
+include 'message-service'
+include 'vote-service'
 

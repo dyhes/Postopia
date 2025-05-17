@@ -114,6 +114,50 @@ services:
     ports:
       - "54323:5432"
 
+  # comment-service
+  comment-postgres:
+    image: 'postgres:latest'
+    container_name: comment-db
+    environment:
+      - POSTGRES_DB=postopia_comment
+      - POSTGRES_PASSWORD=postopia_comment
+      - POSTGRES_USER=postopia_comment
+    ports:
+      - "54324:5432"
+
+  # message-service
+  message-postgres:
+    image: 'postgres:latest'
+    container_name: message-db
+    environment:
+      - POSTGRES_DB=postopia_message
+      - POSTGRES_PASSWORD=postopia_message
+      - POSTGRES_USER=postopia_message
+    ports:
+      - "54325:5432"
+
+  # vote-service
+  vote-postgres:
+    image: 'postgres:latest'
+    container_name: vote-db
+    environment:
+      - POSTGRES_DB=postopia_vote
+      - POSTGRES_PASSWORD=postopia_vote
+      - POSTGRES_USER=postopia_vote
+    ports:
+      - "54326:5432"
+
+  # opinion-service
+  opinion-postgres:
+    image: 'postgres:latest'
+    container_name: opinion-db
+    environment:
+      - POSTGRES_DB=postopia_opinion
+      - POSTGRES_PASSWORD=postopia_opinion
+      - POSTGRES_USER=postopia_opinion
+    ports:
+      - "54327:5432"
+
   redis:
     image: redis:latest
     container_name: postopia-redis

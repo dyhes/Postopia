@@ -1,6 +1,6 @@
 spring:
   application:
-    name: post-service
+    name: opinion-service
   profiles:
     active: dev
   cloud:
