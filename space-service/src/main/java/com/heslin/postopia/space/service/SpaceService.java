@@ -1,6 +1,5 @@
 package com.heslin.postopia.space.service;
 
-import com.heslin.postopia.common.dto.UserId;
 import com.heslin.postopia.common.dto.response.ApiResponse;
 import com.heslin.postopia.common.dto.response.ResMessage;
 import com.heslin.postopia.common.kafka.KafkaService;
@@ -95,7 +94,10 @@ public class SpaceService {
 
     public Page<SearchUserInfo> searchMemberByPrefix(Long spaceId, String prefix, Pageable pageable) {
         Page<MemberLog>  localRet = memberService.searchByPrefix(spaceId, prefix, pageable);
-        var  remoteRet = userClient.getSpaceUserInfo(localRet.getContent().stream().map(memberLog -> new UserId(memberLog.getUserId())).toList());
+        List<Long> userId = localRet.getContent().stream().map(MemberLog::getUserId).toList();
+        System.out.println("userId");
+        userId.forEach(System.out::println);
+        var  remoteRet = userClient.getSpaceUserInfo(userId);
         List<SearchUserInfo> infos = Objects.requireNonNull(remoteRet.getBody()).getData();
         System.out.println("infos");
         infos.forEach(System.out::println);

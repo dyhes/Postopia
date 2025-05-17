@@ -20,7 +20,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("user")
@@ -61,20 +60,20 @@ public class UserController {
         }
     }
 
-    @GetMapping("info/{userId}")
-    public ApiResponseEntity<UserInfo> getUserInfo(@PathVariable UserId userId) {
-        return ApiResponseEntity.success(userService.getUserInfo(userId.getId()));
+    @GetMapping("info")
+    public ApiResponseEntity<UserInfo> getUserInfo(@RequestParam Long userId) {
+        return ApiResponseEntity.success(userService.getUserInfo(userId));
     }
 
     @GetMapping("avatars")
-    public ApiResponseEntity<List<UserAvatar>> getUserAvatar(@RequestParam List<UserId> ids) {
-        List<UserAvatar> ret = userService.getUserAvatars(ids.stream().map(UserId::getId).collect(Collectors.toList()));
+    public ApiResponseEntity<List<UserAvatar>> getUserAvatar(@RequestParam List<Long> userId) {
+        List<UserAvatar> ret = userService.getUserAvatars(userId);
         return ApiResponseEntity.success(ret);
     }
 
     @GetMapping("search/infos")
-    public ApiResponseEntity<List<SearchUserInfo>> getSearchedUserInfos(@RequestParam List<UserId> ids) {
-        List<SearchUserInfo> ret = userService.getSearchUserInfos(ids.stream().map(UserId::getId).collect(Collectors.toList()));
+    public ApiResponseEntity<List<SearchUserInfo>> getSearchedUserInfos(@RequestParam List<Long> userId) {
+        List<SearchUserInfo> ret = userService.getSearchUserInfos(userId);
         return ApiResponseEntity.success(ret);
     }
 

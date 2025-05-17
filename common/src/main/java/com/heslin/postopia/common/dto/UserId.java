@@ -28,6 +28,10 @@ public class UserId implements Serializable {
         return -1L;
     }
 
+    public static String masked(String id) {
+        return masked(Long.parseLong(id)).toString();
+    }
+
     public static String encode(Long id) {
         return masked(id).toString();
     }

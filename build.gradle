@@ -6,8 +6,8 @@ buildscript {
         springCloudAlibabaVersion = '2023.0.1.0' // Use appropriate version compatible with your Spring Boot
     }
     repositories {
+        maven { url 'https://maven.aliyun.com/repository/public/' }
         mavenCentral()
-        //maven { url 'https://maven.aliyun.com/repository/public/' }
     }
     dependencies {
         classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")

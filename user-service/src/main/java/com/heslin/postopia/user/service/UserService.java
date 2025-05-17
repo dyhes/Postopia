@@ -65,7 +65,7 @@ public class UserService {
             .showEmail(false)
             .build();
             user = userRepository.save(user);
-            kafkaService.sendToDocCreate("user", user.getUsername(), new UserDoc(UserId.encode(user.getId()), user.getUsername(), user.getNickname()));
+            kafkaService.sendToDocCreate("user", user.getUsername(), new UserDoc(UserId.encode(user.getUserId()), user.getUsername(), user.getNickname()));
             return new ResMessage("用户 @" + username + " 注册成功", true);
         } catch (DataIntegrityViolationException e) {
             System.out.println("DataIntegrityViolationException: " + e);
@@ -83,7 +83,7 @@ public class UserService {
         if (!passwordEncoder.matches(password, user.getPassword())) {
             throw new RuntimeException("用户 @" + username + "密码错误");
         }
-        String refreshToken = jwtService.generateRefreshToken(user.getId(), username);
+        String refreshToken = jwtService.generateRefreshToken(user.getUserId(), username);
         String accessToken = jwtService.refresh(refreshToken);
         return new Credential(refreshToken, accessToken);
     }
@@ -94,7 +94,7 @@ public class UserService {
 
 
     public UserInfo getUserInfo(Long userId) {
-        return userRepository.findUserInfoById(userId);
+        return userRepository.findUserInfoByUserId(userId);
     }
 
     public void updateUserNickName(Long userId, String username, String nickname) {
@@ -109,11 +109,11 @@ public class UserService {
     }
 
     public List<UserAvatar> getUserAvatars(List<Long> ids) {
-        return userRepository.findAvatarsByIdIn(ids);
+        return userRepository.findAvatarsByUserIdIn(ids);
     }
 
     public List<SearchUserInfo> getSearchUserInfos(List<Long> ids) {
-        return userRepository.findSearchUserInfosByIdIn(ids);
+        return userRepository.findSearchUserInfosByUserIdIn(ids);
     }
 
     public String uploadAsset(UserId userId, MultipartFile file, boolean isVideo) throws IOException {
