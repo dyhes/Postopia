@@ -14,12 +14,12 @@ public class PostopiaFormatter {
         }
     }
 
-    public static String formatUser(String username) {
-        return String.format(" postopia-user{%s} ", username);
+    public static String formatUser(Long userId, String username) {
+        return String.format(" 用户 postopia-user{%d;@%s} ", userId, username);
     }
 
-    public static String formatSpace(String spaceName) {
-        return String.format(" postopia-space{%s} ", spaceName);
+    public static String formatSpace(Long spaceId, String spaceName) {
+        return String.format(" 空间postopia-space{%d;%s} ", spaceId, spaceName);
     }
 
     public static String formatPost(String spaceName, Long postId, String content) {

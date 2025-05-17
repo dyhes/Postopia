@@ -65,7 +65,8 @@ public class UserService {
             .showEmail(false)
             .build();
             user = userRepository.save(user);
-            kafkaService.sendToDocCreate("user", user.getUsername(), new UserDoc(UserId.encode(user.getUserId()), user.getUsername(), user.getNickname()));
+            String id = UserId.encode(user.getUserId());
+            kafkaService.sendToDocCreate("user", id, new UserDoc(id, user.getUsername(), user.getNickname()));
             return new ResMessage("用户 @" + username + " 注册成功", true);
         } catch (DataIntegrityViolationException e) {
             System.out.println("DataIntegrityViolationException: " + e);

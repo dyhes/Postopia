@@ -1,0 +1,165 @@
+package com.heslin.postopia.vote.service;
+
+import com.heslin.postopia.common.dto.Notification;
+import com.heslin.postopia.common.redis.RedisService;
+import com.heslin.postopia.common.utils.PostopiaFormatter;
+import com.heslin.postopia.vote.feign.OpinionFeign;
+import com.heslin.postopia.vote.feign.SpaceFeign;
+import com.heslin.postopia.vote.model.CommonVote;
+import com.heslin.postopia.vote.model.SpaceVote;
+import com.heslin.postopia.vote.model.Vote;
+import com.heslin.postopia.vote.repository.CommonVoteRepository;
+import com.heslin.postopia.vote.repository.SpaceVoteRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
+import org.springframework.stereotype.Service;
+
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Function;
+
+@Service
+public class VoteScheduleService {
+//    private final OpinionRepository opinionRepository;
+//    private final SpaceService spaceService;
+//    private final MessageService messageService;
+//    private final CommentService commentService;
+//    private final PostService postService;
+    private final RedisService redisService;
+    private final ThreadPoolTaskScheduler taskScheduler;
+    private final CommonVoteRepository commonVoteRepository;
+    private final SpaceVoteRepository spaceVoteRepository;
+    private final SpaceFeign spaceFeign;
+    private final OpinionFeign opinionFeign;
+
+    @Autowired
+    public VoteScheduleService(RedisService redisService, ThreadPoolTaskScheduler taskScheduler, CommonVoteRepository commonVoteRepository, SpaceVoteRepository spaceVoteRepository, SpaceFeign spaceFeign, OpinionFeign opinionFeign) {
+        this.redisService = redisService;
+        this.taskScheduler = taskScheduler;
+        this.commonVoteRepository = commonVoteRepository;
+        this.spaceVoteRepository = spaceVoteRepository;
+        this.spaceFeign = spaceFeign;
+        this.opinionFeign = opinionFeign;
+    }
+
+    private void scheduledAction(boolean isCommon, Long voteId, String voteActionMessage, String relatedUserMessage, Function<Long, Void> voteAction) {
+        Vote vote = isCommon? commonVoteRepository.findById(voteId).orElseThrow() : spaceVoteRepository.findById(voteId).orElseThrow();
+        String tail;
+        List<Notification> notifications = new ArrayList<>();
+        if (vote.isFulfilled()) {
+            voteAction.apply(vote.getRelatedEntity());
+            tail = "的投票已成功通过";
+            if (relatedUserMessage != null) {
+                notifications.add(new Notification(vote.getRelatedUser(), relatedUserMessage));
+            }
+        } else {
+            tail = "的投票未通过, 赞成人数 %d，反对人数 %d, 所需最少投票人数 %d".formatted(vote.getPositiveCount(), vote.getNegativeCount(), vote.getThreshold());
+        }
+        notifications.add(new Notification(vote.getInitiator(), "您发起的%s%s".formatted(voteActionMessage, tail)));
+        // notify
+        // not impl
+        opinionFeign.notifyVoter(voteId, "您%s的" + voteActionMessage + tail);
+        if (vote instanceof CommonVote) {
+            commonVoteRepository.delete((CommonVote) vote);
+        } else {
+            spaceVoteRepository.delete((SpaceVote) vote);
+        }
+    }
+
+    public void scheduleUpdateSpaceVote(Long voteId, String spaceMessage, String description, String avatar, Instant endAt) {
+        String voteActionMessage = "修改%s信息".formatted(spaceMessage);
+        taskScheduler.schedule(
+        () -> {
+            scheduledAction(false, voteId, voteActionMessage, null, sid -> {
+                spaceFeign.updateInfo(sid, description, avatar);
+                return null;
+            });
+        },
+        endAt
+        );
+    }
+
+    public void scheduleExpelSpaceUserVote(Long voteId, String spaceMessage, Long userId, String username, String reason, Instant endAt) {
+        String userMessage = PostopiaFormatter.formatUser(userId, username);
+        String expelMessage = "因%s被投票从%s驱逐".formatted(reason, spaceMessage);
+        taskScheduler.schedule(
+        () -> {
+            scheduledAction(false, voteId, "因%s从%s驱逐%s".formatted(reason, spaceMessage, userMessage), "您已%s".formatted(expelMessage), sid -> {
+                spaceFeign.expelUser(sid, userId, userMessage + expelMessage);
+                return null;
+            });
+        },
+        endAt
+        );
+    }
+
+    public void scheduleMuteSpaceUserVote(Long voteId, String spaceMessage, Long userId, String username, String reason, Instant endAt) {
+        String userMessage = PostopiaFormatter.formatUser(userId, username);
+        String muteMessage = "因%s被投票在%s中禁言7天".formatted(reason, spaceMessage);
+        taskScheduler.schedule(
+        () -> {
+            scheduledAction(false, voteId, "因%s在%s中禁言%s".formatted(reason, spaceMessage, userMessage), "您已%s".formatted(muteMessage), sid -> {
+                spaceFeign.muteUser(sid, userId, userMessage + muteMessage);
+                return null;
+            });
+        },
+        endAt
+        );
+    }
+
+    public void scheduleUpdatePostArchiveStatusVote(Long voteId, boolean isArchived, Long postId, String spaceName, String postSubject, String postAuthor, Instant endAt) {
+        String postMessage = "帖子：%s%s".formatted(postSubject, PostopiaFormatter.formatPost(spaceName, postId));
+        String voteActionMessage = "%s归档%s".formatted(isArchived ? "" : "取消", postMessage);
+        String relatedUserMessage = "您的%s已被投票%s归档".formatted(postMessage, isArchived ? "" : "取消");
+        taskScheduler.schedule(
+        () -> {
+            scheduledAction(true ,voteId, voteActionMessage, relatedUserMessage, pid -> {
+                postService.updateArchiveStatus(postId, isArchived);
+                return null;
+            });
+        },
+        endAt
+        );
+    }
+
+    public void scheduleUpdateCommentPinStatusVote(Long voteId, boolean isPined, Long commentId, Long postId, String spaceName, String commentContent, Instant endAt) {
+        String commentMessage = "评论：%s%s".formatted(commentContent, PostopiaFormatter.formatComment(spaceName, postId, commentId));
+        String voteActionMessage = "%s置顶%s".formatted(isPined ? "" : "取消", commentMessage);
+        String relatedUserMessage = "您的%s已被投票%s置顶".formatted(commentMessage, isPined ? "" : "取消");
+        taskScheduler.schedule(
+        () -> {
+            scheduledAction(true,voteId, voteActionMessage, relatedUserMessage, cid -> {
+                commentService.updatePinStatus(commentId, isPined);
+                return null;
+            });
+        },
+        endAt
+        );
+    }
+
+    public void scheduleDeleteCommentVote(Long voteId, Long postId, Long userId, String spaceName, String content, Instant endAt) {
+        taskScheduler.schedule(
+        () -> {
+            scheduledAction(true,voteId, "删除评论 %s".formatted(content), "您的评论：%s 已被投票删除".formatted(content), commentId -> {
+                commentService.deleteComment(commentId, postId, userId, spaceName);
+                return null;
+            });
+        },
+        endAt
+        );
+    }
+
+    public void scheduleDeletePostVote(Long voteId, Long spaceId, String spaceName, Long userId, String postSubject, Instant endAt) {
+        taskScheduler.schedule(
+        () -> {
+            scheduledAction(true,voteId, "删除帖子 %s".formatted(postSubject), "您的帖子：%s 已被投票删除".formatted(postSubject), postId -> {
+                postService.deletePost(postId, spaceId, userId, spaceName);
+                return null;
+            });
+        },
+        endAt
+        );
+    }
+
+}

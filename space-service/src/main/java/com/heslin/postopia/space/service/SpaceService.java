@@ -8,6 +8,7 @@ import com.heslin.postopia.search.model.SpaceDoc;
 import com.heslin.postopia.space.dto.SearchSpaceInfo;
 import com.heslin.postopia.space.dto.SpaceAvatar;
 import com.heslin.postopia.space.dto.SpaceInfo;
+import com.heslin.postopia.space.dto.VoteSpaceInfo;
 import com.heslin.postopia.space.feign.UserClient;
 import com.heslin.postopia.space.model.MemberLog;
 import com.heslin.postopia.space.model.Space;
@@ -25,7 +26,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 @Service
@@ -56,7 +59,8 @@ public class SpaceService {
             throw new DataIntegrityViolationException("空间名称已存在");
         }
         joinSpace(username, userId, space.getId());
-        kafkaService.sendToDocCreate("space", space.getName(), new SpaceDoc(space.getId().toString(), space.getName(),space.getDescription()));
+        String id = space.getId().toString();
+        kafkaService.sendToDocCreate("space", id, new SpaceDoc(id, space.getName(),space.getDescription()));
         return space.getId();
     }
 
@@ -106,5 +110,41 @@ public class SpaceService {
 
     public ResponseEntity<ApiResponse<String>> uploadAvatar(MultipartFile avatar, Long xUserId) {
         return userClient.uploadAvatar(avatar, false, xUserId);
+    }
+
+
+    private void notifyMember(String message) {
+        //not impl
+    }
+
+    public void expelUser(Long spaceId, Long userId, String reason) {
+        boolean success = memberService.leaveSpace(userId, spaceId);
+        if (success) {
+            kafkaService.sendToSpace(spaceId, SpaceOperation.MEMBER_LEFT);
+        }
+        memberService.forbid(spaceId, userId);
+        notifyMember(reason);
+    }
+
+    public void muteUser(Long spaceId, Long userId, String reason) {
+        memberService.mute(spaceId, userId);
+        notifyMember(reason);
+    }
+
+
+    public void updateInfo(Long spaceId, String description, String avatar) {
+        spaceRepository.updateInfo(spaceId, description, avatar);
+        Map<String, Object> mp = new HashMap<>();
+        mp.put("description", description);
+        String id = spaceId.toString();
+        kafkaService.sendToDocUpdate("space", id, id, mp);
+    }
+
+    public boolean isEligible(Long spaceId, Long userId) {
+        return memberService.findBySpaceIdAndUserId(spaceId, userId).isMuted();
+    }
+
+    public VoteSpaceInfo findVoteSpaceInfo(Long spaceId) {
+        return spaceRepository.findVoteSpaceInfoById(spaceId);
     }
 }

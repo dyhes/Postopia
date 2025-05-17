@@ -1,5 +1,6 @@
 package com.heslin.postopia.space.service;
 
+import com.heslin.postopia.space.model.Forbidden;
 import com.heslin.postopia.space.model.MemberLog;
 import com.heslin.postopia.space.repository.ForbiddenRepository;
 import com.heslin.postopia.space.repository.MemberRepository;
@@ -10,6 +11,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 
 @Service
 public class MemberService {
@@ -42,5 +44,19 @@ public class MemberService {
 
     public Page<MemberLog> searchByPrefix(Long spaceId, String prefix, Pageable pageable) {
         return memberRepository.findBySpaceIdAndUsernameStartingWith(spaceId, prefix, pageable);
+    }
+
+    public void forbid(Long spaceId, Long userId) {
+        Forbidden forbidden = Forbidden.builder().spaceId(spaceId).userId(userId).build();
+        forbiddenRepository.save(forbidden);
+    }
+
+    public void mute(Long spaceId, Long userId) {
+        Instant muteUntil = Instant.now().plus(7, ChronoUnit.DAYS);
+        memberRepository.mute(spaceId, userId, muteUntil);
+    }
+
+    public MemberLog findBySpaceIdAndUserId(Long spaceId, Long userId) {
+        return memberRepository.findBySpaceIdAndUserId(spaceId, userId).orElseThrow();
     }
 }

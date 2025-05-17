@@ -10,6 +10,9 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.Instant;
+import java.util.Optional;
+
 @Repository
 public interface MemberRepository extends JpaRepository<MemberLog, Long> {
     @Transactional
@@ -18,4 +21,11 @@ public interface MemberRepository extends JpaRepository<MemberLog, Long> {
     int deleteBySpaceIdAndUserId( @Param("userId") Long userId, @Param("spaceId") Long spaceId);
 
     Page<MemberLog> findBySpaceIdAndUsernameStartingWith(Long spaceId, String username, Pageable pageable);
+
+    @Transactional
+    @Modifying
+    @Query("update MemberLog m set m.muteUntil = :muteUntil where m.spaceId = :spaceId and m.userId= :userId")
+    void mute(@Param("spaceId") Long spaceId,@Param("userId") Long userId, @Param("muteUntil") Instant muteUntil);
+
+    Optional<MemberLog> findBySpaceIdAndUserId(Long spaceId, Long userId);
 }

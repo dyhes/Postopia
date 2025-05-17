@@ -3,10 +3,13 @@ package com.heslin.postopia.space.repository;
 import com.heslin.postopia.space.dto.SearchSpaceInfo;
 import com.heslin.postopia.space.dto.SpaceAvatar;
 import com.heslin.postopia.space.dto.SpaceInfo;
+import com.heslin.postopia.space.dto.VoteSpaceInfo;
 import com.heslin.postopia.space.model.Space;
+import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
@@ -25,4 +28,11 @@ public interface SpaceRepository extends JpaRepository<Space, Long> {
     List<SpaceAvatar> findSpaceAvatarsByIdIn(List<Long> ids);
 
     List<SearchSpaceInfo> findSearchSpaceInfosByIdIn(List<Long> ids);
+
+    @Transactional
+    @Modifying
+    @Query("update Space s set s.avatar = ?3, s.description = ?2 where s.id = ?1")
+    void updateInfo(Long spaceId, String description, String avatar);
+
+    VoteSpaceInfo findVoteSpaceInfoById(Long spaceId);
 }

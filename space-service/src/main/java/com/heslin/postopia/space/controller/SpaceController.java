@@ -10,12 +10,14 @@ import com.heslin.postopia.common.utils.Utils;
 import com.heslin.postopia.space.dto.SearchSpaceInfo;
 import com.heslin.postopia.space.dto.SpaceAvatar;
 import com.heslin.postopia.space.dto.SpaceInfo;
+import com.heslin.postopia.space.dto.VoteSpaceInfo;
 import com.heslin.postopia.space.service.SpaceService;
 import com.heslin.postopia.user.dto.SearchUserInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.util.Pair;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -30,6 +32,21 @@ public class SpaceController {
     @Autowired
     public SpaceController(SpaceService spaceService) {
         this.spaceService = spaceService;
+    }
+
+    @PostMapping("expel")
+    public void expelUser(@RequestParam Long spaceId, @RequestParam Long userId, @RequestParam String reason) {
+        spaceService.expelUser(spaceId, userId, reason);
+    }
+
+    @PostMapping("mute")
+    public void muteUser(@RequestParam Long spaceId, @RequestParam Long userId, @RequestParam String reason) {
+        spaceService.muteUser(spaceId, userId, reason);
+    }
+
+    @PostMapping("update")
+    public void updateInfo(@RequestParam Long spaceId, @RequestParam String description, @RequestParam String avatar) {
+        spaceService.updateInfo(spaceId, description, avatar);
     }
 
     public record SpaceCreateRequest(String name, String description){}
@@ -96,6 +113,17 @@ public class SpaceController {
     public ApiResponseEntity<SpaceInfo> getSpaceInfo(@RequestParam(name = "id") Long spaceId) {
         SpaceInfo space = spaceService.getSpaceInfo(spaceId);
         return ApiResponseEntity.success(space);
+    }
+
+    @GetMapping("info/vote")
+    public Pair<Boolean, VoteSpaceInfo> checkMemberForVote(Long spaceId, Long userId) {
+        try {
+            boolean isEligible = spaceService.isEligible(spaceId, userId);
+            VoteSpaceInfo spaceInfo = spaceService.findVoteSpaceInfo(spaceId);
+            return Pair.of(isEligible, spaceInfo);
+        } catch (RuntimeException e) {
+            return Pair.of(false, null);
+        }
     }
 
     @GetMapping("avatars")
