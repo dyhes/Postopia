@@ -4,12 +4,14 @@ import com.heslin.postopia.common.dto.Notification;
 import com.heslin.postopia.common.redis.RedisService;
 import com.heslin.postopia.common.utils.PostopiaFormatter;
 import com.heslin.postopia.vote.feign.OpinionFeign;
+import com.heslin.postopia.vote.feign.PostFeign;
 import com.heslin.postopia.vote.feign.SpaceFeign;
 import com.heslin.postopia.vote.model.CommonVote;
 import com.heslin.postopia.vote.model.SpaceVote;
 import com.heslin.postopia.vote.model.Vote;
 import com.heslin.postopia.vote.repository.CommonVoteRepository;
 import com.heslin.postopia.vote.repository.SpaceVoteRepository;
+import com.heslin.postopia.vote.request.PostVoteRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Service;
@@ -32,15 +34,17 @@ public class VoteScheduleService {
     private final SpaceVoteRepository spaceVoteRepository;
     private final SpaceFeign spaceFeign;
     private final OpinionFeign opinionFeign;
+    private final PostFeign postFeign;
 
     @Autowired
-    public VoteScheduleService(RedisService redisService, ThreadPoolTaskScheduler taskScheduler, CommonVoteRepository commonVoteRepository, SpaceVoteRepository spaceVoteRepository, SpaceFeign spaceFeign, OpinionFeign opinionFeign) {
+    public VoteScheduleService(RedisService redisService, ThreadPoolTaskScheduler taskScheduler, CommonVoteRepository commonVoteRepository, SpaceVoteRepository spaceVoteRepository, SpaceFeign spaceFeign, OpinionFeign opinionFeign, PostFeign postFeign) {
         this.redisService = redisService;
         this.taskScheduler = taskScheduler;
         this.commonVoteRepository = commonVoteRepository;
         this.spaceVoteRepository = spaceVoteRepository;
         this.spaceFeign = spaceFeign;
         this.opinionFeign = opinionFeign;
+        this.postFeign = postFeign;
     }
 
     private void scheduledAction(boolean isCommon, Long voteId, String voteActionMessage, String relatedUserMessage, Function<Long, Void> voteAction) {
@@ -108,14 +112,14 @@ public class VoteScheduleService {
         );
     }
 
-    public void scheduleUpdatePostArchiveStatusVote(Long voteId, boolean isArchived, Long postId, String spaceName, String postSubject, String postAuthor, Instant endAt) {
-        String postMessage = "帖子：%s%s".formatted(postSubject, PostopiaFormatter.formatPost(spaceName, postId));
+    public void scheduleUpdatePostArchiveStatusVote(Long voteId, boolean isArchived, PostVoteRequest request, Instant endAt) {
+        String postMessage = "帖子：%s%s".formatted(request.postSubject(), PostopiaFormatter.formatPost(request.spaceId(), request.postId()));
         String voteActionMessage = "%s归档%s".formatted(isArchived ? "" : "取消", postMessage);
         String relatedUserMessage = "您的%s已被投票%s归档".formatted(postMessage, isArchived ? "" : "取消");
         taskScheduler.schedule(
         () -> {
             scheduledAction(true ,voteId, voteActionMessage, relatedUserMessage, pid -> {
-                postService.updateArchiveStatus(postId, isArchived);
+                postFeign.updateArchiveStatus(request.postId(), isArchived);
                 return null;
             });
         },
@@ -138,7 +142,7 @@ public class VoteScheduleService {
         );
     }
 
-    public void scheduleDeleteCommentVote(Long voteId, Long postId, Long userId, String spaceName, String content, Instant endAt) {
+    public void scheduleDeleteCommentVote(Long voteId, PostVoteRequest request, Instant endAt) {
         taskScheduler.schedule(
         () -> {
             scheduledAction(true,voteId, "删除评论 %s".formatted(content), "您的评论：%s 已被投票删除".formatted(content), commentId -> {
@@ -150,16 +154,19 @@ public class VoteScheduleService {
         );
     }
 
-    public void scheduleDeletePostVote(Long voteId, Long spaceId, String spaceName, Long userId, String postSubject, Instant endAt) {
+    public void scheduleDeletePostVote(Long voteId, PostVoteRequest request, Instant endAt) {
+        String postMessage = "帖子: %s ".formatted(request.postSubject());
         taskScheduler.schedule(
         () -> {
-            scheduledAction(true,voteId, "删除帖子 %s".formatted(postSubject), "您的帖子：%s 已被投票删除".formatted(postSubject), postId -> {
-                postService.deletePost(postId, spaceId, userId, spaceName);
+            scheduledAction(true, voteId, "删除%s".formatted(postMessage), "您的%s已被投票删除".formatted(postMessage), postId -> {
+                postFeign.deletePost(postId, request.spaceId(), request.userId());
                 return null;
             });
         },
         endAt
         );
     }
+
+
 
 }

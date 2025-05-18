@@ -7,6 +7,7 @@ import com.heslin.postopia.space.dto.VoteSpaceInfo;
 import com.heslin.postopia.vote.dto.VoteInfo;
 import com.heslin.postopia.vote.enums.DetailVoteType;
 import com.heslin.postopia.vote.enums.VoteType;
+import com.heslin.postopia.vote.feign.PostFeign;
 import com.heslin.postopia.vote.feign.SpaceFeign;
 import com.heslin.postopia.vote.feign.UserFeign;
 import com.heslin.postopia.vote.model.CommonVote;
@@ -14,6 +15,7 @@ import com.heslin.postopia.vote.model.SpaceVote;
 import com.heslin.postopia.vote.model.Vote;
 import com.heslin.postopia.vote.repository.CommonVoteRepository;
 import com.heslin.postopia.vote.repository.SpaceVoteRepository;
+import com.heslin.postopia.vote.request.PostVoteRequest;
 import com.heslin.postopia.vote.request.SpaceUserRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -37,6 +39,7 @@ public class VoteService {
     private final ObjectMapper objectMapper;
     private final UserFeign userFeign;
     private final SpaceFeign spaceFeign;
+    private final PostFeign postFeign;
 //    private final OpinionService opinionService;
 //    private final CommentService commentService;
 //    private final PostService postService;
@@ -59,7 +62,7 @@ public class VoteService {
     private float spaceSmall;
 
     @Autowired
-    public VoteService(CommonVoteRepository commonVoteRepository, SpaceVoteRepository spaceVoteRepository, KafkaService kafkaService, VoteScheduleService scheduleService, ObjectMapper objectMapper, UserFeign userFeign, SpaceFeign spaceFeign) {
+    public VoteService(CommonVoteRepository commonVoteRepository, SpaceVoteRepository spaceVoteRepository, KafkaService kafkaService, VoteScheduleService scheduleService, ObjectMapper objectMapper, UserFeign userFeign, SpaceFeign spaceFeign, PostFeign postFeign) {
         this.commonVoteRepository = commonVoteRepository;
         this.spaceVoteRepository = spaceVoteRepository;
         this.kafkaService = kafkaService;
@@ -67,8 +70,12 @@ public class VoteService {
         this.objectMapper = objectMapper;
         this.userFeign = userFeign;
         this.spaceFeign = spaceFeign;
+        this.postFeign = postFeign;
     }
 
+    public Pair<Boolean, VoteSpaceInfo> spaceMemberCheck(Long spaceId, Long userId) {
+        return spaceFeign.checkMemberForVote(spaceId, userId);
+    }
     //    
 //    public void upsertVoteOpinion(Long xUserId, Long id, boolean isPositive) {
 //        VoteOpinion voteOpinion = new VoteOpinion();
@@ -102,36 +109,6 @@ public class VoteService {
     
     public VoteInfo getSpaceVote(Long id) {
         return commonVoteRepository.findSpaceVote(id);
-    }
-
-    private CommonVote createCommonVote(Long xUserId, Long relatedEntity, Long relatedUser, VoteType voteType, DetailVoteType detailVoteType) {
-        Instant start = Instant.now();
-        Long threshold;
-        Instant end;
-        switch (voteType) {
-            case COMMENT -> {
-                threshold = commentThreshold;
-                end = start.plus(commentDuration, ChronoUnit.MINUTES);
-            }
-            case POST -> {
-                threshold = postThreshold;
-                end = start.plus(postDuration, ChronoUnit.MINUTES);
-            }
-            default -> throw new IllegalStateException("Unexpected value: " + voteType);
-        }
-        CommonVote vote = CommonVote.builder()
-        .initiator(xUserId)
-        .relatedEntity(relatedEntity)
-        .relatedUser(relatedUser)
-        .startAt(start)
-        .endAt(end)
-        .detailVoteType(detailVoteType)
-        .positiveCount(1)
-        .negativeCount(0)
-        .threshold(threshold)
-        .voteType(voteType)
-        .build();
-        return commonVoteRepository.save(vote);
     }
 
     private SpaceVote createSpaceVote(Long xUserId, Long relatedEntity, Long relatedUser, DetailVoteType detailVoteType, Long spaceMember, String first, String second) {
@@ -182,69 +159,64 @@ public class VoteService {
         return vote.getId();
     }
 
-
-    public Pair<Boolean, VoteSpaceInfo> spaceMemberCheck(Long spaceId, Long userId) {
-        return spaceFeign.checkMemberForVote(spaceId, userId);
+    private CommonVote createCommonVote(Long xUserId, Long relatedEntity, Long relatedUser, VoteType voteType, DetailVoteType detailVoteType) {
+        Instant start = Instant.now();
+        Long threshold;
+        Instant end;
+        switch (voteType) {
+            case COMMENT -> {
+                threshold = commentThreshold;
+                end = start.plus(commentDuration, ChronoUnit.MINUTES);
+            }
+            case POST -> {
+                threshold = postThreshold;
+                end = start.plus(postDuration, ChronoUnit.MINUTES);
+            }
+            default -> throw new IllegalStateException("Unexpected value: " + voteType);
+        }
+        CommonVote vote = CommonVote.builder()
+        .initiator(xUserId)
+        .relatedEntity(relatedEntity)
+        .relatedUser(relatedUser)
+        .startAt(start)
+        .endAt(end)
+        .detailVoteType(detailVoteType)
+        .positiveCount(1)
+        .negativeCount(0)
+        .threshold(threshold)
+        .voteType(voteType)
+        .build();
+        return commonVoteRepository.save(vote);
     }
-
     
-
-
-    
-//    public Long expelSpaceUserVote(Long xUserId, Long spaceId, String spaceName, Long member, String username, String reason) {
-//        String info;
-//        try {
-//            info = objectMapper.writeValueAsString(new SpaceUserOpInfo(username, reason));
-//        } catch (JsonProcessingException e) {
-//            throw new RuntimeException(e);
-//        }
-//        Vote vote = createCommonVote(xUserId, spaceId, info, VoteType.SPACE, DetailVoteType.EXPEL_USER, member);
-//        scheduleService.scheduleExpelSpaceUserVote(vote.getId(), spaceName, username, reason, vote.getEndAt());
-//        return vote.getId();
-//    }
-
-    
-//    public Long muteSpaceUserVote(Long xUserId, Long spaceId, String spaceName, Long member, String username, String reason) {
-//        String info;
-//        try {
-//            info = objectMapper.writeValueAsString(new SpaceUserOpInfo(username, reason));
-//        } catch (JsonProcessingException e) {
-//            throw new RuntimeException(e);
-//        }
-//        Vote vote = createCommonVote(xUserId, spaceId, info, VoteType.SPACE, DetailVoteType.MUTE_USER, member);
-//        scheduleService.scheduleMuteSpaceUserVote(vote.getId(), spaceName, username, reason, vote.getEndAt());
-//        return vote.getId();
-//    }
-
-    
-    public Long deletePostVote(Long xUserId, Long postId, String postSubject, String postAuthor, Long spaceId, String spaceName, Long userId) {
-        Vote vote = this.createCommonVote(xUserId, postId, postAuthor, VoteType.POST, DetailVoteType.DELETE_POST);
-        scheduleService.scheduleDeletePostVote(vote.getId(), spaceId, spaceName, userId, postSubject, vote.getEndAt());
+    public Long deletePostVote(Long xUserId, PostVoteRequest request) {
+        Vote vote = createCommonVote(xUserId, request.postId(), request.userId(), VoteType.POST, DetailVoteType.DELETE_POST);
+        scheduleService.scheduleDeletePostVote(vote.getId(), request, vote.getEndAt());
         return vote.getId();
     }
 
-    private Long updateArchiveStatusVote(boolean isArchived, Long xUserId, Long postId, String spaceName, String postSubject, String postAuthor) throws BadRequestException {
-        if (!postService.checkPostArchiveStatus(postId, isArchived)) {
+    private Long updateArchiveStatusVote(boolean isArchived, Long xUserId, PostVoteRequest request) {
+        if (!postFeign.checkPostArchiveStatus(request.postId(), isArchived)) {
             throw new RuntimeException(isArchived? "该评论归档" : "该评论未归档");
         }
-        Vote vote = this.createCommonVote(xUserId, postId, postAuthor, VoteType.POST, isArchived? DetailVoteType.ARCHIVE_POST : DetailVoteType.UNARCHIVE_POST);
-        scheduleService.scheduleUpdatePostArchiveStatusVote(vote.getId(), isArchived, postId, spaceName, postSubject, postAuthor, vote.getEndAt());
+        Vote vote = createCommonVote(xUserId, request.postId(), request.userId(), VoteType.POST, isArchived? DetailVoteType.ARCHIVE_POST : DetailVoteType.UNARCHIVE_POST);
+        scheduleService.scheduleUpdatePostArchiveStatusVote(vote.getId(), isArchived, request, vote.getEndAt());
         return vote.getId();
     }
 
     
-    public Long unArchivePostVote(Long xUserId, Long postId, String postSubject, String postAuthor, String spaceName) throws BadRequestException {
-        return updateArchiveStatusVote(false, xUserId, postId, spaceName, postSubject, postAuthor);
+    public Long unArchivePostVote(Long xUserId, PostVoteRequest request) {
+        return updateArchiveStatusVote(false, xUserId, request);
     }
 
     
-    public Long archivePostVote(Long xUserId, Long postId, String postSubject, String postAuthor, String spaceName) throws BadRequestException {
-        return updateArchiveStatusVote(true, xUserId, postId, spaceName, postSubject, postAuthor);
+    public Long archivePostVote(Long xUserId, PostVoteRequest request) {
+        return updateArchiveStatusVote(true, xUserId, request);
     }
 
     
     public Long deleteCommentVote(Long xUserId, Long commentId, Long postId, Long userId, String spaceName, String commentContent, String commentAuthor) {
-        Vote vote = this.createCommonVote(xUserId, commentId, commentAuthor, VoteType.COMMENT, DetailVoteType.DELETE_COMMENT);
+        Vote vote = createCommonVote(xUserId, commentId, commentAuthor, VoteType.COMMENT, DetailVoteType.DELETE_COMMENT);
         scheduleService.scheduleDeleteCommentVote(vote.getId(), postId, userId, spaceName, commentContent, vote.getEndAt());
         return vote.getId();
     }
@@ -253,7 +225,7 @@ public class VoteService {
         if (!commentService.checkCommentPinStatus(commentId, isPined)) {
             throw new RuntimeException(isPined? "该评论已置顶" : "该评论未置顶");
         }
-        Vote vote = this.createCommonVote(xUserId, commentId, commentAuthor, VoteType.COMMENT, isPined? DetailVoteType.PIN_COMMENT : DetailVoteType.UNPIN_COMMENT);
+        Vote vote = createCommonVote(xUserId, commentId, commentAuthor, VoteType.COMMENT, isPined? DetailVoteType.PIN_COMMENT : DetailVoteType.UNPIN_COMMENT);
         scheduleService.scheduleUpdateCommentPinStatusVote(vote.getId(), isPined, commentId, postId, spaceName, commentContent, vote.getEndAt());
         return vote.getId();
     }

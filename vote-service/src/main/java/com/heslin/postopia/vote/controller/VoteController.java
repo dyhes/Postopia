@@ -1,9 +1,9 @@
 package com.heslin.postopia.vote.controller;
 
-import com.heslin.postopia.common.dto.UserId;
 import com.heslin.postopia.common.dto.response.ApiResponseEntity;
 import com.heslin.postopia.common.utils.Utils;
 import com.heslin.postopia.space.dto.VoteSpaceInfo;
+import com.heslin.postopia.vote.request.PostVoteRequest;
 import com.heslin.postopia.vote.request.SpaceInfoRequest;
 import com.heslin.postopia.vote.request.SpaceUserRequest;
 import com.heslin.postopia.vote.service.VoteService;
@@ -85,53 +85,43 @@ public class VoteController {
         }
     }
 
-    public record PostVoteRequest(
-        Long postId,
-        String postSubject,
-        String postAuthor,
-        Long spaceId,
-        String spaceName,
-        UserId userId
-    ){}
+
 
     @PostMapping("post-delete")
     public ApiResponseEntity<Long> deletePostVote(@RequestBody PostVoteRequest request, @RequestHeader Long xUserId) {
-        Utils.checkRequestBody(request);
-        Long id;
         try {
-            id = voteService.deletePostVote(xUserId, request.postId, request.postSubject, request.postAuthor, request.spaceId, request.spaceName, request.userId().getId());
+            Long id = voteService.deletePostVote(xUserId, request);
+            return ApiResponseEntity.success(id);
         } catch (DataIntegrityViolationException e) {
-            return ApiResponseEntity.ok(null, "该帖子存在正在进行的投票");
+            return ApiResponseEntity.fail("该帖子存在正在进行的投票");
         }
-        return ApiResponseEntity.ok(id, "success");
+
     }
 
     @PostMapping("post-archive")
     public ApiResponseEntity<Long> archivePostVote(@RequestBody PostVoteRequest request, @RequestHeader Long xUserId) {
         Utils.checkRequestBody(request);
-        Long id;
         try {
-            id = voteService.archivePostVote(xUserId, request.postId, request.postSubject, request.postAuthor, request.spaceName);
-        }  catch (BadRequestException e) {
-            return ApiResponseEntity.ok(null, e.getMessage());
+            Long id = voteService.archivePostVote(xUserId, request);
+            return ApiResponseEntity.success(id);
         } catch (DataIntegrityViolationException e) {
-            return ApiResponseEntity.ok(null, "该帖子存在正在进行的投票");
+            return ApiResponseEntity.fail("该帖子存在正在进行的投票");
+        } catch (RuntimeException e) {
+            return ApiResponseEntity.fail(e.getMessage());
         }
-        return ApiResponseEntity.ok(id, "success");
     }
 
     @PostMapping("post-unarchive")
     public ApiResponseEntity<Long> unArchivePostVote(@RequestBody PostVoteRequest request, @RequestHeader Long xUserId) {
         Utils.checkRequestBody(request);
-        Long id;
         try {
-            id = voteService.unArchivePostVote(xUserId, request.postId, request.postSubject, request.postAuthor, request.spaceName);
-        }  catch (BadRequestException e) {
-            return ApiResponseEntity.ok(null, e.getMessage());
+            Long id = voteService.unArchivePostVote(xUserId, request);
+            return ApiResponseEntity.success(id);
         } catch (DataIntegrityViolationException e) {
-            return ApiResponseEntity.ok(null, "该帖子存在正在进行的投票");
+            return ApiResponseEntity.fail("该帖子存在正在进行的投票");
+        } catch (RuntimeException e) {
+            return ApiResponseEntity.fail(e.getMessage());
         }
-        return ApiResponseEntity.ok(id, "success");
     }
 
     public record CommentVoteRequest(

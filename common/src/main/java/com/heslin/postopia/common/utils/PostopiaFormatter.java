@@ -22,19 +22,19 @@ public class PostopiaFormatter {
         return String.format(" 空间postopia-space{%d;%s} ", spaceId, spaceName);
     }
 
-    public static String formatPost(String spaceName, Long postId, String content) {
-        return String.format(" postopia-post{%s;%d;%s} ", spaceName, postId, content);
+    public static String formatPost(Long spaceId, Long postId, String content) {
+        return String.format(" postopia-post{%s;%d;%s} ", spaceId, postId, content);
     }
 
-    public static String formatPost(String spaceName, Long postId) {
-        return formatPost(spaceName, postId, "查看详情");
+    public static String formatPost(Long spaceId, Long postId) {
+        return formatPost(spaceId, postId, "查看详情");
     }
 
-    public static String formatComment(String spaceName, Long postId, Long commentId, String content) {
-        return String.format(" postopia-comment{%s;%d;%d;%s} ", spaceName, postId, commentId, content);
+    public static String formatComment(Long spaceId, Long postId, Long commentId, String content) {
+        return String.format(" postopia-comment{%s;%d;%d;%s} ", spaceId, postId, commentId, content);
     }
 
-    public static String formatComment(String spaceName, Long postId, Long commentId) {
-        return formatComment(spaceName, postId, commentId, "查看详情");
+    public static String formatComment(Long spaceId, Long postId, Long commentId) {
+        return formatComment(spaceId, postId, commentId, "查看详情");
     }
 }

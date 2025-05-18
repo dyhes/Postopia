@@ -46,8 +46,8 @@ public class KafkaService {
 //        messageService.saveAll(messages);
 //    }
 
-    public void sendToDocDelete(String fieldType, String key, String value){
-        ssKafkaTemplate.send(fieldType + "_delete", key, value);
+    public void sendToDocDelete(String fieldType, String id, String route){
+        ssKafkaTemplate.send(fieldType + "_delete", id, route);
     }
 
     public void sendToDocUpdate(String fieldType, String key, String routing, Map<String, Object> update) {
