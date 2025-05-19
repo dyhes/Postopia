@@ -8,7 +8,7 @@ import com.heslin.postopia.common.redis.RedisService;
 import com.heslin.postopia.search.model.UserDoc;
 import com.heslin.postopia.user.Repository.UserRepository;
 import com.heslin.postopia.user.dto.Credential;
-import com.heslin.postopia.user.dto.SearchUserInfo;
+import com.heslin.postopia.user.dto.UserPart;
 import com.heslin.postopia.user.dto.UserAvatar;
 import com.heslin.postopia.user.dto.UserInfo;
 import com.heslin.postopia.user.model.User;
@@ -113,7 +113,7 @@ public class UserService {
         return userRepository.findAvatarsByUserIdIn(ids);
     }
 
-    public List<SearchUserInfo> getSearchUserInfos(List<Long> ids) {
+    public List<UserPart> getSearchUserInfos(List<Long> ids) {
         return userRepository.findSearchUserInfosByUserIdIn(ids);
     }
 

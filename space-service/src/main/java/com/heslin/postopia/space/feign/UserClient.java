@@ -1,7 +1,7 @@
 package com.heslin.postopia.space.feign;
 
 import com.heslin.postopia.common.dto.response.ApiResponse;
-import com.heslin.postopia.user.dto.SearchUserInfo;
+import com.heslin.postopia.user.dto.UserPart;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -16,5 +16,5 @@ public interface UserClient {
     ResponseEntity<ApiResponse<String>> uploadAvatar(@RequestPart("file")MultipartFile file, @RequestParam boolean isVideo, @RequestHeader Long userId);
 
     @GetMapping("user/search/infos")
-    ResponseEntity<ApiResponse<List<SearchUserInfo>>>  getSpaceUserInfo(@RequestParam List<Long> userId);
+    ResponseEntity<ApiResponse<List<UserPart>>>  getSpaceUserInfo(@RequestParam List<Long> userId);
 }

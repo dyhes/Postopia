@@ -1,7 +1,7 @@
 package com.heslin.postopia.user.Repository;
 
 import com.heslin.postopia.user.dto.UserAvatar;
-import com.heslin.postopia.user.dto.SearchUserInfo;
+import com.heslin.postopia.user.dto.UserPart;
 import com.heslin.postopia.user.dto.UserInfo;
 import com.heslin.postopia.user.model.User;
 import jakarta.transaction.Transactional;
@@ -18,7 +18,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     User findByUsername(String username);
 
     //@Query("select new com.heslin.postopia.user.dto.SearchUserInfo(new com.heslin.postopia.common.dto.UserId(u.id), u.username, u.nickname, u.avatar, u.introduction, u.postCount, u.commentCount, u.credit) from User u where u.id in ?1")
-    List<SearchUserInfo> findSearchUserInfosByUserIdIn(List<Long> ids);
+    List<UserPart> findSearchUserInfosByUserIdIn(List<Long> ids);
 
     //@Query("select new com.heslin.postopia.user.dto.UserAvatar(new com.heslin.postopia.common.dto.UserId(u.id), u.avatar) from User u where u.id in ?1")
     List<UserAvatar> findAvatarsByUserIdIn(List<Long> ids);
