@@ -86,7 +86,7 @@ public class UserService {
         }
         String refreshToken = jwtService.generateRefreshToken(user.getUserId(), username);
         String accessToken = jwtService.refresh(refreshToken);
-        return new Credential(refreshToken, accessToken);
+        return new Credential(user.getUserId(),refreshToken, accessToken);
     }
 
     public String refresh(RefreshRequest refreshRequest) {
