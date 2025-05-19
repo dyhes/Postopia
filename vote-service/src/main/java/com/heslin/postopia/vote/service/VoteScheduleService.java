@@ -3,6 +3,7 @@ package com.heslin.postopia.vote.service;
 import com.heslin.postopia.common.dto.Notification;
 import com.heslin.postopia.common.redis.RedisService;
 import com.heslin.postopia.common.utils.PostopiaFormatter;
+import com.heslin.postopia.vote.feign.CommentFeign;
 import com.heslin.postopia.vote.feign.OpinionFeign;
 import com.heslin.postopia.vote.feign.PostFeign;
 import com.heslin.postopia.vote.feign.SpaceFeign;
@@ -11,6 +12,7 @@ import com.heslin.postopia.vote.model.SpaceVote;
 import com.heslin.postopia.vote.model.Vote;
 import com.heslin.postopia.vote.repository.CommonVoteRepository;
 import com.heslin.postopia.vote.repository.SpaceVoteRepository;
+import com.heslin.postopia.vote.request.CommentVoteRequest;
 import com.heslin.postopia.vote.request.PostVoteRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
@@ -35,9 +37,10 @@ public class VoteScheduleService {
     private final SpaceFeign spaceFeign;
     private final OpinionFeign opinionFeign;
     private final PostFeign postFeign;
+    private final CommentFeign commentFeign;
 
     @Autowired
-    public VoteScheduleService(RedisService redisService, ThreadPoolTaskScheduler taskScheduler, CommonVoteRepository commonVoteRepository, SpaceVoteRepository spaceVoteRepository, SpaceFeign spaceFeign, OpinionFeign opinionFeign, PostFeign postFeign) {
+    public VoteScheduleService(RedisService redisService, ThreadPoolTaskScheduler taskScheduler, CommonVoteRepository commonVoteRepository, SpaceVoteRepository spaceVoteRepository, SpaceFeign spaceFeign, OpinionFeign opinionFeign, PostFeign postFeign, CommentFeign commentFeign) {
         this.redisService = redisService;
         this.taskScheduler = taskScheduler;
         this.commonVoteRepository = commonVoteRepository;
@@ -45,6 +48,7 @@ public class VoteScheduleService {
         this.spaceFeign = spaceFeign;
         this.opinionFeign = opinionFeign;
         this.postFeign = postFeign;
+        this.commentFeign = commentFeign;
     }
 
     private void scheduledAction(boolean isCommon, Long voteId, String voteActionMessage, String relatedUserMessage, Function<Long, Void> voteAction) {
@@ -127,14 +131,14 @@ public class VoteScheduleService {
         );
     }
 
-    public void scheduleUpdateCommentPinStatusVote(Long voteId, boolean isPined, Long commentId, Long postId, String spaceName, String commentContent, Instant endAt) {
-        String commentMessage = "评论：%s%s".formatted(commentContent, PostopiaFormatter.formatComment(spaceName, postId, commentId));
+    public void scheduleUpdateCommentPinStatusVote(Long voteId, boolean isPined, CommentVoteRequest request, Instant endAt) {
+        String commentMessage = "评论：%s%s".formatted(request.commentContent(), PostopiaFormatter.formatComment(request.spaceId(), request.postId(), request.commentId()));
         String voteActionMessage = "%s置顶%s".formatted(isPined ? "" : "取消", commentMessage);
         String relatedUserMessage = "您的%s已被投票%s置顶".formatted(commentMessage, isPined ? "" : "取消");
         taskScheduler.schedule(
         () -> {
             scheduledAction(true,voteId, voteActionMessage, relatedUserMessage, cid -> {
-                commentService.updatePinStatus(commentId, isPined);
+                commentFeign.updatePinStatus(request.commentId(), isPined);
                 return null;
             });
         },
@@ -142,11 +146,11 @@ public class VoteScheduleService {
         );
     }
 
-    public void scheduleDeleteCommentVote(Long voteId, PostVoteRequest request, Instant endAt) {
+    public void scheduleDeleteCommentVote(Long voteId, CommentVoteRequest request, Instant endAt) {
         taskScheduler.schedule(
         () -> {
-            scheduledAction(true,voteId, "删除评论 %s".formatted(content), "您的评论：%s 已被投票删除".formatted(content), commentId -> {
-                commentService.deleteComment(commentId, postId, userId, spaceName);
+            scheduledAction(true,voteId, "删除评论 %s".formatted(request.commentContent()), "您的评论：%s 已被投票删除".formatted(request.commentContent()), commentId -> {
+                commentFeign.deleteComment(request.spaceId(), request.postId(), commentId, request.userId());
                 return null;
             });
         },

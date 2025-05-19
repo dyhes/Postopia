@@ -3,6 +3,7 @@ package com.heslin.postopia.vote.controller;
 import com.heslin.postopia.common.dto.response.ApiResponseEntity;
 import com.heslin.postopia.common.utils.Utils;
 import com.heslin.postopia.space.dto.VoteSpaceInfo;
+import com.heslin.postopia.vote.request.CommentVoteRequest;
 import com.heslin.postopia.vote.request.PostVoteRequest;
 import com.heslin.postopia.vote.request.SpaceInfoRequest;
 import com.heslin.postopia.vote.request.SpaceUserRequest;
@@ -124,54 +125,44 @@ public class VoteController {
         }
     }
 
-    public record CommentVoteRequest(
-        Long commentId,
-        String commentContent,
-        String commentAuthor,
-        Long postId,
-        String spaceName
-    ){}
-
-
 
     @PostMapping("comment-delete")
-    public ApiResponseEntity<Long> deleteCommentVote(@RequestBody DeleteCommentVoteRequest request, @RequestHeader Long xUserId) {
+    public ApiResponseEntity<Long> deleteCommentVote(@RequestBody CommentVoteRequest request, @RequestHeader Long xUserId) {
         Utils.checkRequestBody(request);
-        Long id;
         try {
-            id = voteService.deleteCommentVote(xUserId, request.commentId, request.postId, request.userId.getId(), request.spaceName, request.commentContent, request.commentAuthor);
+            Long id = voteService.deleteCommentVote(xUserId, request);
+            return ApiResponseEntity.success(id);
         } catch (DataIntegrityViolationException e) {
-            return ApiResponseEntity.ok(null, "该评论存在正在进行的投票");
+            return ApiResponseEntity.fail("该评论存在正在进行的投票");
+        } catch (RuntimeException e) {
+            return ApiResponseEntity.fail(e.getMessage());
         }
-        return ApiResponseEntity.ok(id, "success");
     }
 
     @PostMapping("comment-pin")
     public ApiResponseEntity<Long> pinCommentVote(@RequestBody CommentVoteRequest request, @RequestHeader Long xUserId) {
         Utils.checkRequestBody(request);
-        Long id;
         try {
-            id = voteService.pinCommentVote(xUserId, request.commentId, request.postId, request.spaceName, request.commentContent, request.commentAuthor);
-        } catch (BadRequestException e) {
-            return ApiResponseEntity.ok(null, e.getMessage());
+            Long id = voteService.pinCommentVote(xUserId, request);
+            return ApiResponseEntity.success(id);
         } catch (DataIntegrityViolationException e) {
-            return ApiResponseEntity.ok(null, "该评论存在正在进行的投票");
+            return ApiResponseEntity.fail("该评论存在正在进行的投票");
+        } catch (RuntimeException e) {
+            return ApiResponseEntity.fail(e.getMessage());
         }
-        return ApiResponseEntity.ok(id, "success");
     }
 
     @PostMapping("comment-unpin")
     public ApiResponseEntity<Long> unPinCommentVote(@RequestBody CommentVoteRequest request, @RequestHeader Long xUserId) {
         Utils.checkRequestBody(request);
-        Long id;
         try {
-            id = voteService.unPinCommentVote(xUserId, request.commentId, request.postId, request.spaceName, request.commentContent, request.commentAuthor);
-        } catch (BadRequestException e) {
-            return ApiResponseEntity.ok(null, e.getMessage());
+            Long id = voteService.unPinCommentVote(xUserId, request);
+            return ApiResponseEntity.success(id);
         } catch (DataIntegrityViolationException e) {
-            return ApiResponseEntity.ok(null, "该评论存在正在进行的投票");
+            return ApiResponseEntity.fail("该评论存在正在进行的投票");
+        } catch (RuntimeException e) {
+            return ApiResponseEntity.fail(e.getMessage());
         }
-        return ApiResponseEntity.ok(id, "success");
     }
 
 //    public record OpinionRequest(

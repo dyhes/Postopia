@@ -7,6 +7,7 @@ import com.heslin.postopia.space.dto.VoteSpaceInfo;
 import com.heslin.postopia.vote.dto.VoteInfo;
 import com.heslin.postopia.vote.enums.DetailVoteType;
 import com.heslin.postopia.vote.enums.VoteType;
+import com.heslin.postopia.vote.feign.CommentFeign;
 import com.heslin.postopia.vote.feign.PostFeign;
 import com.heslin.postopia.vote.feign.SpaceFeign;
 import com.heslin.postopia.vote.feign.UserFeign;
@@ -15,6 +16,7 @@ import com.heslin.postopia.vote.model.SpaceVote;
 import com.heslin.postopia.vote.model.Vote;
 import com.heslin.postopia.vote.repository.CommonVoteRepository;
 import com.heslin.postopia.vote.repository.SpaceVoteRepository;
+import com.heslin.postopia.vote.request.CommentVoteRequest;
 import com.heslin.postopia.vote.request.PostVoteRequest;
 import com.heslin.postopia.vote.request.SpaceUserRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,6 +42,7 @@ public class VoteService {
     private final UserFeign userFeign;
     private final SpaceFeign spaceFeign;
     private final PostFeign postFeign;
+    private final CommentFeign commentFeign;
 //    private final OpinionService opinionService;
 //    private final CommentService commentService;
 //    private final PostService postService;
@@ -62,7 +65,7 @@ public class VoteService {
     private float spaceSmall;
 
     @Autowired
-    public VoteService(CommonVoteRepository commonVoteRepository, SpaceVoteRepository spaceVoteRepository, KafkaService kafkaService, VoteScheduleService scheduleService, ObjectMapper objectMapper, UserFeign userFeign, SpaceFeign spaceFeign, PostFeign postFeign) {
+    public VoteService(CommonVoteRepository commonVoteRepository, SpaceVoteRepository spaceVoteRepository, KafkaService kafkaService, VoteScheduleService scheduleService, ObjectMapper objectMapper, UserFeign userFeign, SpaceFeign spaceFeign, PostFeign postFeign, CommentFeign commentFeign) {
         this.commonVoteRepository = commonVoteRepository;
         this.spaceVoteRepository = spaceVoteRepository;
         this.kafkaService = kafkaService;
@@ -71,6 +74,7 @@ public class VoteService {
         this.userFeign = userFeign;
         this.spaceFeign = spaceFeign;
         this.postFeign = postFeign;
+        this.commentFeign = commentFeign;
     }
 
     public Pair<Boolean, VoteSpaceInfo> spaceMemberCheck(Long spaceId, Long userId) {
@@ -215,29 +219,29 @@ public class VoteService {
     }
 
     
-    public Long deleteCommentVote(Long xUserId, Long commentId, Long postId, Long userId, String spaceName, String commentContent, String commentAuthor) {
-        Vote vote = createCommonVote(xUserId, commentId, commentAuthor, VoteType.COMMENT, DetailVoteType.DELETE_COMMENT);
-        scheduleService.scheduleDeleteCommentVote(vote.getId(), postId, userId, spaceName, commentContent, vote.getEndAt());
+    public Long deleteCommentVote(Long xUserId, CommentVoteRequest request) {
+        Vote vote = createCommonVote(xUserId, request.commentId(), request.userId(), VoteType.COMMENT, DetailVoteType.DELETE_COMMENT);
+        scheduleService.scheduleDeleteCommentVote(vote.getId(), request, vote.getEndAt());
         return vote.getId();
     }
 
-    private Long updatePinStatusVote(boolean isPined, Long xUserId, Long commentId, Long postId, String spaceName, String commentContent, String commentAuthor) throws BadRequestException {
-        if (!commentService.checkCommentPinStatus(commentId, isPined)) {
+    private Long updatePinStatusVote(boolean isPined, Long xUserId, CommentVoteRequest request) {
+        if (!commentFeign.checkPinStatus(request.commentId(), isPined)) {
             throw new RuntimeException(isPined? "该评论已置顶" : "该评论未置顶");
         }
-        Vote vote = createCommonVote(xUserId, commentId, commentAuthor, VoteType.COMMENT, isPined? DetailVoteType.PIN_COMMENT : DetailVoteType.UNPIN_COMMENT);
-        scheduleService.scheduleUpdateCommentPinStatusVote(vote.getId(), isPined, commentId, postId, spaceName, commentContent, vote.getEndAt());
+        Vote vote = createCommonVote(xUserId, request.commentId(), request.userId(), VoteType.COMMENT, isPined? DetailVoteType.PIN_COMMENT : DetailVoteType.UNPIN_COMMENT);
+        scheduleService.scheduleUpdateCommentPinStatusVote(vote.getId(), isPined, request, vote.getEndAt());
         return vote.getId();
     }
 
     
-    public Long pinCommentVote(Long xUserId, Long commentId, Long postId, String spaceName, String commentContent, String commentAuthor) throws BadRequestException {
-        return updatePinStatusVote(true, xUserId, commentId, postId, spaceName, commentContent, commentAuthor);
+    public Long pinCommentVote(Long xUserId, CommentVoteRequest request) {
+        return updatePinStatusVote(true, xUserId, request);
     }
 
     
-    public Long unPinCommentVote(Long xUserId, Long commentId, Long postId, String spaceName, String commentContent, String commentAuthor) throws BadRequestException {
-        return updatePinStatusVote(false, xUserId, commentId, postId, spaceName, commentContent, commentAuthor);
+    public Long unPinCommentVote(Long xUserId, CommentVoteRequest request) {
+        return updatePinStatusVote(false, xUserId, request);
     }
 
     public String uploadAvatar(Long xUserId, MultipartFile file) {
