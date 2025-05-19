@@ -22,29 +22,22 @@ import java.util.stream.Collectors;
 public class KafkaService {
     private final KafkaTemplate<Long, Integer> liKafkaTemplate;
     private final KafkaTemplate<String, String> ssKafkaTemplate;
+    private final KafkaTemplate<Long, String> lsKfafkaTemplate;
     private final ObjectMapper objectMapper;
     private final EntityManager entityManager;
 
     @Autowired
-    public KafkaService(KafkaTemplate<Long, Integer> liKafkaTemplate, KafkaTemplate<String, String> ssKafkaTemplate, ObjectMapper objectMapper, EntityManager entityManager) {
+    public KafkaService(KafkaTemplate<Long, Integer> liKafkaTemplate, KafkaTemplate<String, String> ssKafkaTemplate, KafkaTemplate<Long, String> lsKfafkaTemplate, ObjectMapper objectMapper, EntityManager entityManager) {
         this.liKafkaTemplate = liKafkaTemplate;
         this.ssKafkaTemplate = ssKafkaTemplate;
+        this.lsKfafkaTemplate = lsKfafkaTemplate;
         this.objectMapper = objectMapper;
         this.entityManager = entityManager;
     }
 
-    public void sendMessage(String username, String content) {
-        ssKafkaTemplate.send("msg", username, content);
+    public void sendMessage(Long userId, String content) {
+        lsKfafkaTemplate.send("msg", userId, content);
     }
-
-//    @KafkaListener(topics = "msg", containerFactory = "batchSSFactory")
-//    @Transactional
-//    protected void processMessages(List<ConsumerRecord<String, String>> records) {
-//        Instant current = Instant.now();
-//        List<Message> messages = records.stream().map(record -> Message.builder().username(record.key()).content(record.value()).isRead(false).createdAt(current).build()
-//        ).toList();
-//        messageService.saveAll(messages);
-//    }
 
     public void sendToDocDelete(String fieldType, String id, String route){
         ssKafkaTemplate.send(fieldType + "_delete", id, route);

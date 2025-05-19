@@ -1,6 +1,7 @@
 package com.heslin.postopia.message.service;
 
 import com.heslin.postopia.message.dto.MessageInfo;
+import com.heslin.postopia.message.model.Message;
 import com.heslin.postopia.message.repository.MessageRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,21 +46,8 @@ public class MessageService{
     public void deleteAllRead(Long userId) {
         messageRepository.deleteAllRead(userId);
     }
-    
-//    @Transactional
-//    public void saveAll(List<Message> messages) {
-//        messageRepository.saveAll(messages);
-//    }
 
-//    public static <T> List<List<T>> splitByStream(List<T> list, int chunkSize) {
-//        return IntStream.range(0, (list.size() + chunkSize - 1) / chunkSize)
-//        .mapToObj(i -> list.subList(i * chunkSize, Math.min((i + 1) * chunkSize, list.size())))
-//        .collect(Collectors.toList());
-//    }
-//
-//
-//    public void batchSave(List<Message> messages) {
-//        List<List<Message>> partition = splitByStream(messages, 1000);
-//        partition.forEach(messageRepository::saveAll);
-//    }
+    public void saveAll(List<Message> messages) {
+        messageRepository.saveAll(messages);
+    }
 }

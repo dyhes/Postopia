@@ -1,6 +1,6 @@
 package com.heslin.postopia.vote.service;
 
-import com.heslin.postopia.common.dto.Notification;
+import com.heslin.postopia.common.kafka.KafkaService;
 import com.heslin.postopia.common.redis.RedisService;
 import com.heslin.postopia.common.utils.PostopiaFormatter;
 import com.heslin.postopia.vote.feign.CommentFeign;
@@ -19,8 +19,6 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.function.Function;
 
 @Service
@@ -38,9 +36,10 @@ public class VoteScheduleService {
     private final OpinionFeign opinionFeign;
     private final PostFeign postFeign;
     private final CommentFeign commentFeign;
+    private final KafkaService kafkaService;
 
     @Autowired
-    public VoteScheduleService(RedisService redisService, ThreadPoolTaskScheduler taskScheduler, CommonVoteRepository commonVoteRepository, SpaceVoteRepository spaceVoteRepository, SpaceFeign spaceFeign, OpinionFeign opinionFeign, PostFeign postFeign, CommentFeign commentFeign) {
+    public VoteScheduleService(RedisService redisService, ThreadPoolTaskScheduler taskScheduler, CommonVoteRepository commonVoteRepository, SpaceVoteRepository spaceVoteRepository, SpaceFeign spaceFeign, OpinionFeign opinionFeign, PostFeign postFeign, CommentFeign commentFeign, KafkaService kafkaService) {
         this.redisService = redisService;
         this.taskScheduler = taskScheduler;
         this.commonVoteRepository = commonVoteRepository;
@@ -49,24 +48,22 @@ public class VoteScheduleService {
         this.opinionFeign = opinionFeign;
         this.postFeign = postFeign;
         this.commentFeign = commentFeign;
+        this.kafkaService = kafkaService;
     }
 
     private void scheduledAction(boolean isCommon, Long voteId, String voteActionMessage, String relatedUserMessage, Function<Long, Void> voteAction) {
         Vote vote = isCommon? commonVoteRepository.findById(voteId).orElseThrow() : spaceVoteRepository.findById(voteId).orElseThrow();
         String tail;
-        List<Notification> notifications = new ArrayList<>();
         if (vote.isFulfilled()) {
             voteAction.apply(vote.getRelatedEntity());
             tail = "的投票已成功通过";
             if (relatedUserMessage != null) {
-                notifications.add(new Notification(vote.getRelatedUser(), relatedUserMessage));
+                kafkaService.sendMessage(vote.getRelatedUser(), relatedUserMessage);
             }
         } else {
             tail = "的投票未通过, 赞成人数 %d，反对人数 %d, 所需最少投票人数 %d".formatted(vote.getPositiveCount(), vote.getNegativeCount(), vote.getThreshold());
         }
-        notifications.add(new Notification(vote.getInitiator(), "您发起的%s%s".formatted(voteActionMessage, tail)));
-        // notify
-        // not impl
+        kafkaService.sendMessage(vote.getInitiator(), "您发起的%s%s".formatted(voteActionMessage, tail));
         opinionFeign.notifyVoter(voteId, "您%s的" + voteActionMessage + tail);
         if (vote instanceof CommonVote) {
             commonVoteRepository.delete((CommonVote) vote);
