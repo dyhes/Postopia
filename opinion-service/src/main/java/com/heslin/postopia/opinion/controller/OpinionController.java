@@ -1,0 +1,63 @@
+package com.heslin.postopia.opinion.controller;
+
+import com.heslin.postopia.common.dto.UserId;
+import com.heslin.postopia.common.dto.response.BasicApiResponseEntity;
+import com.heslin.postopia.common.utils.Utils;
+import com.heslin.postopia.opinion.request.OpinionRequest;
+import com.heslin.postopia.opinion.request.UpsertCommentRequest;
+import com.heslin.postopia.opinion.request.UpsertPostRequest;
+import com.heslin.postopia.opinion.service.OpinionService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping("opinon")
+public class OpinionController {
+    private final OpinionService opinionService;
+
+    @Autowired
+    public OpinionController(OpinionService opinionService) {
+        this.opinionService = opinionService;
+    }
+
+    @PostMapping("vote")
+    public BasicApiResponseEntity createVoteOpinion(@RequestBody OpinionRequest request, @RequestHeader Long xUserId) {
+        Utils.checkRequestBody(request);
+        opinionService.upsertVoteOpinion(xUserId, request.isPositive(), request.id());
+        return BasicApiResponseEntity.success();
+    }
+
+    @PostMapping("/vote/notify")
+    public void notifyVoter(@RequestParam Long voteId, @RequestParam String message) {
+        opinionService.notifyVoter(voteId, message);
+    }
+
+    // 非幂等！！！
+    @PostMapping("post")
+    public BasicApiResponseEntity upsertPostOpinion(@RequestBody UpsertPostRequest request, @RequestHeader Long xUserId, @RequestHeader String xUsername) {
+        Utils.checkRequestBody(request);
+        opinionService.upsertPostOpinion(xUserId, xUsername, request);
+        return BasicApiResponseEntity.success();
+    }
+
+    @PostMapping("comment")
+    public BasicApiResponseEntity upsertCommentOpinion(@RequestBody UpsertCommentRequest request, @RequestHeader String xUsername, @RequestHeader Long xUserId) {
+        Utils.checkRequestBody(request);
+        opinionService.upsertCommentOpinion(xUserId, xUsername, request);
+        return BasicApiResponseEntity.success();
+    }
+
+    @PostMapping("comment-delete")
+    public BasicApiResponseEntity deleteCommentOpinion(@RequestBody OpinionRequest request, @RequestHeader Long xUserId) {
+        Utils.checkRequestBody(request);
+        opinionService.deleteCommentOpinion(xUserId, request.id(), request.isPositive());
+        return BasicApiResponseEntity.success();
+    }
+
+    @PostMapping("post-delete")
+    public BasicApiResponseEntity deletePostOpinion(@RequestBody OpinionRequest request, @RequestHeader Long xUserId) {
+        Utils.checkRequestBody(request);
+        opinionService.deletePostOpinion(xUserId, request.id(), request.isPositive());
+        return BasicApiResponseEntity.success();
+    }
+}

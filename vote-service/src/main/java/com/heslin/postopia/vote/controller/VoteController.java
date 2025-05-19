@@ -164,16 +164,4 @@ public class VoteController {
             return ApiResponseEntity.fail(e.getMessage());
         }
     }
-
-//    public record OpinionRequest(
-//    Long id,
-//    boolean isPositive
-//    ){}
-//
-//    @PostMapping("opinion")
-//    public BasicApiResponseEntity createOpinion(@RequestBody OpinionRequest request, @RequestHeader Long xUserId) {
-//        Utils.checkRequestBody(request);
-//        voteService.upsertVoteOpinion(xUserId, request.id, request.isPositive);
-//        return BasicApiResponseEntity.ok("success");
-//    }
 }

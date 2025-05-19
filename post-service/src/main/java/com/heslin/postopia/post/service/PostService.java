@@ -39,4 +39,10 @@ public class PostService {
     public void updateArchiveStatus(Long postId, boolean isArchived) {
         // not impl
     }
+
+    //
+//
+//    public Page<FeedPostSummary> getPostOpinionsByUser(Long id, List<Boolean> statuses, Pageable pageable) {
+//        return opinionRepository.getPostOpinionsByUser(id, statuses, pageable);
+//    }
 }
