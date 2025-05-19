@@ -1,6 +1,6 @@
 package com.heslin.postopia.space.repository;
 
-import com.heslin.postopia.space.dto.SearchSpaceInfo;
+import com.heslin.postopia.space.dto.SpacePart;
 import com.heslin.postopia.space.dto.SpaceAvatar;
 import com.heslin.postopia.space.dto.SpaceInfo;
 import com.heslin.postopia.space.dto.VoteSpaceInfo;
@@ -27,7 +27,7 @@ public interface SpaceRepository extends JpaRepository<Space, Long> {
 
     List<SpaceAvatar> findSpaceAvatarsByIdIn(List<Long> ids);
 
-    List<SearchSpaceInfo> findSearchSpaceInfosByIdIn(List<Long> ids);
+    List<SpacePart> findSearchSpaceInfosByIdIn(List<Long> ids);
 
     @Transactional
     @Modifying

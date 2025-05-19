@@ -7,7 +7,7 @@ import com.heslin.postopia.common.dto.response.PagedApiResponseEntity;
 import com.heslin.postopia.common.dto.response.ResMessage;
 import com.heslin.postopia.common.utils.PostopiaFormatter;
 import com.heslin.postopia.common.utils.Utils;
-import com.heslin.postopia.space.dto.SearchSpaceInfo;
+import com.heslin.postopia.space.dto.SpacePart;
 import com.heslin.postopia.space.dto.SpaceAvatar;
 import com.heslin.postopia.space.dto.SpaceInfo;
 import com.heslin.postopia.space.dto.VoteSpaceInfo;
@@ -133,7 +133,7 @@ public class SpaceController {
     }
 
     @GetMapping("search/infos")
-    public ApiResponseEntity<List<SearchSpaceInfo>> getSearchedSpaceInfos(@RequestParam List<Long> ids) {
+    public ApiResponseEntity<List<SpacePart>> getSearchedSpaceInfos(@RequestParam List<Long> ids) {
         var ret = spaceService.getSearchSpaceInfos(ids);
         return ApiResponseEntity.success(ret);
     }
