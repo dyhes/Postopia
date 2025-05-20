@@ -4,4 +4,4 @@ import com.heslin.postopia.opinion.dto.OpinionInfo;
 import com.heslin.postopia.user.dto.UserInfo;
 import com.heslin.postopia.vote.dto.VoteInfo;
 
-public class PostInfo(PostPart post, UserInfo user, OpinionInfo opinion, VoteInfo vote) {}
+public record PostInfo(PostPart post, OpinionInfo opinion, UserInfo user, VoteInfo vote) {}

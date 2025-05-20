@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.heslin.postopia.common.dto.response.*;
 import com.heslin.postopia.common.utils.Utils;
 import com.heslin.postopia.opinion.enums.OpinionStatus;
+import com.heslin.postopia.post.dto.FeedPostInfo;
 import com.heslin.postopia.post.dto.OpinionPostInfo;
 import com.heslin.postopia.post.dto.PostInfo;
 import com.heslin.postopia.post.dto.UserPostInfo;
@@ -61,7 +62,7 @@ public class PostController {
         Utils.checkRequestBody(request);
         postService.validate(xUserId, request.spaceId());
         Long pid = postService.createPost(xUserId, request);
-        return ApiResponseEntity.ok(new ApiResponse<>(pair.first(), pair.second()));
+        return ApiResponseEntity.success(pid);
     }
 
     @PostMapping("delete")
@@ -80,67 +81,61 @@ public class PostController {
     }
 
     @GetMapping("info")
-    public ApiResponseEntity<PostInfo> getPostInfo(@RequestParam Long id, @AuthenticationPrincipal User user) {
-        if (id == null) {
-            throw new BadRequestException("postId is required");
-        }
-        return ApiResponseEntity.ok(new ApiResponse<>("获取帖子信息成功", postService.getPostInfo(id, user)));
-    }
-
-    @GetMapping("user")
-    public CompletableFuture<PagedApiResponseEntity<List<OpinionPostInfo>>> getUserPosts(
-            @RequestHeader Long xUserId,
-            @RequestParam int page,
-            @RequestParam(required = false) Long userId,
-            @RequestParam(defaultValue = "50") int size,
-            @RequestParam(defaultValue = "DESC") Sort.Direction direction) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, "p.createdAt"));
-        boolean isSelf = userId == null || userId.getId().equals(user.getId());
-        Long queryId = userId == null ? user.getId() : userId.getId();
-        Long selfId = user.getId();
-        return ApiResponseEntity.ok(new ApiResponse<>("获取帖子列表成功", new PageResult<>(postService.getPostsByUser(isSelf, queryId, selfId, pageable))));
-    }
-
-    @GetMapping("user_opinion")
-    public CompletableFuture<PagedApiResponseEntity<List<UserPostInfo>>> getUserOpinionedPosts(
-    @RequestHeader Long xUserId,
-    @RequestParam int page,
-    @RequestParam(required = false) Long userId,
-    @RequestParam(defaultValue = "NIL") OpinionStatus opinion,
-    @RequestParam(defaultValue = "50") int size,
-    @RequestParam(defaultValue = "DESC") Sort.Direction direction) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, "o.updatedAt"));
-        Long queryId = userId == null? user.getId() : userId.getId();
-        return ApiResponseEntity.ok(new ApiResponse<>("获取帖子态度列表成功", new PageResult<>(postService.getPostOpinionsByUser(queryId, opinion, pageable))));
-    }
-
-
-    @GetMapping("popular")
-    public ApiResponseEntity<PageResult<FeedPostSummary>> getPopularPosts(
-    @RequestHeader Long xUserId,
-    @RequestParam int page,
-    @RequestParam(defaultValue = "15") int size) {
-        Pageable pageable = PageRequest.of(page, size);
-        return ApiResponseEntity.ok(new ApiResponse<>("获取帖子列表成功", new PageResult<>(postService.getPopularPosts(pageable, user))));
+    public CompletableFuture<ApiResponseEntity<PostInfo>> getPostInfo(@RequestHeader Long xUserId, @RequestParam Long postId) {
+        return postService.getPostInfo(xUserId, postId).thenApply(ApiResponseEntity::success);
     }
 
     @GetMapping("space")
-    public ApiResponseEntity<PageResult<SpacePostSummary>> getPosts(
+    public CompletableFuture<PagedApiResponseEntity<PostInfo>> getPosts(
+        @RequestHeader Long xUserId,
+        @RequestParam Long spaceId,
+        @RequestParam int page,
+        @RequestParam(defaultValue = "25") int size,
+        @RequestParam(defaultValue = "DESC") Sort.Direction direction
+    ) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, "createdAt"));
+        return postService.getSpacePosts(xUserId, spaceId, pageable)
+            .thenApply(PagedApiResponseEntity::success);
+    }
+
+    @GetMapping("user")
+    public CompletableFuture<PagedApiResponseEntity<OpinionPostInfo>> getUserPosts(
+            @RequestHeader Long xUserId,
+            @RequestParam int page,
+            @RequestParam(required = false) Long userId,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "DESC") Sort.Direction direction) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, "createdAt"));
+        Long queryId = userId == null ? xUserId : userId;
+        return postService.getUserPosts(xUserId, queryId, pageable)
+            .thenApply(PagedApiResponseEntity::success);
+    }
+
+    @GetMapping("user_opinion")
+    public CompletableFuture<PagedApiResponseEntity<UserPostInfo>> getUserOpinionedPosts(
+        @RequestHeader Long xUserId,
+        @RequestParam int page,
+        @RequestParam(defaultValue = "20") int size,
+        @RequestParam(required = false) Long userId,
+        @RequestParam(defaultValue = "NIL") OpinionStatus opinion) {
+        Long queryId = userId == null? xUserId : userId;
+        return postService.getUserOpinionedPosts(queryId, opinion, page, size)
+            .thenApply(PagedApiResponseEntity::success);
+    }
+
+    @GetMapping("popular")
+    public CompletableFuture<PagedApiResponseEntity<FeedPostInfo>> getPopularPosts(
     @RequestHeader Long xUserId,
-    @RequestParam Long spaceId,
     @RequestParam int page,
-    @RequestParam(defaultValue = "15") int size,
-    @RequestParam(defaultValue = "DESC") Sort.Direction direction) {
-        if (spaceId == null) {
-            throw new BadRequestException("spaceId is required");
-        }
-        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, "p.createdAt"));
-        return ApiResponseEntity.ok(new ApiResponse<>("获取帖子列表成功", new PageResult<>(postService.getPosts(spaceId, pageable, user))));
+    @RequestParam(defaultValue = "20") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return postService.getPopularPosts(xUserId, pageable)
+            .thenApply(PagedApiResponseEntity::success);
     }
 
     @GetMapping("search")
-    public ApiResponseEntity<List<SearchedPostInfo>> getPostInfosInSearch(@RequestParam List<Long> ids) {
-        return ApiResponseEntity.ok(postService.getPostInfosInSearch(ids), "success");
+    public CompletableFuture<ApiResponseEntity<List<FeedPostInfo>>> getPostInfosInSearch(@RequestHeader Long xUserId, @RequestParam List<Long> ids) {
+        return postService.getSearchPosts(xUserId, ids).thenApply(ApiResponseEntity::success);
     }
 
 //    @PostMapping("draft")

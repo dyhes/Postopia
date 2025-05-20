@@ -3,12 +3,16 @@ package com.heslin.postopia.opinion.controller;
 import com.heslin.postopia.common.dto.response.BasicApiResponseEntity;
 import com.heslin.postopia.common.utils.Utils;
 import com.heslin.postopia.opinion.dto.OpinionInfo;
+import com.heslin.postopia.opinion.enums.OpinionStatus;
 import com.heslin.postopia.opinion.enums.OpinionType;
 import com.heslin.postopia.opinion.request.OpinionRequest;
 import com.heslin.postopia.opinion.request.UpsertCommentRequest;
 import com.heslin.postopia.opinion.request.UpsertPostRequest;
 import com.heslin.postopia.opinion.service.OpinionService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,6 +25,18 @@ public class OpinionController {
     @Autowired
     public OpinionController(OpinionService opinionService) {
         this.opinionService = opinionService;
+    }
+
+    @GetMapping("user/post")
+    public Page<OpinionInfo> getUserPostOpinion(@RequestParam Long userId, @RequestParam int page, @RequestParam int size, @RequestParam OpinionStatus status) {
+        Pageable pageable = PageRequest.of(page, size);
+        return opinionService.getUserPostOpinion(userId, status, pageable);
+    }
+
+    @GetMapping("user/comment")
+    public Page<OpinionInfo> getUserCommentOpinion(@RequestParam Long userId, @RequestParam int page, @RequestParam int size, @RequestParam OpinionStatus status) {
+        Pageable pageable = PageRequest.of(page, size);
+        return opinionService.getUserCommentOpinion(userId, status, pageable);
     }
 
     @GetMapping("post")
@@ -65,14 +81,14 @@ public class OpinionController {
         return BasicApiResponseEntity.success();
     }
 
-    @PostMapping("comment-delete")
+    @PostMapping("comment/delete")
     public BasicApiResponseEntity deleteCommentOpinion(@RequestBody OpinionRequest request, @RequestHeader Long xUserId) {
         Utils.checkRequestBody(request);
         opinionService.deleteCommentOpinion(xUserId, request.id(), request.isPositive());
         return BasicApiResponseEntity.success();
     }
 
-    @PostMapping("post-delete")
+    @PostMapping("post/delete")
     public BasicApiResponseEntity deletePostOpinion(@RequestBody OpinionRequest request, @RequestHeader Long xUserId) {
         Utils.checkRequestBody(request);
         opinionService.deletePostOpinion(xUserId, request.id(), request.isPositive());

@@ -7,6 +7,8 @@ import com.heslin.postopia.opinion.model.VoteOpinion;
 import jakarta.persistence.QueryHint;
 import jakarta.transaction.Transactional;
 import org.hibernate.jpa.AvailableHints;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -93,4 +95,16 @@ public interface OpinionRepository extends JpaRepository<Opinion, Long> {
 
     @Query("select new com.heslin.postopia.opinion.dto.OpinionInfo(o.voteId, CASE WHEN o.isPositive = true THEN com.heslin.postopia.opinion.enums.OpinionStatus.POSITIVE ELSE com.heslin.postopia.opinion.enums.OpinionStatus.NEGATIVE END, o.updatedAt) from VoteOpinion o where o.voteId in ?2 and o.userId = ?1")
     List<OpinionInfo> getVoteOpinion(Long userId, List<Long> idList);
+
+    @Query("select new com.heslin.postopia.opinion.dto.OpinionInfo(o.postId, CASE WHEN o.isPositive = true THEN com.heslin.postopia.opinion.enums.OpinionStatus.POSITIVE ELSE com.heslin.postopia.opinion.enums.OpinionStatus.NEGATIVE END, o.updatedAt) from PostOpinion o where o.userId = ?1")
+    Page<OpinionInfo> findPostOpinionsByUserId(Long userId, Pageable pageable);
+
+    @Query("select new com.heslin.postopia.opinion.dto.OpinionInfo(o.postId, CASE WHEN o.isPositive = true THEN com.heslin.postopia.opinion.enums.OpinionStatus.POSITIVE ELSE com.heslin.postopia.opinion.enums.OpinionStatus.NEGATIVE END, o.updatedAt) from PostOpinion o where o.userId = ?1 and o.isPositive = ?2")
+    Page<OpinionInfo> findPostOpinionByUserIdAndPositive(Long userId, boolean positive, Pageable pageable);
+
+    @Query("select new com.heslin.postopia.opinion.dto.OpinionInfo(o.commentId, CASE WHEN o.isPositive = true THEN com.heslin.postopia.opinion.enums.OpinionStatus.POSITIVE ELSE com.heslin.postopia.opinion.enums.OpinionStatus.NEGATIVE END, o.updatedAt) from CommentOpinion o where o.userId = ?1")
+    Page<OpinionInfo> findCommentOpinionsByUserId(Long userId, Pageable pageable);
+
+    @Query("select new com.heslin.postopia.opinion.dto.OpinionInfo(o.commentId, CASE WHEN o.isPositive = true THEN com.heslin.postopia.opinion.enums.OpinionStatus.POSITIVE ELSE com.heslin.postopia.opinion.enums.OpinionStatus.NEGATIVE END, o.updatedAt) from CommentOpinion o where o.userId = ?1 and o.isPositive = ?2")
+    Page<OpinionInfo> findCommentOpinionByUserIdAndPositive(Long userId, boolean positive, Pageable pageable);
 }

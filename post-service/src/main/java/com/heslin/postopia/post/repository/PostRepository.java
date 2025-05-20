@@ -1,8 +1,12 @@
 package com.heslin.postopia.post.repository;
 
+import com.heslin.postopia.post.dto.FeedPostPart;
 import com.heslin.postopia.post.dto.PostOpinionHint;
+import com.heslin.postopia.post.dto.PostPart;
 import com.heslin.postopia.post.model.Post;
 import jakarta.transaction.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -33,4 +37,15 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     @Transactional
     @Query("update Post p set p.isArchived = :isArchived where p.id = :pid")
     void updateArchiveStatus(@Param("pid") Long postId, @Param("isArchived") boolean isArchived);
+
+    Page<FeedPostPart> findByCommentCountGreaterThan(long commentCountIsGreaterThan, Pageable pageable);
+
+
+    Page<FeedPostPart> findByUserId(Long userId, Pageable pageable);
+
+    Page<PostPart> findBySpaceId(Long spaceId, Pageable pageable);
+
+    PostPart findPostPartById(Long postId);
+
+    List<FeedPostPart> findFeedPostByIdIn(Collection<Long> ids);
 }

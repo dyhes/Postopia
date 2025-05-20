@@ -53,6 +53,22 @@ public class Utils {
         .toList();
     }
 
+    public static <T, U, R> List<R> biMerge(
+    List<T> mainRecords,
+    List<U> subRecords,
+    Function<U, Long> subKeyExtractor,
+    BiFunction<T, Map<Long, U>, U> subRecordExtractor,
+    BiFunction<T, U, R> recordConstructor) {
+        Map<Long, U> subMap = subRecords.stream()
+        .collect(Collectors.toMap(subKeyExtractor, Function.identity()));
+        return mainRecords.stream()
+        .map(main -> {
+            U sub = subRecordExtractor.apply(main, subMap);
+            return recordConstructor.apply(main, sub);
+        })
+        .toList();
+    }
+
     public static <T, U, V, R> List<R> triMerge(
     List<T> mainRecords,
     List<U> subRecords1,

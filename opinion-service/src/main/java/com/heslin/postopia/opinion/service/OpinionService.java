@@ -17,6 +17,8 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -143,5 +145,21 @@ public class OpinionService{
         Map<Long, OpinionInfo> mergeIdMap = opinionInfos.stream().collect(Collectors.toMap(OpinionInfo::mergeId, opinionPart -> opinionPart));
         List<OpinionInfo> res = idList.stream().map(id -> mergeIdMap.getOrDefault(id, new OpinionInfo(id, OpinionStatus.NIL, null))).toList();
         return res;
+    }
+
+    public Page<OpinionInfo> getUserPostOpinion(Long userId, OpinionStatus status, Pageable pageable) {
+        if (status == OpinionStatus.NIL) {
+            return opinionRepository.findPostOpinionsByUserId(userId, pageable);
+        } else {
+            return opinionRepository.findPostOpinionByUserIdAndPositive(userId, status == OpinionStatus.POSITIVE, pageable);
+        }
+    }
+
+    public Page<OpinionInfo> getUserCommentOpinion(Long userId, OpinionStatus status, Pageable pageable) {
+        if (status == OpinionStatus.NIL) {
+            return opinionRepository.findCommentOpinionsByUserId(userId, pageable);
+        } else {
+            return opinionRepository.findCommentOpinionByUserIdAndPositive(userId, status == OpinionStatus.POSITIVE, pageable);
+        }
     }
 }
