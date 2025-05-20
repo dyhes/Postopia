@@ -13,7 +13,7 @@ import org.springframework.data.elasticsearch.annotations.Routing;
 @NoArgsConstructor
 @AllArgsConstructor
 @Document(indexName = "posts")
-@Routing("spaceName")
+@Routing("spaceId")
 public class PostDoc {
     @Id
     private Long id;
@@ -22,7 +22,7 @@ public class PostDoc {
     @Field(type = FieldType.Text, analyzer = "ik_max_word", searchAnalyzer = "ik_smart")
     private String content;
     @Field(type = FieldType.Keyword)
-    private String spaceName;
+    private String spaceId;
     @Field(type = FieldType.Keyword)
-    private String username;
+    private String userId;
 }

@@ -42,7 +42,7 @@ public interface PostDocRepository extends ElasticsearchRepository<PostDoc, Long
           "filter": [
             {
               "term": {
-                "spaceName": "?1",
+                "spaceId": "?1",
                 "_routing": [ "?1" ]
               }
             }

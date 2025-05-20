@@ -71,13 +71,13 @@ public class SearchConsumer {
     @KafkaListener(topics = "post_create", containerFactory = "batchSSFactory")
     @Transactional
     protected void processPostCreate(List<ConsumerRecord<String, String>> records) {
-        processDocCreate(records, PostDoc::getSpaceName, PostDoc.class);
+        processDocCreate(records, PostDoc::getSpaceId, PostDoc.class);
     }
 
     @KafkaListener(topics = "comment_create", containerFactory = "batchSSFactory")
     @Transactional
     protected void processCommentCreate(List<ConsumerRecord<String, String>> records) {
-        processDocCreate(records, CommentDoc::getSpaceName, CommentDoc.class);
+        processDocCreate(records, CommentDoc::getSpaceId, CommentDoc.class);
     }
 
     protected <T> void processDocUpdate(List<ConsumerRecord<String, String>> records, Class<T> documentClass) {

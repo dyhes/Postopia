@@ -13,18 +13,18 @@ import org.springframework.data.elasticsearch.annotations.Routing;
 @NoArgsConstructor
 @AllArgsConstructor
 @Document(indexName = "comments")
-@Routing("spaceName")
+@Routing("spaceId")
 public class CommentDoc {
     @Id
     private Long id;
     @Field(type = FieldType.Text, analyzer = "ik_max_word", searchAnalyzer = "ik_smart")
     private String content;
     @Field(type = FieldType.Keyword)
+    private String spaceId;
+    @Field(type = FieldType.Keyword)
     private String parentId;
     @Field(type = FieldType.Keyword)
     private String postId;
     @Field(type = FieldType.Keyword)
-    private String spaceName;
-    @Field(type = FieldType.Keyword)
-    private String username;
+    private String userId;
 }
