@@ -1,3 +1,5 @@
 dependencies {
+    implementation project(':user-service')
+    implementation project(':opinion-service')
     implementation project(':space-service')
 }

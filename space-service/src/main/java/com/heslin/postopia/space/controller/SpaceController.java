@@ -12,7 +12,7 @@ import com.heslin.postopia.space.dto.SpaceAvatar;
 import com.heslin.postopia.space.dto.SpaceInfo;
 import com.heslin.postopia.space.dto.VoteSpaceInfo;
 import com.heslin.postopia.space.service.SpaceService;
-import com.heslin.postopia.user.dto.UserPart;
+import com.heslin.postopia.user.dto.UserInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -139,13 +139,13 @@ public class SpaceController {
     }
 
     @GetMapping("user/prefix")
-    public PagedApiResponseEntity<UserPart> searchMemberByPrefix(
+    public PagedApiResponseEntity<UserInfo> searchMemberByPrefix(
         @RequestParam Long spaceId,
         @RequestParam(defaultValue = "0") int page,
         @RequestParam(defaultValue = "20") int size,
         @RequestParam String prefix) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<UserPart> members = spaceService.searchMemberByPrefix(spaceId, prefix, pageable);
+        Page<UserInfo> members = spaceService.searchMemberByPrefix(spaceId, prefix, pageable);
         return PagedApiResponseEntity.success(members);
     }
 }

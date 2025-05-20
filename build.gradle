@@ -52,6 +52,7 @@ subprojects {
             implementation 'org.springframework.kafka:spring-kafka'
             implementation 'org.springframework.cloud:spring-cloud-starter'
             implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
+            implementation 'io.github.openfeign:feign-okhttp'
         }
         if (it.name != "search-searvice") {
             dependencies {

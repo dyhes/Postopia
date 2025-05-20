@@ -3,6 +3,8 @@ package com.heslin.postopia.vote.controller;
 import com.heslin.postopia.common.dto.response.ApiResponseEntity;
 import com.heslin.postopia.common.utils.Utils;
 import com.heslin.postopia.space.dto.VoteSpaceInfo;
+import com.heslin.postopia.vote.dto.SpaceVoteInfo;
+import com.heslin.postopia.vote.dto.VoteInfo;
 import com.heslin.postopia.vote.request.CommentVoteRequest;
 import com.heslin.postopia.vote.request.PostVoteRequest;
 import com.heslin.postopia.vote.request.SpaceInfoRequest;
@@ -14,6 +16,9 @@ import org.springframework.data.util.Pair;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+
 @RestController
 @RequestMapping("vote")
 public class VoteController {
@@ -24,20 +29,20 @@ public class VoteController {
         this.voteService = voteService;
     }
 
-//    @GetMapping("comment")
-//    public ApiResponseEntity<List<VoteInfo>> getCommentVotes(@RequestParam List<Long> ids) {
-//        return ApiResponseEntity.ok(voteService.getCommentVotes(ids), "success");
-//    }
-//
-//    @GetMapping("post")
-//    public ApiResponseEntity<List<VoteInfo>> getPostVotes(@RequestParam List<Long> ids) {
-//        return ApiResponseEntity.ok(voteService.getPostVotes(ids), "success");
-//    }
-//
-//    @GetMapping("space")
-//    public ApiResponseEntity<VoteInfo> getSpaceVote(@RequestParam Long id) {
-//        return ApiResponseEntity.ok(voteService.getSpaceVote(id), "success");
-//    }
+    @GetMapping("comment")
+    public CompletableFuture<List<VoteInfo>> getCommentVotes(@RequestParam Long userId, @RequestParam List<Long> ids) {
+        return voteService.getCommentVotes(userId, ids);
+    }
+
+    @GetMapping("post")
+    public CompletableFuture<List<VoteInfo>> getPostVotes(@RequestParam Long userId, @RequestParam List<Long> ids) {
+        return voteService.getPostVotes(userId, ids);
+    }
+
+    @GetMapping("space")
+    public CompletableFuture<ApiResponseEntity<List<SpaceVoteInfo>>> getSpaceVote(@RequestParam Long userId, @RequestParam Long spaceId) {
+        return voteService.getSpaceVote(spaceId);
+    }
 
 
     private VoteSpaceInfo spaceMemberCheck(Long spaceId, Long userId) {

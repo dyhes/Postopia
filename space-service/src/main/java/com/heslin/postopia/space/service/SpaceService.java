@@ -13,7 +13,7 @@ import com.heslin.postopia.space.feign.UserClient;
 import com.heslin.postopia.space.model.MemberLog;
 import com.heslin.postopia.space.model.Space;
 import com.heslin.postopia.space.repository.SpaceRepository;
-import com.heslin.postopia.user.dto.UserPart;
+import com.heslin.postopia.user.dto.UserInfo;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -96,13 +96,13 @@ public class SpaceService {
         return spaceRepository.findSearchSpaceInfosByIdIn(ids);
     }
 
-    public Page<UserPart> searchMemberByPrefix(Long spaceId, String prefix, Pageable pageable) {
+    public Page<UserInfo> searchMemberByPrefix(Long spaceId, String prefix, Pageable pageable) {
         Page<MemberLog>  localRet = memberService.searchByPrefix(spaceId, prefix, pageable);
         List<Long> userId = localRet.getContent().stream().map(MemberLog::getUserId).toList();
         System.out.println("userId");
         userId.forEach(System.out::println);
         var  remoteRet = userClient.getSpaceUserInfo(userId);
-        List<UserPart> infos = Objects.requireNonNull(remoteRet.getBody()).getData();
+        List<UserInfo> infos = Objects.requireNonNull(remoteRet.getBody()).getData();
         System.out.println("infos");
         infos.forEach(System.out::println);
         return new PageImpl<>(infos, pageable, localRet.getTotalElements());

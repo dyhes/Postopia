@@ -1,8 +1,10 @@
 package com.heslin.postopia.vote.dto;
 
-import com.heslin.postopia.vote.enums.DetailVoteType;
+import com.heslin.postopia.opinion.dto.OpinionInfo;
+import com.heslin.postopia.user.dto.UserInfo;
 
-import java.time.Instant;
-
-public record VoteInfo(Long id, Long voteId, DetailVoteType voteType, String initiator, long positiveCount, long negativeCount, Instant startAt, Instant endAt, String additional) {
+public record VoteInfo(Long mergeId, VotePart vote, UserInfo initiator, OpinionInfo opinion) {
+    public VoteInfo(Long mergeId) {
+        this(mergeId, null, null, null);
+    }
 }

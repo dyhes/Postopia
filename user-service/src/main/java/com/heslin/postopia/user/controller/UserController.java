@@ -7,9 +7,9 @@ import com.heslin.postopia.common.dto.response.ResMessage;
 import com.heslin.postopia.common.utils.PostopiaFormatter;
 import com.heslin.postopia.common.utils.Utils;
 import com.heslin.postopia.user.dto.Credential;
-import com.heslin.postopia.user.dto.UserPart;
-import com.heslin.postopia.user.dto.UserAvatar;
 import com.heslin.postopia.user.dto.UserInfo;
+import com.heslin.postopia.user.dto.UserAvatar;
+import com.heslin.postopia.user.dto.UserDetail;
 import com.heslin.postopia.user.request.RefreshRequest;
 import com.heslin.postopia.user.request.SignInRequest;
 import com.heslin.postopia.user.request.SignUpRequest;
@@ -60,9 +60,14 @@ public class UserController {
         }
     }
 
+    @GetMapping("detail")
+    public ApiResponseEntity<UserDetail> getUserDetail(@RequestParam Long userId) {
+        return ApiResponseEntity.success(userService.getUserDetail(userId));
+    }
+
     @GetMapping("info")
-    public ApiResponseEntity<UserInfo> getUserInfo(@RequestParam Long userId) {
-        return ApiResponseEntity.success(userService.getUserInfo(userId));
+    public List<UserInfo> getUserInfos(@RequestParam List<Long> userId) {
+        return userService.getUserInfos(userId);
     }
 
     @GetMapping("avatars")
@@ -72,8 +77,8 @@ public class UserController {
     }
 
     @GetMapping("search/infos")
-    public ApiResponseEntity<List<UserPart>> getSearchedUserInfos(@RequestParam List<Long> userId) {
-        List<UserPart> ret = userService.getSearchUserInfos(userId);
+    public ApiResponseEntity<List<UserInfo>> getSearchedUserInfos(@RequestParam List<Long> userId) {
+        List<UserInfo> ret = userService.getSearchUserInfos(userId);
         return ApiResponseEntity.success(ret);
     }
 

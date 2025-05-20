@@ -8,9 +8,9 @@ import com.heslin.postopia.common.redis.RedisService;
 import com.heslin.postopia.search.model.UserDoc;
 import com.heslin.postopia.user.Repository.UserRepository;
 import com.heslin.postopia.user.dto.Credential;
-import com.heslin.postopia.user.dto.UserPart;
-import com.heslin.postopia.user.dto.UserAvatar;
 import com.heslin.postopia.user.dto.UserInfo;
+import com.heslin.postopia.user.dto.UserAvatar;
+import com.heslin.postopia.user.dto.UserDetail;
 import com.heslin.postopia.user.model.User;
 import com.heslin.postopia.user.request.RefreshRequest;
 import com.heslin.postopia.user.request.SignInRequest;
@@ -94,8 +94,12 @@ public class UserService {
     }
 
 
-    public UserInfo getUserInfo(Long userId) {
-        return userRepository.findUserInfoByUserId(userId);
+    public UserDetail getUserDetail(Long userId) {
+        return userRepository.findUserDetailByUserId(userId);
+    }
+
+    public List<UserInfo> getUserInfos(List<Long> userIds) {
+        return userRepository.findUserInfosByUserIdIn(userIds);
     }
 
     public void updateUserNickName(Long userId, String username, String nickname) {
@@ -113,7 +117,7 @@ public class UserService {
         return userRepository.findAvatarsByUserIdIn(ids);
     }
 
-    public List<UserPart> getSearchUserInfos(List<Long> ids) {
+    public List<UserInfo> getSearchUserInfos(List<Long> ids) {
         return userRepository.findSearchUserInfosByUserIdIn(ids);
     }
 

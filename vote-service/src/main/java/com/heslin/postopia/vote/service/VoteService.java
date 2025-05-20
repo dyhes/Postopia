@@ -1,16 +1,20 @@
 package com.heslin.postopia.vote.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.heslin.postopia.common.dto.response.ApiResponseEntity;
 import com.heslin.postopia.common.kafka.KafkaService;
 import com.heslin.postopia.common.utils.PostopiaFormatter;
+import com.heslin.postopia.common.utils.Utils;
+import com.heslin.postopia.opinion.dto.OpinionInfo;
 import com.heslin.postopia.space.dto.VoteSpaceInfo;
+import com.heslin.postopia.user.dto.UserInfo;
+import com.heslin.postopia.vote.dto.SpaceVoteInfo;
+import com.heslin.postopia.vote.dto.SpaceVotePart;
 import com.heslin.postopia.vote.dto.VoteInfo;
+import com.heslin.postopia.vote.dto.VotePart;
 import com.heslin.postopia.vote.enums.DetailVoteType;
 import com.heslin.postopia.vote.enums.VoteType;
-import com.heslin.postopia.vote.feign.CommentFeign;
-import com.heslin.postopia.vote.feign.PostFeign;
-import com.heslin.postopia.vote.feign.SpaceFeign;
-import com.heslin.postopia.vote.feign.UserFeign;
+import com.heslin.postopia.vote.feign.*;
 import com.heslin.postopia.vote.model.CommonVote;
 import com.heslin.postopia.vote.model.SpaceVote;
 import com.heslin.postopia.vote.model.Vote;
@@ -28,8 +32,10 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @RefreshScope
 @Service
@@ -43,6 +49,7 @@ public class VoteService {
     private final SpaceFeign spaceFeign;
     private final PostFeign postFeign;
     private final CommentFeign commentFeign;
+    private final OpinionFeign opinionFeign;
 //    private final OpinionService opinionService;
 //    private final CommentService commentService;
 //    private final PostService postService;
@@ -65,7 +72,7 @@ public class VoteService {
     private float spaceSmall;
 
     @Autowired
-    public VoteService(CommonVoteRepository commonVoteRepository, SpaceVoteRepository spaceVoteRepository, KafkaService kafkaService, VoteScheduleService scheduleService, ObjectMapper objectMapper, UserFeign userFeign, SpaceFeign spaceFeign, PostFeign postFeign, CommentFeign commentFeign) {
+    public VoteService(CommonVoteRepository commonVoteRepository, SpaceVoteRepository spaceVoteRepository, KafkaService kafkaService, VoteScheduleService scheduleService, ObjectMapper objectMapper, UserFeign userFeign, SpaceFeign spaceFeign, PostFeign postFeign, CommentFeign commentFeign, OpinionFeign opinionFeign) {
         this.commonVoteRepository = commonVoteRepository;
         this.spaceVoteRepository = spaceVoteRepository;
         this.kafkaService = kafkaService;
@@ -75,12 +82,14 @@ public class VoteService {
         this.spaceFeign = spaceFeign;
         this.postFeign = postFeign;
         this.commentFeign = commentFeign;
+        this.opinionFeign = opinionFeign;
     }
 
     public Pair<Boolean, VoteSpaceInfo> spaceMemberCheck(Long spaceId, Long userId) {
         return spaceFeign.checkMemberForVote(spaceId, userId);
     }
-    //    
+
+    //
 //    public void upsertVoteOpinion(Long xUserId, Long id, boolean isPositive) {
 //        VoteOpinion voteOpinion = new VoteOpinion();
 //        voteOpinion.setUser(user);
@@ -96,23 +105,72 @@ public class VoteService {
 //        }
 //    }
 
-    private List<VoteInfo> getVotes(List<Long> ids, VoteType voteType) {
-        return commonVoteRepository.findVotes(ids, voteType);
+    public CompletableFuture<List<VoteInfo>> asyncCompleteVote(Long userId, List<Long> ids, List<VotePart> voteParts) {
+        if (voteParts == null || voteParts.isEmpty()) {
+            return CompletableFuture.completedFuture(Collections.emptyList());
+        }
+        List<Long> voteIds = new ArrayList<>();
+        List<Long> initiator = new ArrayList<>();
+        voteParts
+        .forEach(votePart -> {
+            voteIds.add(votePart.id());
+            initiator.add(votePart.initiator());
+        });
+        CompletableFuture<List<OpinionInfo>> futureOpinionInfo = opinionFeign.getOpinionInfos(userId, voteIds);
+        CompletableFuture<List<UserInfo>> futureUserInfo = userFeign.getUserInfos(initiator);
+        return CompletableFuture.allOf(futureUserInfo, futureOpinionInfo).thenApply(v -> {
+            List<OpinionInfo> opinionInfos = futureOpinionInfo.join();
+            List<UserInfo> userInfos = futureUserInfo.join();
+            List<VoteInfo> partial = Utils.triMerge(voteParts,
+            opinionInfos, OpinionInfo::mergeId, (votePart, mp) -> mp.get(votePart.id()),
+            userInfos, UserInfo::userId, (votePart, mp) -> mp.get(votePart.initiator()),
+            (votePart, opinionInfo, userInfo) -> new VoteInfo(votePart.relatedEntity(), votePart, userInfo, opinionInfo)
+            );
+            Map<Long, VoteInfo> voteInfoMap = partial.stream().collect(Collectors.toMap(VoteInfo::mergeId, Function.identity()));
+            return ids.stream().map(id -> voteInfoMap.getOrDefault(id, new VoteInfo(id))).toList();
+        });
+    }
+
+    public CompletableFuture<List<VoteInfo>> getCommentVotes(Long userId, List<Long> ids) {
+        List<VotePart> voteParts = commonVoteRepository.findVotes(ids, VoteType.COMMENT);
+        return asyncCompleteVote(userId, ids, voteParts);
     }
 
     
-    public List<VoteInfo> getCommentVotes(List<Long> commentIds) {
-        return getVotes(commentIds, VoteType.COMMENT);
+    public CompletableFuture<List<VoteInfo>> getPostVotes(Long userId, List<Long> ids) {
+        List<VotePart> voteParts = commonVoteRepository.findVotes(ids, VoteType.POST);
+        return asyncCompleteVote(userId, ids, voteParts);
     }
 
     
-    public List<VoteInfo> getPostVotes(List<Long> ids) {
-        return getVotes(ids, VoteType.POST);
-    }
-
-    
-    public VoteInfo getSpaceVote(Long id) {
-        return commonVoteRepository.findSpaceVote(id);
+    public CompletableFuture<ApiResponseEntity<List<SpaceVoteInfo>>> getSpaceVote(Long userId, Long id) {
+        List<SpaceVotePart> spaceVoteParts = spaceVoteRepository.findByRelatedEntity(id);
+        if (spaceVoteParts == null || spaceVoteParts.isEmpty()) {
+            return CompletableFuture.completedFuture(ApiResponseEntity.success(Collections.emptyList()));
+        }
+        List<Long> voteIds = new ArrayList<>();
+        List<Long> initiator = new ArrayList<>();
+        List<Long> relatedUsers = new ArrayList<>();
+        spaceVoteParts
+        .forEach(votePart -> {
+            voteIds.add(votePart.id());
+            initiator.add(votePart.initiator());
+            relatedUsers.add(votePart.relatedEntity());
+        });
+        CompletableFuture<List<OpinionInfo>> futureOpinionInfo = opinionFeign.getOpinionInfos(userId, voteIds);
+        CompletableFuture<List<UserInfo>> futureUserInfo = userFeign.getUserInfos(initiator);
+        CompletableFuture<List<UserInfo>> futureRelatedUserInfo = userFeign.getUserInfos(relatedUsers);
+        return CompletableFuture.allOf(futureUserInfo, futureOpinionInfo, futureRelatedUserInfo).thenApply(v -> {
+            List<OpinionInfo> opinionInfos = futureOpinionInfo.join();
+            List<UserInfo> userInfos = futureUserInfo.join();
+            List<UserInfo> relatedUserInfos = futureRelatedUserInfo.join();
+            List<SpaceVoteInfo> res = Utils.quaMerge(spaceVoteParts,
+            opinionInfos, OpinionInfo::mergeId, (votePart, mp) -> mp.get(votePart.id()),
+            userInfos, UserInfo::userId, (votePart, mp) -> mp.get(votePart.initiator()),
+            relatedUserInfos, UserInfo::userId, (votePart, mp) -> mp.get(votePart.relatedUser()),
+            (votePart, opinionInfo, userInfo, relatedUserInfo) -> new SpaceVoteInfo(votePart, userInfo, opinionInfo, relatedUserInfo));
+            return ApiResponseEntity.success(res);
+        });
     }
 
     private SpaceVote createSpaceVote(Long xUserId, Long relatedEntity, Long relatedUser, DetailVoteType detailVoteType, Long spaceMember, String first, String second) {
