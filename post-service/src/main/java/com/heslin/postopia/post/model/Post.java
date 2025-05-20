@@ -1,12 +1,20 @@
 package com.heslin.postopia.post.model;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.Instant;
 
 @Entity
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@Data
 @EntityListeners(AuditingEntityListener.class)
 public class Post {
     @Id
@@ -21,12 +29,17 @@ public class Post {
 
     private Long spaceId;
 
+    private String spaceName;
+
     private boolean isArchived;
 
+    @Column(columnDefinition = "bigint default 0")
     private long positiveCount;
 
+    @Column(columnDefinition = "bigint default 0")
     private long negativeCount;
 
+    @Column(columnDefinition = "bigint default 0")
     private long commentCount;
 
     @CreatedDate

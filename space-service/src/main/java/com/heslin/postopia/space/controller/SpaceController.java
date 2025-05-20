@@ -117,13 +117,12 @@ public class SpaceController {
 
     @GetMapping("info/vote")
     public Pair<Boolean, VoteSpaceInfo> checkMemberForVote(Long spaceId, Long userId) {
-        try {
-            boolean isEligible = spaceService.isEligible(spaceId, userId);
+        boolean isEligible = spaceService.isEligible(spaceId, userId);
+        if (isEligible) {
             VoteSpaceInfo spaceInfo = spaceService.findVoteSpaceInfo(spaceId);
             return Pair.of(isEligible, spaceInfo);
-        } catch (RuntimeException e) {
-            return Pair.of(false, null);
         }
+        return Pair.of(false, new VoteSpaceInfo("null", null));
     }
 
     @GetMapping("avatars")
@@ -147,5 +146,10 @@ public class SpaceController {
         Pageable pageable = PageRequest.of(page, size);
         Page<UserInfo> members = spaceService.searchMemberByPrefix(spaceId, prefix, pageable);
         return PagedApiResponseEntity.success(members);
+    }
+
+    @GetMapping("eligible")
+    public boolean isEligible(@RequestParam Long userId, @RequestParam Long spaceId) {
+        return spaceService.isEligible(userId, spaceId);
     }
 }

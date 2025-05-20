@@ -26,8 +26,10 @@ public class Comment {
 
     private boolean isPined;
 
+    @Column(columnDefinition = "bigint default 0")
     private long positiveCount;
 
+    @Column(columnDefinition = "bigint default 0")
     private long negativeCount;
 
     @CreatedDate

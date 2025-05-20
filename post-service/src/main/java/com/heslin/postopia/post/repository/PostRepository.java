@@ -6,6 +6,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.Collection;
@@ -19,4 +20,17 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     boolean deletePost(Long postId);
 
     List<PostOpinionHint> findPOHByIdIn(Collection<Long> ids);
+
+    @Modifying
+    @Transactional
+    @Query("update Post p set p.subject = :subject, p.content = :content where p.id = :id and p.userId = :uid and p.isArchived = false ")
+    int updateSubjectAndContent(@Param("id")Long id, @Param("uid")Long uid, @Param("subject")String subject, @Param("content")String content);
+
+    @Query("select count(*) from Post p where p.id = :pid and p.isArchived = :isArchived")
+    int checkPostArchiveStatus(@Param("pid") Long postId, @Param("isArchived") boolean isArchived);
+
+    @Modifying
+    @Transactional
+    @Query("update Post p set p.isArchived = :isArchived where p.id = :pid")
+    void updateArchiveStatus(@Param("pid") Long postId, @Param("isArchived") boolean isArchived);
 }

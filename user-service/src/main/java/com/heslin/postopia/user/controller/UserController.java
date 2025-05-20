@@ -152,5 +152,4 @@ public class UserController {
         ResMessage verify = userService.verifyUserEmail(xUserId, verifyEmailRequest.email, verifyEmailRequest.authCode);
         return BasicApiResponseEntity.res(verify);
     }
-
 }

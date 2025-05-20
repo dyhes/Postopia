@@ -39,6 +39,14 @@ public class KafkaService {
         lsKfafkaTemplate.send("msg", userId, content);
     }
 
+    public void sendToPostCascade(Long id) {
+        liKafkaTemplate.send("post-cascade", id, 0);
+    }
+
+    public void sendToCommentCascade(Long id) {
+        liKafkaTemplate.send("comment-cascade", id, 0);
+    }
+
     public void sendToDocDelete(String fieldType, String id, String route){
         ssKafkaTemplate.send(fieldType + "_delete", id, route);
     }

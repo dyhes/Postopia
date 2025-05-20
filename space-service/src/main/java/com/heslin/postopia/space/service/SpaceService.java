@@ -141,7 +141,11 @@ public class SpaceService {
     }
 
     public boolean isEligible(Long spaceId, Long userId) {
-        return memberService.findBySpaceIdAndUserId(spaceId, userId).isMuted();
+        try {
+            return memberService.findBySpaceIdAndUserId(spaceId, userId).isMuted();
+        } catch (RuntimeException e) {
+            return false;
+        }
     }
 
     public VoteSpaceInfo findVoteSpaceInfo(Long spaceId) {

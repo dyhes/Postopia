@@ -1,0 +1,7 @@
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
+    implementation project(':user-service')
+    implementation project(':opinion-service')
+    implementation project(':vote-service')
+    implementation project(':search-service')
+}

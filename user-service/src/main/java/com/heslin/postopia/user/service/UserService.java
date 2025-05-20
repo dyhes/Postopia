@@ -58,9 +58,6 @@ public class UserService {
         String password = signupRequest.password();
         try {
             User user = User.builder().username(username).nickname(username).avatar(defaultUserAvatar)
-            .postCount(0L)
-            .commentCount(0L)
-            .credit(0L)
             .password(passwordEncoder.encode(password))
             .showEmail(false)
             .build();
