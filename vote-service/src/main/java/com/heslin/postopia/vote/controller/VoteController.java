@@ -41,7 +41,7 @@ public class VoteController {
 
     @GetMapping("space")
     public CompletableFuture<ApiResponseEntity<List<SpaceVoteInfo>>> getSpaceVote(@RequestParam Long userId, @RequestParam Long spaceId) {
-        return voteService.getSpaceVote(spaceId);
+        return voteService.getSpaceVote(userId, spaceId);
     }
 
 
@@ -77,7 +77,6 @@ public class VoteController {
         }
     }
 
-
     @PostMapping("space-update")
     public ApiResponseEntity<Long> updateSpaceVote(@RequestPart(required = false, name = "avatar") MultipartFile file, @RequestPart(name="info") SpaceInfoRequest request, @RequestHeader Long xUserId) {
         Utils.checkRequestBody(request);
@@ -90,8 +89,6 @@ public class VoteController {
             return ApiResponseEntity.fail(e.getMessage());
         }
     }
-
-
 
     @PostMapping("post-delete")
     public ApiResponseEntity<Long> deletePostVote(@RequestBody PostVoteRequest request, @RequestHeader Long xUserId) {
@@ -129,7 +126,6 @@ public class VoteController {
             return ApiResponseEntity.fail(e.getMessage());
         }
     }
-
 
     @PostMapping("comment-delete")
     public ApiResponseEntity<Long> deleteCommentVote(@RequestBody CommentVoteRequest request, @RequestHeader Long xUserId) {

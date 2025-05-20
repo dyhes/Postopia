@@ -24,12 +24,12 @@ import java.util.function.Function;
 import java.util.List;
 
 @Component
-public class KafkaConsumer {
+public class SearchConsumer {
     private final ObjectMapper objectMapper;
     private final ElasticsearchOperations elasticsearchOperations;
 
     @Autowired
-    public KafkaConsumer(ObjectMapper objectMapper, ElasticsearchOperations elasticsearchOperations) {
+    public SearchConsumer(ObjectMapper objectMapper, ElasticsearchOperations elasticsearchOperations) {
         this.objectMapper = objectMapper;
         this.elasticsearchOperations = elasticsearchOperations;
     }

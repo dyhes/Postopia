@@ -87,52 +87,6 @@ public class KafkaService {
         send("space", spaceId, value);
     }
 
-//
-//    @KafkaListener(topics = "vote", containerFactory = "batchLIFactory")
-//    @Transactional
-//    protected void processVoteOperations(List<ConsumerRecord<Long, Integer>> records) {
-//        var mp = new HashMap<Long, Diff>();
-//        records.forEach(record -> {
-//            Diff diff = mp.computeIfAbsent(record.key(), k -> new VoteDiff());
-//            diff.updateDiff(record.value());
-//        });
-//        executeBatchDiffOperations(mp, "votes");
-//    }
-//
-//    @KafkaListener(topics = "post", containerFactory = "batchLIFactory")
-//    @Transactional
-//    protected void processPostOperations(List<ConsumerRecord<Long, Integer>> records) {
-//        var mp = new HashMap<Long, Diff>();
-//        records.forEach(record -> {
-//            Diff diff = mp.computeIfAbsent(record.key(), k -> new PostDiff());
-//            diff.updateDiff(record.value());
-//        });
-//        executeBatchDiffOperations(mp, "posts");
-//    }
-//
-//    @KafkaListener(topics = "comment", containerFactory = "batchLIFactory")
-//    @Transactional
-//    protected void processCommentOperations(List<ConsumerRecord<Long, Integer>> records) {
-//        var mp = new HashMap<Long, Diff>();
-//        records.forEach(record -> {
-//            Diff diff = mp.computeIfAbsent(record.key(), k -> new CommentDiff());
-//            diff.updateDiff(record.value());
-//        });
-//        executeBatchDiffOperations(mp, "comments");
-//    }
-//
-//    @KafkaListener(topics = "space", containerFactory = "batchLIFactory")
-//    @Transactional
-//    protected void processSpaceOperations(List<ConsumerRecord<Long, Integer>> records) {
-//        var mp = new HashMap<Long, Diff>();
-//        records.forEach(record -> {
-//            Diff diff = mp.computeIfAbsent(record.key(), k -> new SpaceDiff());
-//            diff.updateDiff(record.value());
-//        });
-//        executeBatchDiffOperations(mp, "spaces");
-//    }
-
-
     private void buildSql(StringBuilder sql, Map<String, Object> params, HashMap<Long, Diff> mp, boolean shouldEnter, Function<Diff, Boolean> shouldApply, Function<Diff, Long> diffCounter, String field) {
         if (shouldEnter) {
             sql.append(field).append(" = CASE id ");

@@ -1,4 +1,4 @@
-package com.heslin.postopia.user.kafka;
+package com.heslin.postopia.vote.kafka;
 
 import com.heslin.postopia.common.kafka.Diff;
 import com.heslin.postopia.common.kafka.KafkaService;
@@ -12,22 +12,22 @@ import java.util.HashMap;
 import java.util.List;
 
 @Component
-public class KafkaComsumer {
+public class VoteConsumer {
     private final KafkaService kafkaService;
 
     @Autowired
-    public KafkaComsumer(KafkaService kafkaService) {
+    public VoteConsumer(KafkaService kafkaService) {
         this.kafkaService = kafkaService;
     }
 
-    @KafkaListener(topics = "user", containerFactory = "batchLIFactory")
+    @KafkaListener(topics = "vote", containerFactory = "batchLIFactory")
     @Transactional
-    protected void processUserOperations(List<ConsumerRecord<Long, Integer>> records) {
+    protected void processVoteOperations(List<ConsumerRecord<Long, Integer>> records) {
         var mp = new HashMap<Long, Diff>();
         records.forEach(record -> {
-            Diff diff = mp.computeIfAbsent(record.key(), k -> new UserDiff());
+            Diff diff = mp.computeIfAbsent(record.key(), k -> new VoteDiff());
             diff.updateDiff(record.value());
         });
-        kafkaService.executeBatchDiffOperations(mp, "users");
+        kafkaService.executeBatchDiffOperations(mp, "votes");
     }
 }

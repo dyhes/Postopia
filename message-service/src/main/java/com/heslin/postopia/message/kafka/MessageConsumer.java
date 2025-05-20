@@ -12,11 +12,11 @@ import java.time.Instant;
 import java.util.List;
 
 @Component
-public class KafkaConsumer {
+public class MessageConsumer {
     private final MessageService messageService;
 
     @Autowired
-    public KafkaConsumer(MessageService messageService) {
+    public MessageConsumer(MessageService messageService) {
         this.messageService = messageService;
     }
 
