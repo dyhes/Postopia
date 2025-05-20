@@ -1,38 +1,33 @@
 package com.heslin.postopia.opinion.redis;
 
-import com.heslin.postopia.common.redis.model.OpinionAggregation;
-import com.heslin.postopia.common.redis.repository.OpinionAggregationRepository;
+import com.heslin.postopia.common.redis.model.COAggragation;
+import com.heslin.postopia.common.redis.model.POAggregation;
+import com.heslin.postopia.common.redis.repository.COAggregationRepository;
+import com.heslin.postopia.common.redis.repository.POAggregationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.Cursor;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.stereotype.Service;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.Consumer;
 
 @Service
 public class OpinionRedisService {
-    private final RedisTemplate<String, Object> redisTemplate;
-    private final OpinionAggregationRepository opinionAggregationRepository;
+    private final POAggregationRepository POAggregationRepository;
+    private final COAggregationRepository COAggregationRepository;
 
     @Autowired
-    public OpinionRedisService(RedisTemplate<String, Object> redisTemplate, OpinionAggregationRepository opinionAggregationRepository) {
-        this.redisTemplate = redisTemplate;
-        this.opinionAggregationRepository = opinionAggregationRepository;
+    public OpinionRedisService(POAggregationRepository POAggregationRepository, COAggregationRepository COAggregationRepository) {
+        this.POAggregationRepository = POAggregationRepository;
+        this.COAggregationRepository = COAggregationRepository;
     }
 
-    public void updateOpinionAggregation(Long spaceId, Long postId, Long commentId, String username, boolean isPositive) {
-        String id;
-        if (commentId != null) {
-            id = "comment_" + commentId;
-        } else {
-            id = "post_" + postId;
-        }
-        OpinionAggregation opinionAggregation = opinionAggregationRepository.findById(id).orElse(new OpinionAggregation(id, spaceId, postId, commentId));
-        opinionAggregation.update(username, isPositive);
-        opinionAggregationRepository.save(opinionAggregation);
+    public void updatePOOpinionAggregation(Long spaceId, Long postId, Long userId, String username, boolean isPositive) {
+        POAggregation opinionAggregation = POAggregationRepository.findById(postId).orElse(new POAggregation(postId, spaceId));
+        opinionAggregation.update(userId, username, isPositive);
+        POAggregationRepository.save(opinionAggregation);
+    }
+
+    public void updateCOOpinionAggregation(Long spaceId, Long commentId, Long userId, String username, boolean isPositive) {
+        COAggragation opinionAggregation = COAggregationRepository.findById(commentId).orElse(new COAggragation(commentId, spaceId));
+        opinionAggregation.update(userId, username, isPositive);
+        COAggregationRepository.save(opinionAggregation);
     }
 
 //    public Iterable<OpinionAggregation> findAll() {
@@ -58,7 +53,7 @@ public class OpinionRedisService {
 //        return new PageImpl<>(new ArrayList<>(aggregations), pageable, total);
 //    }
 
-    private void processBatchAggregations(List<String> keys, Consumer<List<OpinionAggregation>> consumer) {
+//    private void processBatchAggregations(List<String> keys, Consumer<List<OpinionAggregation>> consumer) {
 //        System.out.println("keys");
 //        System.out.println(keys);
 //        List<OpinionAggregation> opinionAggregations = oaRedisTemplate.executePipelined((RedisCallback<Object>) connection -> {
@@ -78,30 +73,5 @@ public class OpinionRedisService {
 //        List<OpinionAggregation> aggregations = objects.stream().map(aggregation -> (OpinionAggregation)aggregation).toList();
 //        System.out.println("aggregations");
 //        System.out.println(aggregations);
-        List<OpinionAggregation> aggregations = keys.stream().map(key -> opinionAggregationRepository.findById(key.split(":")[1]).orElseThrow()).toList();
-        opinionAggregationRepository.deleteAll(aggregations);
-        consumer.accept(aggregations);
-        keys.clear();
-    }
-
-    public void sendOpinionMessage(Consumer<List<OpinionAggregation>> consumer) {
-        int pageSize = 1000;
-        ScanOptions options = ScanOptions.scanOptions()
-        .match("opinion_aggregation:*")
-        .count(pageSize)
-        .build();
-        Cursor<String> cursor = redisTemplate.scan(options);
-        List<String> ids = new ArrayList<>();
-        while (cursor.hasNext()) {
-            String key = cursor.next();
-            System.out.printf("key: %s%n", key);
-            ids.add(key);
-            if (ids.size() >= pageSize) {
-                processBatchAggregations(ids, consumer);
-            }
-        }
-        if (!ids.isEmpty()) {
-            processBatchAggregations(ids, consumer);
-        }
-    }
+//    }
 }

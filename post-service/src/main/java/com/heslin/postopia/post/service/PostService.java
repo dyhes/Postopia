@@ -3,9 +3,12 @@ package com.heslin.postopia.post.service;
 import com.heslin.postopia.common.kafka.KafkaService;
 import com.heslin.postopia.common.kafka.enums.SpaceOperation;
 import com.heslin.postopia.common.kafka.enums.UserOperation;
+import com.heslin.postopia.post.dto.PostOpinionHint;
 import com.heslin.postopia.post.repository.PostRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class PostService {
@@ -38,6 +41,10 @@ public class PostService {
 
     public void updateArchiveStatus(Long postId, boolean isArchived) {
         // not impl
+    }
+
+    public List<PostOpinionHint> getOpinionHints(List<Long> list) {
+        return postRepository.findPOHByIdIn(list);
     }
 
     //

@@ -5,11 +5,8 @@ import com.heslin.postopia.common.kafka.enums.CommentOperation;
 import com.heslin.postopia.common.kafka.enums.PostOperation;
 import com.heslin.postopia.common.kafka.enums.UserOperation;
 import com.heslin.postopia.opinion.dto.VoteOpinionInfo;
-import com.heslin.postopia.opinion.model.PostOpinion;
-import com.heslin.postopia.opinion.model.VoteOpinion;
 import com.heslin.postopia.opinion.redis.OpinionRedisService;
 import com.heslin.postopia.opinion.repository.OpinionRepository;
-import com.heslin.postopia.opinion.repository.VoteOpinionRepository;
 import com.heslin.postopia.opinion.request.UpsertCommentRequest;
 import com.heslin.postopia.opinion.request.UpsertPostRequest;
 import jakarta.persistence.EntityManager;
@@ -21,19 +18,15 @@ import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.util.stream.Stream;
 
-import static org.springframework.data.jpa.domain.AbstractPersistable_.id;
-
 @Service
 public class OpinionService{
-    private final VoteOpinionRepository voteOpinionRepository;
     private final OpinionRepository opinionRepository;
     private final EntityManager entityManager;
     private final KafkaService kafkaService;
     private final OpinionRedisService redisService;
-    
+
     @Autowired
-    public OpinionService(VoteOpinionRepository voteOpinionRepository, OpinionRepository opinionRepository, EntityManager entityManager, KafkaService kafkaService, OpinionRedisService redisService) {
-        this.voteOpinionRepository = voteOpinionRepository;
+    public OpinionService(OpinionRepository opinionRepository, EntityManager entityManager, KafkaService kafkaService, OpinionRedisService redisService) {
         this.opinionRepository = opinionRepository;
         this.entityManager = entityManager;
         this.kafkaService = kafkaService;
@@ -91,7 +84,7 @@ public class OpinionService{
         } else {
             kafkaService.sendToPost(request.postId(), request.isPositive()? PostOperation.SWITCH_TO_LIKE : PostOperation.SWITCH_TO_DISLIKE);
         }
-        redisService.updateOpinionAggregation(spaceName, id, null, user.getUsername(), isPositive);
+        redisService.updatePOOpinionAggregation(request.spaceId(), request.postId(), xUserId, xUsername, request.isPositive());
     }
 
     public void upsertCommentOpinion(Long xUserId, String xUsername, UpsertCommentRequest request) {
@@ -115,11 +108,11 @@ public class OpinionService{
         } else {
             kafkaService.sendToComment(request.commentId(), request.isPositive()? CommentOperation.SWITCH_TO_LIKE : CommentOperation.SWITCH_TO_DISLIKE );
         }
-        //redisService.updateOpinionAggregation(request.spaceId(), postId, id, xUsername, isPositive);
+        redisService.updateCOOpinionAggregation(request.spaceId(), request.commentId(), xUserId, xUsername, request.isPositive());
     }
 
     public void notifyVoter(Long voteId, String message) {
-        Stream<VoteOpinionInfo> opinionStream = voteOpinionRepository.findVoteOpinionsByVoteId(voteId);
+        Stream<VoteOpinionInfo> opinionStream = opinionRepository.findStreamVoteOpinions(voteId);
         opinionStream.forEach(info -> {
             kafkaService.sendMessage(info.userId(), message.formatted(info.isPositive()? "赞成" : "反对"));
         });
