@@ -4,6 +4,7 @@ import com.heslin.postopia.common.kafka.KafkaService;
 import com.heslin.postopia.common.kafka.enums.CommentOperation;
 import com.heslin.postopia.common.kafka.enums.PostOperation;
 import com.heslin.postopia.common.kafka.enums.UserOperation;
+import com.heslin.postopia.common.kafka.enums.VoteOperation;
 import com.heslin.postopia.opinion.dto.OpinionInfo;
 import com.heslin.postopia.opinion.dto.VoteOpinionInfo;
 import com.heslin.postopia.opinion.enums.OpinionStatus;
@@ -66,6 +67,13 @@ public class OpinionService{
         query.setParameter("uid", xUserId);
         query.setParameter("vid", voteId);
         kafkaService.sendToUser(xUserId, UserOperation.CREDIT_EARNED);
+        boolean isInsert = (boolean) query.getSingleResult();
+        if (isInsert) {
+            kafkaService.sendToVote(voteId, isPositive? VoteOperation.AGREED : VoteOperation.DISAGREED);
+            kafkaService.sendToUser(xUserId, UserOperation.CREDIT_EARNED);
+        } else {
+            kafkaService.sendToVote(voteId, isPositive? VoteOperation.SWITCH_TO_AGREE : VoteOperation.SWITCH_TO_DISAGREE);
+        }
     }
 
     public void upsertPostOpinion(Long xUserId, String xUsername, UpsertPostRequest request) {

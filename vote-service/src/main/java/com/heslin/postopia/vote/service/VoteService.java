@@ -89,22 +89,6 @@ public class VoteService {
         return spaceFeign.checkMemberForVote(spaceId, userId);
     }
 
-    //
-//    public void upsertVoteOpinion(Long xUserId, Long id, boolean isPositive) {
-//        VoteOpinion voteOpinion = new VoteOpinion();
-//        voteOpinion.setUser(user);
-//        voteOpinion.setUsername(user.getUsername());
-//        voteOpinion.setVote(Vote.builder().id(id).build());
-//        voteOpinion.setPositive(isPositive);
-//        boolean isInsert = opinionService.upsertOpinion(voteOpinion);
-//        if (isInsert) {
-//            kafkaService.sendToVote(id, isPositive? VoteOperation.AGREED : VoteOperation.DISAGREED);
-//            kafkaService.sendToUser(user.getId(), UserOperation.CREDIT_EARNED);
-//        } else {
-//            kafkaService.sendToVote(id, isPositive? VoteOperation.SWITCH_TO_AGREE : VoteOperation.SWITCH_TO_DISAGREE);
-//        }
-//    }
-
     public CompletableFuture<List<VoteInfo>> asyncCompleteVote(Long userId, List<Long> ids, List<VotePart> voteParts) {
         if (voteParts == null || voteParts.isEmpty()) {
             return CompletableFuture.completedFuture(Collections.emptyList());
