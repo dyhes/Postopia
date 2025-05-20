@@ -1,14 +1,17 @@
 package com.heslin.postopia.opinion.controller;
 
-import com.heslin.postopia.common.dto.UserId;
 import com.heslin.postopia.common.dto.response.BasicApiResponseEntity;
 import com.heslin.postopia.common.utils.Utils;
+import com.heslin.postopia.opinion.dto.OpinionPart;
+import com.heslin.postopia.opinion.enums.OpinionType;
 import com.heslin.postopia.opinion.request.OpinionRequest;
 import com.heslin.postopia.opinion.request.UpsertCommentRequest;
 import com.heslin.postopia.opinion.request.UpsertPostRequest;
 import com.heslin.postopia.opinion.service.OpinionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("opinon")
@@ -18,6 +21,21 @@ public class OpinionController {
     @Autowired
     public OpinionController(OpinionService opinionService) {
         this.opinionService = opinionService;
+    }
+
+    @GetMapping("post")
+    public List<OpinionPart> getPostOpinion(@RequestParam Long userId, @RequestParam List<Long> postId) {
+        return opinionService.getOpinion(userId, postId, OpinionType.POST);
+    }
+
+    @GetMapping("comment")
+    public List<OpinionPart> getCommentOpinion(@RequestParam Long userId, @RequestParam List<Long> commentId) {
+        return opinionService.getOpinion(userId, commentId, OpinionType.COMMENT);
+    }
+
+    @GetMapping("vote")
+    public List<OpinionPart> getVoteOpinion(@RequestParam Long userId, @RequestParam List<Long> voteId) {
+        return opinionService.getOpinion(userId, voteId, OpinionType.VOTE);
     }
 
     @PostMapping("vote")

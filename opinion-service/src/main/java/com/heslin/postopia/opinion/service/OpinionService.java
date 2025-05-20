@@ -4,7 +4,10 @@ import com.heslin.postopia.common.kafka.KafkaService;
 import com.heslin.postopia.common.kafka.enums.CommentOperation;
 import com.heslin.postopia.common.kafka.enums.PostOperation;
 import com.heslin.postopia.common.kafka.enums.UserOperation;
+import com.heslin.postopia.opinion.dto.OpinionPart;
 import com.heslin.postopia.opinion.dto.VoteOpinionInfo;
+import com.heslin.postopia.opinion.enums.OpinionStatus;
+import com.heslin.postopia.opinion.enums.OpinionType;
 import com.heslin.postopia.opinion.redis.OpinionRedisService;
 import com.heslin.postopia.opinion.repository.OpinionRepository;
 import com.heslin.postopia.opinion.request.UpsertCommentRequest;
@@ -16,6 +19,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Service
@@ -116,5 +122,18 @@ public class OpinionService{
         opinionStream.forEach(info -> {
             kafkaService.sendMessage(info.userId(), message.formatted(info.isPositive()? "赞成" : "反对"));
         });
+    }
+
+    public List<OpinionPart> getOpinion(Long userId, List<Long> idList, OpinionType opinionType) {
+        List<OpinionPart> opinionParts;
+        switch (opinionType) {
+            case POST -> opinionParts = opinionRepository.getPostOpinion(userId, idList);
+            case COMMENT -> opinionParts = opinionRepository.getCommentOpinion(userId, idList);
+            case VOTE -> opinionParts = opinionRepository.getVoteOpinion(userId, idList);
+            default -> throw new IllegalArgumentException("Invalid opinion type: " + opinionType);
+        }
+        Map<Long, OpinionPart> mergeIdMap = opinionParts.stream().collect(Collectors.toMap(OpinionPart::mergeId, opinionPart -> opinionPart));
+        List<OpinionPart> res = idList.stream().map(id -> mergeIdMap.getOrDefault(id, new OpinionPart(id, OpinionStatus.NIL, null))).toList();
+        return res;
     }
 }
