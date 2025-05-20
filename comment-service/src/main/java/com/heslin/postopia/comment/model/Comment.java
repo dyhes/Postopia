@@ -20,6 +20,8 @@ public class Comment {
 
     Long postId;
 
+    Long spaceId;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_id", foreignKey = @ForeignKey(name = "fk_comment_comment", foreignKeyDefinition = "FOREIGN KEY (parent_id) REFERENCES comments(id) ON DELETE CASCADE"))
     private Comment parent;
