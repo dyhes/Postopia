@@ -4,7 +4,7 @@ import com.heslin.postopia.common.kafka.KafkaService;
 import com.heslin.postopia.common.kafka.enums.CommentOperation;
 import com.heslin.postopia.common.kafka.enums.PostOperation;
 import com.heslin.postopia.common.kafka.enums.UserOperation;
-import com.heslin.postopia.opinion.dto.OpinionPart;
+import com.heslin.postopia.opinion.dto.OpinionInfo;
 import com.heslin.postopia.opinion.dto.VoteOpinionInfo;
 import com.heslin.postopia.opinion.enums.OpinionStatus;
 import com.heslin.postopia.opinion.enums.OpinionType;
@@ -124,16 +124,16 @@ public class OpinionService{
         });
     }
 
-    public List<OpinionPart> getOpinion(Long userId, List<Long> idList, OpinionType opinionType) {
-        List<OpinionPart> opinionParts;
+    public List<OpinionInfo> getOpinion(Long userId, List<Long> idList, OpinionType opinionType) {
+        List<OpinionInfo> opinionInfos;
         switch (opinionType) {
-            case POST -> opinionParts = opinionRepository.getPostOpinion(userId, idList);
-            case COMMENT -> opinionParts = opinionRepository.getCommentOpinion(userId, idList);
-            case VOTE -> opinionParts = opinionRepository.getVoteOpinion(userId, idList);
+            case POST -> opinionInfos = opinionRepository.getPostOpinion(userId, idList);
+            case COMMENT -> opinionInfos = opinionRepository.getCommentOpinion(userId, idList);
+            case VOTE -> opinionInfos = opinionRepository.getVoteOpinion(userId, idList);
             default -> throw new IllegalArgumentException("Invalid opinion type: " + opinionType);
         }
-        Map<Long, OpinionPart> mergeIdMap = opinionParts.stream().collect(Collectors.toMap(OpinionPart::mergeId, opinionPart -> opinionPart));
-        List<OpinionPart> res = idList.stream().map(id -> mergeIdMap.getOrDefault(id, new OpinionPart(id, OpinionStatus.NIL, null))).toList();
+        Map<Long, OpinionInfo> mergeIdMap = opinionInfos.stream().collect(Collectors.toMap(OpinionInfo::mergeId, opinionPart -> opinionPart));
+        List<OpinionInfo> res = idList.stream().map(id -> mergeIdMap.getOrDefault(id, new OpinionInfo(id, OpinionStatus.NIL, null))).toList();
         return res;
     }
 }

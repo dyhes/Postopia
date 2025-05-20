@@ -1,6 +1,6 @@
 package com.heslin.postopia.opinion.repository;
 
-import com.heslin.postopia.opinion.dto.OpinionPart;
+import com.heslin.postopia.opinion.dto.OpinionInfo;
 import com.heslin.postopia.opinion.dto.VoteOpinionInfo;
 import com.heslin.postopia.opinion.model.Opinion;
 import com.heslin.postopia.opinion.model.VoteOpinion;
@@ -85,12 +85,12 @@ public interface OpinionRepository extends JpaRepository<Opinion, Long> {
     @Query("delete CommentOpinion co where co.commentId = :cid and co.userId= :uid and co.isPositive = :ip")
     int deleteCommentPinion(@Param("cid") Long commentId, @Param("uid") Long userId, @Param("ip") boolean isPositive);
 
-    @Query("select new com.heslin.postopia.opinion.dto.OpinionPart(o.postId, CASE WHEN o.isPositive = true THEN com.heslin.postopia.opinion.enums.OpinionStatus.POSITIVE ELSE com.heslin.postopia.opinion.enums.OpinionStatus.NEGATIVE END, o.updatedAt) from PostOpinion o where o.postId in ?2 and o.userId = ?1")
-    List<OpinionPart> getPostOpinion(Long userId, List<Long> idList);
+    @Query("select new com.heslin.postopia.opinion.dto.OpinionInfo(o.postId, CASE WHEN o.isPositive = true THEN com.heslin.postopia.opinion.enums.OpinionStatus.POSITIVE ELSE com.heslin.postopia.opinion.enums.OpinionStatus.NEGATIVE END, o.updatedAt) from PostOpinion o where o.postId in ?2 and o.userId = ?1")
+    List<OpinionInfo> getPostOpinion(Long userId, List<Long> idList);
 
-    @Query("select new com.heslin.postopia.opinion.dto.OpinionPart(o.commentId, CASE WHEN o.isPositive = true THEN com.heslin.postopia.opinion.enums.OpinionStatus.POSITIVE ELSE com.heslin.postopia.opinion.enums.OpinionStatus.NEGATIVE END, o.updatedAt) from CommentOpinion o where o.commentId in ?2 and o.userId = ?1")
-    List<OpinionPart> getCommentOpinion(Long userId, List<Long> idList);
+    @Query("select new com.heslin.postopia.opinion.dto.OpinionInfo(o.commentId, CASE WHEN o.isPositive = true THEN com.heslin.postopia.opinion.enums.OpinionStatus.POSITIVE ELSE com.heslin.postopia.opinion.enums.OpinionStatus.NEGATIVE END, o.updatedAt) from CommentOpinion o where o.commentId in ?2 and o.userId = ?1")
+    List<OpinionInfo> getCommentOpinion(Long userId, List<Long> idList);
 
-    @Query("select new com.heslin.postopia.opinion.dto.OpinionPart(o.voteId, CASE WHEN o.isPositive = true THEN com.heslin.postopia.opinion.enums.OpinionStatus.POSITIVE ELSE com.heslin.postopia.opinion.enums.OpinionStatus.NEGATIVE END, o.updatedAt) from VoteOpinion o where o.voteId in ?2 and o.userId = ?1")
-    List<OpinionPart> getVoteOpinion(Long userId, List<Long> idList);
+    @Query("select new com.heslin.postopia.opinion.dto.OpinionInfo(o.voteId, CASE WHEN o.isPositive = true THEN com.heslin.postopia.opinion.enums.OpinionStatus.POSITIVE ELSE com.heslin.postopia.opinion.enums.OpinionStatus.NEGATIVE END, o.updatedAt) from VoteOpinion o where o.voteId in ?2 and o.userId = ?1")
+    List<OpinionInfo> getVoteOpinion(Long userId, List<Long> idList);
 }
