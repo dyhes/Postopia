@@ -15,6 +15,7 @@ import com.heslin.postopia.common.utils.Utils;
 import com.heslin.postopia.opinion.dto.OpinionInfo;
 import com.heslin.postopia.opinion.enums.OpinionStatus;
 import com.heslin.postopia.post.dto.CommentPostInfo;
+import com.heslin.postopia.post.dto.SummaryPostInfo;
 import com.heslin.postopia.post.feign.VoteFeign;
 import com.heslin.postopia.search.model.CommentDoc;
 import com.heslin.postopia.user.dto.UserInfo;
@@ -216,5 +217,11 @@ public class CommentService {
             List<RecursiveComment> res = topIds.stream().map(mp::get).toList();
             return new PageImpl<>(res, pageable, commentPage.getTotalElements());
         });
+    }
+
+    public PostSummary getSummaryInfo(Long postId) {
+        SummaryPostInfo post = postFeign.getSummaryPostInfo(postId);
+        List<SummaryCommentInfo> comments = commentRepository.findSummaryByPostId(postId);
+        return new PostSummary(post, comments);
     }
 }

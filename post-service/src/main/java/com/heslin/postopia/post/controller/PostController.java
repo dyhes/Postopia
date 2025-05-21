@@ -1,22 +1,19 @@
 package com.heslin.postopia.post.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.heslin.postopia.common.dto.response.*;
+import com.heslin.postopia.common.dto.response.ApiResponseEntity;
+import com.heslin.postopia.common.dto.response.BasicApiResponseEntity;
+import com.heslin.postopia.common.dto.response.PagedApiResponseEntity;
 import com.heslin.postopia.common.utils.Utils;
 import com.heslin.postopia.opinion.enums.OpinionStatus;
 import com.heslin.postopia.post.dto.*;
 import com.heslin.postopia.post.request.CreatePostRequest;
 import com.heslin.postopia.post.request.UpdatePostRequest;
-import com.heslin.postopia.post.service.IntelligenceService;
 import com.heslin.postopia.post.service.PostService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.MediaType;
-import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.web.bind.annotation.*;
-import reactor.core.publisher.Flux;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -25,25 +22,10 @@ import java.util.concurrent.CompletableFuture;
 @RequestMapping("post")
 public class PostController {
     private final PostService postService;
-    private final IntelligenceService intelligenceService;
 
     @Autowired
-    public PostController(PostService postService, IntelligenceService intelligenceService) {
+    public PostController(PostService postService) {
         this.postService = postService;
-        this.intelligenceService = intelligenceService;
-    }
-
-    @GetMapping(value = "summary", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<ServerSentEvent<String>> summary(@RequestParam Long postId) {
-        return Flux.create(sink -> {
-            CompletableFuture.runAsync(() -> {
-                try {
-                    intelligenceService.summary(sink, postId);
-                } catch (JsonProcessingException e) {
-                    throw new RuntimeException(e);
-                }
-            });
-        });
     }
 
     @PostMapping("update")
@@ -139,6 +121,11 @@ public class PostController {
     @GetMapping("comment")
     public List<CommentPostInfo> getCommentPostInfos(@RequestParam List<Long> ids) {
         return postService.getCommentPostInfos(ids);
+    }
+
+    @GetMapping("summary")
+    public SummaryPostInfo getSummaryPostInfo(@RequestParam Long postId) {
+        return postService.getSummaryPostInfo(postId);
     }
 
 //    @PostMapping("draft")

@@ -1,6 +1,7 @@
-package com.heslin.postopia.post.service;
+package com.heslin.postopia.comment.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.heslin.postopia.post.dto.SiliconRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,19 +24,21 @@ public class IntelligenceService {
     @Value("${postopia.silicon.prompt.summary}")
     private String summaryPrompt;
     private final WebClient webClient;
-    private final PostService postService;
+    private final CommentService commentService;
+    private final ObjectMapper objectMapper;
 
     @Autowired
-    public IntelligenceService(WebClient webClient, PostService postService) {
+    public IntelligenceService(WebClient webClient, CommentService commentService, ObjectMapper objectMapper) {
         this.webClient = webClient;
-        this.postService = postService;
+        this.commentService = commentService;
+        this.objectMapper = objectMapper;
     }
 
     public void summary(FluxSink<ServerSentEvent<String>> sink, Long postId) throws JsonProcessingException {
         System.out.println("sysPrompt:");
         System.out.println(sysPrompt);
         System.out.println("userPrompt:");
-        String userPrompt = postService.getPostForSummary(postId);
+        String userPrompt = objectMapper.writeValueAsString(commentService.getSummaryInfo(postId));
         System.out.println(userPrompt);
         SiliconRequest body = new SiliconRequest(model, sysPrompt);
         body.append(userPrompt);

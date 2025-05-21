@@ -210,6 +210,10 @@ public class PostService {
         return postRepository.findCommentPostInfosByIdIn(ids);
     }
 
+    public SummaryPostInfo getSummaryPostInfo(Long postId) {
+        return postRepository.findSummaryById(postId);
+    }
+
 //    public Page<FeedPostSummary> getPostOpinionsByUser(Long id, List<Boolean> statuses, Pageable pageable) {
 //        return opinionRepository.getPostOpinionsByUser(id, statuses, pageable);
 //    }

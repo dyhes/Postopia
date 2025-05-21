@@ -4,4 +4,5 @@ dependencies {
     implementation project(':vote-service')
     implementation project(':post-service')
     implementation project(':search-service')
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
 }

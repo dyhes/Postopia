@@ -1,11 +1,13 @@
 package com.heslin.postopia.comment.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.heslin.postopia.comment.dto.OpinionCommentInfo;
 import com.heslin.postopia.comment.dto.RecursiveComment;
 import com.heslin.postopia.comment.dto.SearchCommentInfo;
 import com.heslin.postopia.comment.dto.UserCommentInfo;
 import com.heslin.postopia.comment.request.CreateCommentRequest;
 import com.heslin.postopia.comment.service.CommentService;
+import com.heslin.postopia.comment.service.IntelligenceService;
 import com.heslin.postopia.common.dto.response.ApiResponseEntity;
 import com.heslin.postopia.common.dto.response.PagedApiResponseEntity;
 import com.heslin.postopia.opinion.enums.OpinionStatus;
@@ -13,7 +15,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.MediaType;
+import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Flux;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -22,10 +27,12 @@ import java.util.concurrent.CompletableFuture;
 @RequestMapping("comment")
 public class CommentController {
     private final CommentService commentService;
+    private final IntelligenceService intelligenceService;
 
     @Autowired
-    public CommentController(CommentService commentService) {
+    public CommentController(CommentService commentService, IntelligenceService intelligenceService) {
         this.commentService = commentService;
+        this.intelligenceService = intelligenceService;
     }
 
     @PostMapping("create")
@@ -90,5 +97,18 @@ public class CommentController {
         Long queryId = userId == null ? xUserId : userId;
         return commentService.getUserOpinionedComments(queryId, opinion, page, size, direction)
         .thenApply(PagedApiResponseEntity::success);
+    }
+
+    @GetMapping(value = "summary", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<ServerSentEvent<String>> summary(@RequestParam Long postId) {
+        return Flux.create(sink -> {
+            CompletableFuture.runAsync(() -> {
+                try {
+                    intelligenceService.summary(sink, postId);
+                } catch (JsonProcessingException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+        });
     }
 }

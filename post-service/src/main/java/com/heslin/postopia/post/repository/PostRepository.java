@@ -1,9 +1,6 @@
 package com.heslin.postopia.post.repository;
 
-import com.heslin.postopia.post.dto.CommentPostInfo;
-import com.heslin.postopia.post.dto.FeedPostPart;
-import com.heslin.postopia.post.dto.PostOpinionHint;
-import com.heslin.postopia.post.dto.PostPart;
+import com.heslin.postopia.post.dto.*;
 import com.heslin.postopia.post.model.Post;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
@@ -51,4 +48,6 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     List<FeedPostPart> findFeedPostByIdIn(Collection<Long> ids);
 
     List<CommentPostInfo> findCommentPostInfosByIdIn(Collection<Long> ids);
+
+    SummaryPostInfo findSummaryById(Long id);
 }

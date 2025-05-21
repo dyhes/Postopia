@@ -118,4 +118,6 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
     FROM comment_tree
     """, nativeQuery = true)
     List<DeleteCommentInfo> findByParentRecursive(@Param("commentId") Long commentId);
+
+    List<SummaryCommentInfo> findSummaryByPostId(Long postId);
 }
