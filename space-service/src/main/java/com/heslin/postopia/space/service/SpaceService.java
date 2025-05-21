@@ -5,7 +5,7 @@ import com.heslin.postopia.common.dto.response.ResMessage;
 import com.heslin.postopia.common.kafka.KafkaService;
 import com.heslin.postopia.common.kafka.enums.SpaceOperation;
 import com.heslin.postopia.search.model.SpaceDoc;
-import com.heslin.postopia.space.dto.SpacePart;
+import com.heslin.postopia.space.dto.SearchSpaceInfo;
 import com.heslin.postopia.space.dto.SpaceAvatar;
 import com.heslin.postopia.space.dto.SpaceInfo;
 import com.heslin.postopia.space.dto.VoteSpaceInfo;
@@ -92,7 +92,7 @@ public class SpaceService {
         return spaceRepository.findSpaceAvatarsByIdIn(ids);
     }
 
-    public List<SpacePart> getSearchSpaceInfos(List<Long> ids) {
+    public List<SearchSpaceInfo> getSearchSpaceInfos(List<Long> ids) {
         return spaceRepository.findSearchSpaceInfosByIdIn(ids);
     }
 

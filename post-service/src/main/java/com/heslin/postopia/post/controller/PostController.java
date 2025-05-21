@@ -111,7 +111,7 @@ public class PostController {
             .thenApply(PagedApiResponseEntity::success);
     }
 
-    @GetMapping("user_opinion")
+    @GetMapping("user/opinion")
     public CompletableFuture<PagedApiResponseEntity<UserPostInfo>> getUserOpinionedPosts(
         @RequestHeader Long xUserId,
         @RequestParam int page,

@@ -7,7 +7,7 @@ import com.heslin.postopia.common.dto.response.PagedApiResponseEntity;
 import com.heslin.postopia.common.dto.response.ResMessage;
 import com.heslin.postopia.common.utils.PostopiaFormatter;
 import com.heslin.postopia.common.utils.Utils;
-import com.heslin.postopia.space.dto.SpacePart;
+import com.heslin.postopia.space.dto.SearchSpaceInfo;
 import com.heslin.postopia.space.dto.SpaceAvatar;
 import com.heslin.postopia.space.dto.SpaceInfo;
 import com.heslin.postopia.space.dto.VoteSpaceInfo;
@@ -90,6 +90,17 @@ public class SpaceController {
         return BasicApiResponseEntity.res(message);
     }
 
+    @GetMapping("user/prefix")
+    public PagedApiResponseEntity<UserInfo> searchMemberByPrefix(
+    @RequestParam Long spaceId,
+    @RequestParam(defaultValue = "0") int page,
+    @RequestParam(defaultValue = "20") int size,
+    @RequestParam String prefix) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<UserInfo> members = spaceService.searchMemberByPrefix(spaceId, prefix, pageable);
+        return PagedApiResponseEntity.success(members);
+    }
+
     @GetMapping("user")
     public PagedApiResponseEntity<SpaceInfo> getUserSpaces(
         @RequestHeader Long xUserId,
@@ -115,41 +126,30 @@ public class SpaceController {
         return ApiResponseEntity.success(space);
     }
 
-    @GetMapping("info/vote")
-    public Pair<Boolean, VoteSpaceInfo> checkMemberForVote(Long spaceId, Long userId) {
-        boolean isEligible = spaceService.isEligible(spaceId, userId);
-        if (isEligible) {
-            VoteSpaceInfo spaceInfo = spaceService.findVoteSpaceInfo(spaceId);
-            return Pair.of(isEligible, spaceInfo);
-        }
-        return Pair.of(false, new VoteSpaceInfo("null", null));
-    }
-
     @GetMapping("avatars")
     public ApiResponseEntity<List<SpaceAvatar>> getSpaceAvatar(@RequestParam List<Long> ids) {
         var ret = spaceService.getSpaceAvatars(ids);
         return ApiResponseEntity.success(ret);
     }
 
-    @GetMapping("search/infos")
-    public ApiResponseEntity<List<SpacePart>> getSearchedSpaceInfos(@RequestParam List<Long> ids) {
+    @GetMapping("search")
+    public ApiResponseEntity<List<SearchSpaceInfo>> getSearchedSpaceInfos(@RequestParam List<Long> ids) {
         var ret = spaceService.getSearchSpaceInfos(ids);
         return ApiResponseEntity.success(ret);
-    }
-
-    @GetMapping("user/prefix")
-    public PagedApiResponseEntity<UserInfo> searchMemberByPrefix(
-        @RequestParam Long spaceId,
-        @RequestParam(defaultValue = "0") int page,
-        @RequestParam(defaultValue = "20") int size,
-        @RequestParam String prefix) {
-        Pageable pageable = PageRequest.of(page, size);
-        Page<UserInfo> members = spaceService.searchMemberByPrefix(spaceId, prefix, pageable);
-        return PagedApiResponseEntity.success(members);
     }
 
     @GetMapping("eligible")
     public boolean isEligible(@RequestParam Long userId, @RequestParam Long spaceId) {
         return spaceService.isEligible(userId, spaceId);
+    }
+
+    @GetMapping("info/vote")
+    public Pair<Boolean, VoteSpaceInfo> checkMemberForVote(Long spaceId, Long userId) {
+        boolean isEligible = spaceService.isEligible(spaceId, userId);
+        if (isEligible) {
+            VoteSpaceInfo spaceInfo = spaceService.findVoteSpaceInfo(spaceId);
+            return Pair.of(true, spaceInfo);
+        }
+        return Pair.of(false, new VoteSpaceInfo("null", null));
     }
 }
