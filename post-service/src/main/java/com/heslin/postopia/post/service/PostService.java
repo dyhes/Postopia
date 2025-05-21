@@ -115,7 +115,7 @@ public class PostService {
         List<Long> userId = posts.stream().map(FeedPostPart::userId).toList();
         CompletableFuture<List<OpinionInfo>> futureOpinionInfo = opinionFeign.getOpinionInfos(xUserId, postId);
         CompletableFuture<List<UserInfo>> futureUserInfo = userFeign.getUserInfos(userId);
-        CompletableFuture<List<VoteInfo>> futureVoteInfo = voteFeign.getPostVotes(xUserId, postId);
+        CompletableFuture<List<VoteInfo>> futureVoteInfo = voteFeign.getCommentVotes(xUserId, postId);
         return CompletableFuture.allOf(futureUserInfo, futureOpinionInfo, futureVoteInfo).thenApply(v -> {
             List<OpinionInfo> opinionInfos = futureOpinionInfo.join();
             List<UserInfo> userInfos = futureUserInfo.join();
@@ -160,7 +160,7 @@ public class PostService {
         List<Long> userIds = posts.stream().map(PostPart::userId).toList();
         CompletableFuture<List<OpinionInfo>> futureOpinionInfo = opinionFeign.getOpinionInfos(xUserId, postId);
         CompletableFuture<List<UserInfo>> futureUserInfo = userFeign.getUserInfos(userIds);
-        CompletableFuture<List<VoteInfo>> futureVoteInfo = voteFeign.getPostVotes(xUserId, postId);
+        CompletableFuture<List<VoteInfo>> futureVoteInfo = voteFeign.getCommentVotes(xUserId, postId);
         return CompletableFuture.allOf(futureUserInfo, futureOpinionInfo, futureVoteInfo).thenApply(v -> {
             List<OpinionInfo> opinionInfos = futureOpinionInfo.join();
             List<UserInfo> userInfos = futureUserInfo.join();

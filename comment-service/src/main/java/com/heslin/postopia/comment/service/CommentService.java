@@ -15,8 +15,10 @@ import com.heslin.postopia.common.utils.Utils;
 import com.heslin.postopia.opinion.dto.OpinionInfo;
 import com.heslin.postopia.opinion.enums.OpinionStatus;
 import com.heslin.postopia.post.dto.CommentPostInfo;
+import com.heslin.postopia.post.feign.VoteFeign;
 import com.heslin.postopia.search.model.CommentDoc;
 import com.heslin.postopia.user.dto.UserInfo;
+import com.heslin.postopia.vote.dto.VoteInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -24,7 +26,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static java.lang.Math.min;
 
@@ -35,14 +41,16 @@ public class CommentService {
     private final OpinionFeign opinionFeign;
     private final UserFeign userFeign;
     private final PostFeign postFeign;
+    private final VoteFeign voteFeign;
 
     @Autowired
-    public CommentService(CommentRepository commentRepository, KafkaService kafkaService, OpinionFeign opinionFeign, UserFeign userFeign, PostFeign postFeign) {
+    public CommentService(CommentRepository commentRepository, KafkaService kafkaService, OpinionFeign opinionFeign, UserFeign userFeign, PostFeign postFeign, VoteFeign voteFeign) {
         this.commentRepository = commentRepository;
         this.kafkaService = kafkaService;
         this.opinionFeign = opinionFeign;
         this.userFeign = userFeign;
         this.postFeign = postFeign;
+        this.voteFeign = voteFeign;
     }
 
     public List<CommentOpinionHint> getOpinionHints(List<Long> list) {
@@ -157,5 +165,37 @@ public class CommentService {
             infos, CommentPostInfo::id, (commentPart, mp) -> mp.get(commentPart.postId()),
             SearchCommentInfo::new);}
             );
+    }
+
+    public CompletableFuture<Page<RecursiveComment>> getCommentsByPost(Long xUserId, Long postId, Pageable pageable) {
+        Page<CommentPart> commentPage = commentRepository.findByPostIdAndParentIdIsNull(postId, pageable);
+        List<CommentPart> tops = commentPage.getContent();
+        List<Long> topIds = tops.stream().map(CommentPart::id).toList();
+        List<CommentPart> subs = commentRepository.findSubs(topIds);
+        List<CommentPart> commentParts = Stream.concat(tops.stream(), subs.stream()).toList();
+        List<Long> commentId = commentParts.stream().map(CommentPart::id).toList();
+        CompletableFuture<List<OpinionInfo>> futureOpinionInfo = opinionFeign.getOpinionInfos(xUserId, commentId);
+        CompletableFuture<List<UserInfo>> futureUserInfo = userFeign.getUserInfos(commentParts.stream().map(CommentPart::userId).toList());
+        CompletableFuture<List<VoteInfo>> futureVoteInfo = voteFeign.getCommentVotes(xUserId, commentId);
+        return CompletableFuture.allOf(futureOpinionInfo, futureUserInfo, futureVoteInfo).thenApply(v -> {
+            List<OpinionInfo> opinions = futureOpinionInfo.join();
+            List<UserInfo> userInfos = futureUserInfo.join();
+            List<VoteInfo> voteInfos = futureVoteInfo.join();
+            List<CommentInfo> commentInfos = Utils.quaMerge(commentParts,
+            opinions, OpinionInfo::mergeId, (commentPart, mp) -> mp.get(commentPart.id()),
+            userInfos, UserInfo::userId, (commentPart, mp) -> mp.get(commentPart.userId()),
+            voteInfos, VoteInfo::mergeId, (commentPart, mp) -> mp.get(commentPart.id()),
+            CommentInfo::new);
+            List<RecursiveComment> comments = commentInfos.stream().map(RecursiveComment::new).toList();
+            Map<Long, RecursiveComment> mp = comments.stream().collect(Collectors.toMap(c->c.getComment().comment().id(), Function.identity()));
+            for (RecursiveComment comment : comments) {
+                if (comment.getComment().comment().parentId() != null) {
+                    RecursiveComment parent = mp.get(comment.getComment().comment().parentId());
+                    parent.getChildren().add(comment);
+                }
+            }
+            List<RecursiveComment> res = topIds.stream().map(mp::get).toList();
+            return new PageImpl<>(res, pageable, commentPage.getTotalElements());
+        });
     }
 }

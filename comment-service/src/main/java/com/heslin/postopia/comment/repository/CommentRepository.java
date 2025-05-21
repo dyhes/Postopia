@@ -1,6 +1,7 @@
 package com.heslin.postopia.comment.repository;
 
 import com.heslin.postopia.comment.dto.CommentOpinionHint;
+import com.heslin.postopia.comment.dto.CommentPart;
 import com.heslin.postopia.comment.dto.SearchCommentPart;
 import com.heslin.postopia.comment.dto.SpaceCommentPart;
 import com.heslin.postopia.comment.model.Comment;
@@ -35,4 +36,52 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
     List<SpaceCommentPart> findByIdIn(Collection<Long> ids);
 
     List<SearchCommentPart> findSearchByIdIn(Collection<Long> ids);
+
+    Page<CommentPart> findByPostIdAndParentIdIsNull(Long postId, Pageable pageable);
+
+    @Query(value =
+        """
+        WITH RECURSIVE comment_tree AS (
+            SELECT
+                c.id,
+                c.parent_id as parentId,
+                c.user_id as userId,
+                c.content,
+                c.is_pined as isPined,
+                c.positive_count as positiveCount,
+                c.negative_count as negativeCount,
+                c.created_at as createdAt
+            FROM
+                comments c
+            WHERE
+                c.parent_id IN (:topIds)
+
+            UNION ALL
+
+            SELECT
+                child.id,
+                child.parent_id as parentId,
+                child.user_id as userId,
+                child.content,
+                child.is_pined as isPined,
+                child.positive_count as positiveCount,
+                child.negative_count as negativeCount,
+                child.created_at as createdAt
+            FROM
+                comments child
+            JOIN
+                comment_tree parent ON parent.id = child.parent_id
+        )
+        SELECT
+            id,
+            parentId,
+            userId,
+            content,
+            isPined,
+            positiveCount,
+            negativeCount,
+            createdAt
+        FROM comment_tree
+        """, nativeQuery = true)
+    List<CommentPart> findSubs(@Param("topIds") List<Long> topIds);
 }
