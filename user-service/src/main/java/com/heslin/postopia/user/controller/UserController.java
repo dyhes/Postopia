@@ -106,10 +106,10 @@ public class UserController {
     public record NickNameRequest(String nickname) {}
 
     @PostMapping("nickname")
-    public BasicApiResponseEntity updateNickName(@RequestHeader Long xUserId, @RequestHeader String username, @RequestBody NickNameRequest request) {
+    public BasicApiResponseEntity updateNickName(@RequestHeader Long xUserId, @RequestBody NickNameRequest request) {
         Utils.checkRequestBody(request);
         PostopiaFormatter.isValid(request.nickname);
-        userService.updateUserNickName(xUserId, username, request.nickname);
+        userService.updateUserNickName(xUserId, request.nickname);
         return BasicApiResponseEntity.success();
     }
 
@@ -134,10 +134,10 @@ public class UserController {
     public record EmailRequest(String email) {}
 
     @PostMapping("email")
-    public BasicApiResponseEntity updateEmail(@RequestBody EmailRequest emailRequest, @RequestHeader String username, @RequestHeader Long xUserId) {
+    public BasicApiResponseEntity updateEmail(@RequestBody EmailRequest emailRequest, @RequestHeader String xUsername, @RequestHeader Long xUserId) {
         Utils.checkRequestBody(emailRequest);
         try {
-            userService.updateUserEmail(xUserId, username, emailRequest.email);
+            userService.updateUserEmail(xUserId, xUsername, emailRequest.email);
         } catch (MessagingException e) {
             return BasicApiResponseEntity.fail(e.getMessage());
         }

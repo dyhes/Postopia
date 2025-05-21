@@ -99,11 +99,11 @@ public class UserService {
         return userRepository.findUserInfosByUserIdIn(userIds);
     }
 
-    public void updateUserNickName(Long userId, String username, String nickname) {
+    public void updateUserNickName(Long userId, String nickname) {
         userRepository.updateNickname(userId, nickname);
         Map<String, Object> mp = new HashMap<>();
         mp.put("nickname", nickname);
-        kafkaService.sendToDocUpdate("user", UserId.encode(userId), username, mp);
+        kafkaService.sendToDocUpdate("user", UserId.encode(userId), userId.toString(), mp);
     }
 
     public void updateUserIntroduction(Long userId, String introduction) {
