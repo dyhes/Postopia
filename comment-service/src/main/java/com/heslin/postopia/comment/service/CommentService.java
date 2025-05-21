@@ -19,6 +19,7 @@ import com.heslin.postopia.post.feign.VoteFeign;
 import com.heslin.postopia.search.model.CommentDoc;
 import com.heslin.postopia.user.dto.UserInfo;
 import com.heslin.postopia.vote.dto.VoteInfo;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -69,40 +70,58 @@ public class CommentService {
         .build();
         comment = commentRepository.save(comment);
 
-        String parentId = request.parentId() != null? request.parentId().toString() : null;
-
         kafkaService.sendToDocCreate("comment", comment.getId().toString(),
         new CommentDoc(
             comment.getId(),
             comment.getContent(),
             request.spaceId().toString(),
             request.postId().toString(),
-            parentId,
             xUserId.toString()));
         kafkaService.sendToPost(request.postId(), PostOperation.COMMENT_CREATED);
         kafkaService.sendToUser(xUserId, UserOperation.COMMENT_CREATED);
         kafkaService.sendToUser(request.userId(), UserOperation.CREDIT_EARNED);
 
-        StringBuilder messageContent = new StringBuilder();
-        messageContent
-        .append(PostopiaFormatter.formatUser(xUserId, xUsername))
-        .append("回复了您：")
-        .append(request.content(), 0, min(request.content().length(), 20))
-        .append("... %s".formatted(PostopiaFormatter.formatComment(request.spaceId(), request.postId(), comment.getId())));
-        kafkaService.sendMessage(request.userId(), messageContent.toString());
+        String messageContent = PostopiaFormatter.formatUser(xUserId, xUsername) +
+        "回复了您：" +
+        request.content().substring(0, min(request.content().length(), 20)) +
+        "... %s".formatted(PostopiaFormatter.formatComment(request.spaceId(), request.postId(), comment.getId()));
+        kafkaService.sendMessage(request.userId(), messageContent);
 
         return comment.getId();
     }
 
     public void deleteComment(Long spaceId, Long postId, Long commentId, Long userId) {
-        // not impl
-        // query children comments
-//        boolean success = commentRepository.deleteById(commentId); > 0;
-//        if (success) {
-//            kafkaService.sendToPost(postId, PostOperation.COMMENT_DELETED);
-//            kafkaService.sendToUser(userId, UserOperation.COMMENT_DELETED);
-//            kafkaService.sendToDocDelete("comment", commentId.toString(), spaceId.toString());
-//        }
+        List<DeleteCommentInfo> comments = commentRepository.findByParentRecursive(commentId);
+        boolean success = commentRepository.deleteByIdIn(comments.stream().map(DeleteCommentInfo::id).toList()) > 0;
+        if (!success) {
+            throw new RuntimeException("Failed to delete comment");
+        }
+        String spaceIdStr = spaceId.toString();
+        comments.forEach(comment -> {
+            kafkaService.sendToPost(postId, PostOperation.COMMENT_DELETED);
+            kafkaService.sendToUser(comment.userId(), UserOperation.COMMENT_DELETED);
+            kafkaService.sendToDocDelete("comment", comment.id().toString(), spaceIdStr);
+            if (!comment.id().equals(commentId)) {
+                kafkaService.sendMessage(comment.userId(), "您的评论：%s 已被递归删除".formatted(comment.content()));
+            }
+            kafkaService.sendToCommentCascade(comment.id());
+        });
+    }
+
+    @Transactional
+    public void deleteCommentByPostIds(List<Long> list) {
+        List<DeleteCommentDetail> comments = commentRepository.findByPostIdIn(list);
+        boolean success = commentRepository.deleteByIdIn(comments.stream().map(DeleteCommentDetail::id).toList()) > 0;
+        if (!success) {
+            throw new RuntimeException("Failed to delete comment");
+        }
+        comments.forEach(comment -> {
+            kafkaService.sendToPost(comment.postId(), PostOperation.COMMENT_DELETED);
+            kafkaService.sendToUser(comment.userId(), UserOperation.COMMENT_DELETED);
+            kafkaService.sendToDocDelete("comment", comment.id().toString(), comment.spaceId().toString());
+            kafkaService.sendMessage(comment.userId(), "您的评论：%s 已被递归删除".formatted(comment.content()));
+            kafkaService.sendToCommentCascade(comment.id());
+        });
     }
 
     public boolean checkPinStatus(Long commentId, boolean isPined) {

@@ -1,5 +1,6 @@
 package com.heslin.postopia.comment.kafka;
 
+import com.heslin.postopia.comment.service.CommentService;
 import com.heslin.postopia.common.kafka.Diff;
 import com.heslin.postopia.common.kafka.KafkaService;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -14,10 +15,12 @@ import java.util.List;
 @Component
 public class CommentConsumer {
     private final KafkaService kafkaService;
+    private final CommentService commentService;
 
     @Autowired
-    public CommentConsumer(KafkaService kafkaService) {
+    public CommentConsumer(KafkaService kafkaService, CommentService commentService) {
         this.kafkaService = kafkaService;
+        this.commentService = commentService;
     }
 
     @KafkaListener(topics = "comment", containerFactory = "batchLIFactory")
@@ -29,5 +32,11 @@ public class CommentConsumer {
             diff.updateDiff(record.value());
         });
         kafkaService.executeBatchDiffOperations(mp, "comments");
+    }
+
+    @KafkaListener(topics = "post_casade", containerFactory = "batchLIFactory")
+    @Transactional
+    protected void processPostDelete(List<ConsumerRecord<Long, Integer>> records) {
+        commentService.deleteCommentByPostIds(records.stream().map(ConsumerRecord::key).toList());
     }
 }

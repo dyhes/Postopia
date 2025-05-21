@@ -1,9 +1,6 @@
 package com.heslin.postopia.comment.repository;
 
-import com.heslin.postopia.comment.dto.CommentOpinionHint;
-import com.heslin.postopia.comment.dto.CommentPart;
-import com.heslin.postopia.comment.dto.SearchCommentPart;
-import com.heslin.postopia.comment.dto.SpaceCommentPart;
+import com.heslin.postopia.comment.dto.*;
 import com.heslin.postopia.comment.model.Comment;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -84,4 +81,41 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
         FROM comment_tree
         """, nativeQuery = true)
     List<CommentPart> findSubs(@Param("topIds") List<Long> topIds);
+
+    List<DeleteCommentDetail> findByPostIdIn(Collection<Long> postIds);
+
+    @Transactional
+    @Modifying
+    @Query("delete Comment c where c.id in ?1")
+    int deleteByIdIn(List<Long> list);
+
+    @Query(value = """
+    WITH RECURSIVE comment_tree AS (
+        SELECT
+            c.id,
+            c.user_id as userId,
+            c.content
+        FROM
+            comments c
+        WHERE
+            c.id = :commentId
+            
+        UNION ALL
+        
+        SELECT
+            child.id,
+            child.user_id as userId,
+            child.content
+        FROM
+            comments child
+        JOIN
+            comment_tree parent ON parent.id = child.parent_id
+    )
+    SELECT
+        id,
+        userId,
+        content
+    FROM comment_tree
+    """, nativeQuery = true)
+    List<DeleteCommentInfo> findByParentRecursive(@Param("commentId") Long commentId);
 }

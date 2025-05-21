@@ -132,7 +132,8 @@ public class SearchConsumer {
     @KafkaListener(topics = "comment_delete", containerFactory = "ssFactory")
     @Transactional
     protected void processCommentDelete(ConsumerRecord<String, String> record) {
-        processDocDelete(record.key(), record.value(), CommentDoc.class, "parentId", CommentDoc.class);
+        elasticsearchOperations.delete(record.key(), CommentDoc.class);
+        //processDocDelete(record.key(), record.value(), CommentDoc.class, "parentId", CommentDoc.class);
     }
 
 }

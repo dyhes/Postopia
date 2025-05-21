@@ -107,4 +107,14 @@ public interface OpinionRepository extends JpaRepository<Opinion, Long> {
 
     @Query("select new com.heslin.postopia.opinion.dto.OpinionInfo(o.commentId, CASE WHEN o.isPositive = true THEN com.heslin.postopia.opinion.enums.OpinionStatus.POSITIVE ELSE com.heslin.postopia.opinion.enums.OpinionStatus.NEGATIVE END, o.updatedAt) from CommentOpinion o where o.userId = ?1 and o.isPositive = ?2")
     Page<OpinionInfo> findCommentOpinionByUserIdAndPositive(Long userId, boolean positive, Pageable pageable);
+
+    @Transactional
+    @Modifying
+    @Query("delete from PostOpinion po where po.postId in ?1")
+    void deletePostPinionInBatch(List<Long> list);
+
+    @Transactional
+    @Modifying
+    @Query("delete from CommentOpinion co where co.commentId in ?1")
+    void deleteCommentPinionInBatch(List<Long> list);
 }

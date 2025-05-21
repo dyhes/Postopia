@@ -162,4 +162,12 @@ public class OpinionService{
             return opinionRepository.findCommentOpinionByUserIdAndPositive(userId, status == OpinionStatus.POSITIVE, pageable);
         }
     }
+
+    public void deleteCommentOpinionInBatch(List<Long> list) {
+        opinionRepository.deleteCommentPinionInBatch(list);
+    }
+
+    public void deletePostOpinionInBatch(List<Long> list) {
+        opinionRepository.deletePostPinionInBatch(list);
+    }
 }
