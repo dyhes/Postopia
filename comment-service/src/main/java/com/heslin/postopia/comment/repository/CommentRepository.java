@@ -1,7 +1,11 @@
 package com.heslin.postopia.comment.repository;
 
 import com.heslin.postopia.comment.dto.CommentOpinionHint;
+import com.heslin.postopia.comment.dto.SearchCommentPart;
+import com.heslin.postopia.comment.dto.SpaceCommentPart;
 import com.heslin.postopia.comment.model.Comment;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -9,6 +13,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collection;
 import java.util.List;
 
 @Repository
@@ -24,4 +29,10 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
     @Transactional
     @Query("update Comment c set c.isPined = :isPined where c.id = :cid")
     void updateCommentPinStatus(@Param("cid") Long commentId,@Param("isPined") boolean isPined);
+
+    Page<SpaceCommentPart> findByUserId(Long userId, Pageable pageable);
+
+    List<SpaceCommentPart> findByIdIn(Collection<Long> ids);
+
+    List<SearchCommentPart> findSearchByIdIn(Collection<Long> ids);
 }

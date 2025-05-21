@@ -1,4 +1,4 @@
-package com.heslin.postopia.post.feign;
+package com.heslin.postopia.comment.feign;
 
 import com.heslin.postopia.opinion.dto.OpinionInfo;
 import com.heslin.postopia.opinion.enums.OpinionStatus;
@@ -12,9 +12,9 @@ import java.util.concurrent.CompletableFuture;
 
 @FeignClient("opinion-service")
 public interface OpinionFeign {
-    @GetMapping("opinion/post")
-    CompletableFuture<List<OpinionInfo>> getOpinionInfos(@RequestParam Long userId, @RequestParam List<Long> postId);
+    @GetMapping("opinion/comment")
+    CompletableFuture<List<OpinionInfo>> getOpinionInfos(@RequestParam Long userId, @RequestParam List<Long> commentId);
 
-    @GetMapping("opinion/user/post")
-    Page<OpinionInfo> getUserPostOpinion(@RequestParam Long userId, @RequestParam int page, @RequestParam int size, @RequestParam String direction, @RequestParam OpinionStatus status);
+    @GetMapping("opinion/user/comment")
+    Page<OpinionInfo> getUserCommentOpinion(@RequestParam Long userId, @RequestParam int page, @RequestParam int size, @RequestParam String direction, @RequestParam OpinionStatus status);
 }

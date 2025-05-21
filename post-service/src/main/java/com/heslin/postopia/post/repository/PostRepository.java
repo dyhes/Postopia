@@ -1,5 +1,6 @@
 package com.heslin.postopia.post.repository;
 
+import com.heslin.postopia.post.dto.CommentPostInfo;
 import com.heslin.postopia.post.dto.FeedPostPart;
 import com.heslin.postopia.post.dto.PostOpinionHint;
 import com.heslin.postopia.post.dto.PostPart;
@@ -48,4 +49,6 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     PostPart findPostPartById(Long postId);
 
     List<FeedPostPart> findFeedPostByIdIn(Collection<Long> ids);
+
+    List<CommentPostInfo> findCommentPostInfosByIdIn(Collection<Long> ids);
 }

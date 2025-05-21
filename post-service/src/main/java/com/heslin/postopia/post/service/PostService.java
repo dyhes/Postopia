@@ -142,15 +142,15 @@ public class PostService {
         });
     }
 
-    public CompletableFuture<Page<OpinionPostInfo>> getUserPosts(Long xUserId, Long queryId, Pageable pageable) {
+    public CompletableFuture<Page<UserPostInfo>> getUserPosts(Long xUserId, Long queryId, Pageable pageable) {
         Page<FeedPostPart> postPage = postRepository.findByUserId(queryId, pageable);
         List<FeedPostPart> posts = postPage.getContent();
         List<Long> postId = posts.stream().map(FeedPostPart::id).toList();
         CompletableFuture<List<OpinionInfo>> futureOpinionInfo = opinionFeign.getOpinionInfos(xUserId, postId);
         return futureOpinionInfo.thenApply(opinionInfos -> {
-            List<OpinionPostInfo> content = Utils.biMerge(posts,
+            List<UserPostInfo> content = Utils.biMerge(posts,
             opinionInfos, OpinionInfo::mergeId, (postPart, mp) -> mp.get(postPart.id()),
-            OpinionPostInfo::new);
+            UserPostInfo::new);
             return new PageImpl<>(content, pageable, postPage.getTotalElements());
         });
     }
@@ -187,8 +187,8 @@ public class PostService {
         return getPostInfos(xUserId, posts).thenApply(postInfos -> new PageImpl<>(postInfos, pageable, postPage.getTotalElements()));
     }
 
-    public CompletableFuture<Page<UserPostInfo>> getUserOpinionedPosts(Long queryId, OpinionStatus opinion, int page, int size) {
-        Page<OpinionInfo> opinionInfos = opinionFeign.getUserPostOpinion(queryId, page, size, opinion);
+    public CompletableFuture<Page<OpinionPostInfo>> getUserOpinionedPosts(Long queryId, OpinionStatus opinion, int page, int size, String direction) {
+        Page<OpinionInfo> opinionInfos = opinionFeign.getUserPostOpinion(queryId, page, size, direction, opinion);
         List<OpinionInfo> opinions = opinionInfos.getContent();
         List<Long> postId = opinions.stream().map(OpinionInfo::mergeId).toList();
         if (postId.isEmpty()) {
@@ -198,12 +198,16 @@ public class PostService {
         List<Long> userId = posts.stream().map(FeedPostPart::userId).toList();
         CompletableFuture<List<UserInfo>> futureUserInfo = userFeign.getUserInfos(userId);
         return futureUserInfo.thenApply(userInfos -> {
-            List<UserPostInfo> content = Utils.triMerge(posts,
+            List<OpinionPostInfo> content = Utils.triMerge(posts,
             opinions, OpinionInfo::mergeId, (postPart, mp) -> mp.get(postPart.id()),
             userInfos, UserInfo::userId, (postPart, mp) -> mp.get(postPart.userId()),
-            UserPostInfo::new);
+            OpinionPostInfo::new);
             return new PageImpl<>(content, opinionInfos.getPageable(), opinionInfos.getTotalElements());
         });
+    }
+
+    public List<CommentPostInfo> getCommentPostInfos(List<Long> ids) {
+        return postRepository.findCommentPostInfosByIdIn(ids);
     }
 
 //    public Page<FeedPostSummary> getPostOpinionsByUser(Long id, List<Boolean> statuses, Pageable pageable) {

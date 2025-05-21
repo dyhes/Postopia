@@ -4,10 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.heslin.postopia.common.dto.response.*;
 import com.heslin.postopia.common.utils.Utils;
 import com.heslin.postopia.opinion.enums.OpinionStatus;
-import com.heslin.postopia.post.dto.FeedPostInfo;
-import com.heslin.postopia.post.dto.OpinionPostInfo;
-import com.heslin.postopia.post.dto.PostInfo;
-import com.heslin.postopia.post.dto.UserPostInfo;
+import com.heslin.postopia.post.dto.*;
 import com.heslin.postopia.post.request.CreatePostRequest;
 import com.heslin.postopia.post.request.UpdatePostRequest;
 import com.heslin.postopia.post.service.IntelligenceService;
@@ -99,7 +96,7 @@ public class PostController {
     }
 
     @GetMapping("user")
-    public CompletableFuture<PagedApiResponseEntity<OpinionPostInfo>> getUserPosts(
+    public CompletableFuture<PagedApiResponseEntity<UserPostInfo>> getUserPosts(
             @RequestHeader Long xUserId,
             @RequestParam int page,
             @RequestParam(required = false) Long userId,
@@ -112,14 +109,15 @@ public class PostController {
     }
 
     @GetMapping("user/opinion")
-    public CompletableFuture<PagedApiResponseEntity<UserPostInfo>> getUserOpinionedPosts(
+    public CompletableFuture<PagedApiResponseEntity<OpinionPostInfo>> getUserOpinionedPosts(
         @RequestHeader Long xUserId,
         @RequestParam int page,
         @RequestParam(defaultValue = "20") int size,
         @RequestParam(required = false) Long userId,
-        @RequestParam(defaultValue = "NIL") OpinionStatus opinion) {
+        @RequestParam(defaultValue = "NIL") OpinionStatus opinion,
+        @RequestParam(defaultValue = "DESC") String direction) {
         Long queryId = userId == null? xUserId : userId;
-        return postService.getUserOpinionedPosts(queryId, opinion, page, size)
+        return postService.getUserOpinionedPosts(queryId, opinion, page, size, direction)
             .thenApply(PagedApiResponseEntity::success);
     }
 
@@ -136,6 +134,11 @@ public class PostController {
     @GetMapping("search")
     public CompletableFuture<ApiResponseEntity<List<FeedPostInfo>>> getPostInfosInSearch(@RequestHeader Long xUserId, @RequestParam List<Long> ids) {
         return postService.getSearchPosts(xUserId, ids).thenApply(ApiResponseEntity::success);
+    }
+
+    @GetMapping("comment")
+    public List<CommentPostInfo> getCommentPostInfos(@RequestParam List<Long> ids) {
+        return postService.getCommentPostInfos(ids);
     }
 
 //    @PostMapping("draft")

@@ -4,15 +4,14 @@ import com.heslin.postopia.comment.dto.CommentInfo;
 import com.heslin.postopia.comment.dto.OpinionCommentInfo;
 import com.heslin.postopia.comment.dto.SearchCommentInfo;
 import com.heslin.postopia.comment.dto.UserCommentInfo;
-import com.heslin.postopia.comment.model.Comment;
 import com.heslin.postopia.comment.request.CreateCommentRequest;
 import com.heslin.postopia.comment.service.CommentService;
 import com.heslin.postopia.common.dto.UserId;
-import com.heslin.postopia.common.dto.response.*;
-import com.heslin.postopia.common.utils.PostopiaFormatter;
-import com.heslin.postopia.common.utils.Utils;
+import com.heslin.postopia.common.dto.response.ApiResponse;
+import com.heslin.postopia.common.dto.response.ApiResponseEntity;
+import com.heslin.postopia.common.dto.response.PageResult;
+import com.heslin.postopia.common.dto.response.PagedApiResponseEntity;
 import com.heslin.postopia.opinion.enums.OpinionStatus;
-import com.heslin.postopia.post.model.Post;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -20,6 +19,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 @RestController
 @RequestMapping("comment")
@@ -53,34 +53,33 @@ public class CommentController {
     }
 
     @GetMapping("post")
-    public PagedApiResponseEntity<CommentInfo> getComments(
+    public CompletableFuture<PagedApiResponseEntity<CommentInfo>> getComments(
         @RequestHeader Long xUserId,
         @RequestParam(name = "postId") Long postId,
         @RequestParam int page,
         @RequestParam(defaultValue = "30") int size,
         @RequestParam(defaultValue = "ASC") Sort.Direction direction
     ) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, "c.createdAt"));
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, "createdAt"));
         return ApiResponseEntity.ok(new PageResult<>(commentService.getCommentsByPost(postId,user.getId(), pageable)), "success", true);
     }
 
     @GetMapping("search")
-    public ApiResponseEntity<List<SearchCommentInfo>> getCommentInfosInSearch(@RequestParam List<Long> ids) {
-        return ApiResponseEntity.ok(commentService.getCommentInfosInSearch(ids), "success");
+    public CompletableFuture<ApiResponseEntity<List<SearchCommentInfo>>> getCommentInfosInSearch(@RequestParam Long xUserId, @RequestParam List<Long> ids) {
+        return commentService.getSearchComments(xUserId, ids).thenApply(ApiResponseEntity::success);
     }
 
     @GetMapping("user")
-    public PagedApiResponseEntity<UserCommentInfo> getComments(
+    public CompletableFuture<PagedApiResponseEntity<UserCommentInfo>> getComments(
         @RequestHeader Long xUserId,
         @RequestParam int page,
-        @RequestParam(required = false) UserId userId,
+        @RequestParam(required = false) Long userId,
         @RequestParam(defaultValue = "30") int size,
         @RequestParam(defaultValue = "DESC") Sort.Direction direction) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, "c.createdAt"));
-        boolean isSelf = userId == null || userId.getId().equals(user.getId());
-        Long queryId = userId == null ? user.getId() : userId.getId();
-        Long selfId = user.getId();
-        return ApiResponseEntity.ok(new ApiResponse<>("获取评论列表成功", new PageResult<>(commentService.getCommentsByUser(queryId, selfId, pageable))));
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, "createdAt"));
+        Long queryId = userId == null ? xUserId : userId;
+        return commentService.getUserComments(xUserId, queryId, pageable)
+        .thenApply(PagedApiResponseEntity::success);
     }
 
     @GetMapping("user/opinion")
@@ -91,8 +90,7 @@ public class CommentController {
             @RequestParam(defaultValue = "NIL") OpinionStatus opinion,
             @RequestParam(defaultValue = "30") int size,
             @RequestParam(defaultValue = "DESC") Sort.Direction direction) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, "o.updatedAt"));
-        Long queryId = userId == null? user.getId() : userId.getId();
-        return ApiResponseEntity.ok(new ApiResponse<>("获取评论态度列表成功", new PageResult<>(commentService.getCommentOpinionsByUser(queryId, opinion, pageable))));
+        return commentService.getUserOpinionedComments(queryId, opinion, page, size, direction)
+        .thenApply(PagedApiResponseEntity::success);
     }
 }

@@ -1,6 +1,9 @@
 package com.heslin.postopia.comment.service;
 
-import com.heslin.postopia.comment.dto.CommentOpinionHint;
+import com.heslin.postopia.comment.dto.*;
+import com.heslin.postopia.comment.feign.OpinionFeign;
+import com.heslin.postopia.comment.feign.PostFeign;
+import com.heslin.postopia.comment.feign.UserFeign;
 import com.heslin.postopia.comment.model.Comment;
 import com.heslin.postopia.comment.repository.CommentRepository;
 import com.heslin.postopia.comment.request.CreateCommentRequest;
@@ -8,11 +11,20 @@ import com.heslin.postopia.common.kafka.KafkaService;
 import com.heslin.postopia.common.kafka.enums.PostOperation;
 import com.heslin.postopia.common.kafka.enums.UserOperation;
 import com.heslin.postopia.common.utils.PostopiaFormatter;
+import com.heslin.postopia.common.utils.Utils;
+import com.heslin.postopia.opinion.dto.OpinionInfo;
+import com.heslin.postopia.opinion.enums.OpinionStatus;
+import com.heslin.postopia.post.dto.CommentPostInfo;
 import com.heslin.postopia.search.model.CommentDoc;
+import com.heslin.postopia.user.dto.UserInfo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 import static java.lang.Math.min;
 
@@ -20,11 +32,17 @@ import static java.lang.Math.min;
 public class CommentService {
     private final CommentRepository commentRepository;
     private final KafkaService kafkaService;
+    private final OpinionFeign opinionFeign;
+    private final UserFeign userFeign;
+    private final PostFeign postFeign;
 
     @Autowired
-    public CommentService(CommentRepository commentRepository, KafkaService kafkaService) {
+    public CommentService(CommentRepository commentRepository, KafkaService kafkaService, OpinionFeign opinionFeign, UserFeign userFeign, PostFeign postFeign) {
         this.commentRepository = commentRepository;
         this.kafkaService = kafkaService;
+        this.opinionFeign = opinionFeign;
+        this.userFeign = userFeign;
+        this.postFeign = postFeign;
     }
 
     public List<CommentOpinionHint> getOpinionHints(List<Long> list) {
@@ -87,7 +105,57 @@ public class CommentService {
         commentRepository.updateCommentPinStatus(commentId, isPined);
     }
 
-//    public Page<UserOpinionCommentSummary> getCommentOpinionsByUser(Long id, List<Boolean> statuses, Pageable pageable) {
-//        return opinionRepository.getCommentOpinionsByUser(id, statuses, pageable);
-//    }
+
+    public CompletableFuture<Page<UserCommentInfo>> getUserComments(Long xUserId, Long queryId, Pageable pageable) {
+        Page<SpaceCommentPart> commentPage = commentRepository.findByUserId(queryId, pageable);
+        List<SpaceCommentPart> comments = commentPage.getContent();
+        List<Long> commentId = comments.stream().map(SpaceCommentPart::id).toList();
+        CompletableFuture<List<OpinionInfo>> futureOpinionInfo = opinionFeign.getOpinionInfos(xUserId, commentId);
+        return futureOpinionInfo.thenApply(opinionInfos -> {
+            List<UserCommentInfo> content = Utils.biMerge(comments,
+            opinionInfos, OpinionInfo::mergeId, (commentPart, mp) -> mp.get(commentPart.id()),
+            UserCommentInfo::new);
+            return new PageImpl<>(content, pageable, commentPage.getTotalElements());
+        });
+    }
+
+    public CompletableFuture<Page<OpinionCommentInfo>> getUserOpinionedComments(Long queryId, OpinionStatus opinion, int page, int size, String direction) {
+        Page<OpinionInfo> opinionInfos = opinionFeign.getUserCommentOpinion(queryId, page, size, direction, opinion);
+        List<OpinionInfo> opinions = opinionInfos.getContent();
+        List<Long> commentId = opinions.stream().map(OpinionInfo::mergeId).toList();
+        if (commentId.isEmpty()) {
+            return CompletableFuture.completedFuture(new PageImpl<>(List.of(), opinionInfos.getPageable(), opinionInfos.getTotalElements()));
+        }
+        List<SpaceCommentPart> comments = commentRepository.findByIdIn(commentId);
+        List<Long> userId = comments.stream().map(SpaceCommentPart::userId).toList();
+        CompletableFuture<List<UserInfo>> futureUserInfo = userFeign.getUserInfos(userId);
+        return futureUserInfo.thenApply(userInfos -> {
+            List<OpinionCommentInfo> content = Utils.triMerge(
+            comments,
+            opinions, OpinionInfo::mergeId, (commentPart, mp) -> mp.get(commentPart.id()),
+            userInfos, UserInfo::userId, (commentPart, mp) -> mp.get(commentPart.userId()),
+            OpinionCommentInfo::new);
+            return new PageImpl<>(content, opinionInfos.getPageable(), opinionInfos.getTotalElements());
+        });
+    }
+
+    public CompletableFuture<List<SearchCommentInfo>> getSearchComments(Long xUserId, List<Long> ids) {
+        List<SearchCommentPart> comments = commentRepository.findSearchByIdIn(ids);
+        List<Long> commentId = comments.stream().map(SearchCommentPart::id).toList();
+        List<Long> postId = comments.stream().map(SearchCommentPart::postId).toList();
+        List<Long> userId = comments.stream().map(SearchCommentPart::userId).toList();
+        CompletableFuture<List<OpinionInfo>> futureOpinionInfo = opinionFeign.getOpinionInfos(xUserId, commentId);
+        CompletableFuture<List<UserInfo>> futureUserInfo = userFeign.getUserInfos(userId);
+        CompletableFuture<List<CommentPostInfo>> futurePostInfos = postFeign.getCommentPostInfos(postId);
+        return CompletableFuture.allOf(futurePostInfos, futureUserInfo, futureOpinionInfo).thenApply(v -> {
+            List<OpinionInfo> opinions = futureOpinionInfo.join();
+            List<UserInfo> userInfos = futureUserInfo.join();
+            List<CommentPostInfo> infos = futurePostInfos.join();
+            return Utils.quaMerge(comments,
+            opinions, OpinionInfo::mergeId, (commentPart, mp) -> mp.get(commentPart.id()),
+            userInfos, UserInfo::userId, (commentPart, mp) -> mp.get(commentPart.userId()),
+            infos, CommentPostInfo::id, (commentPart, mp) -> mp.get(commentPart.postId()),
+            SearchCommentInfo::new);}
+            );
+    }
 }
