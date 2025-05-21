@@ -3,6 +3,7 @@ package com.heslin.postopia.post.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.heslin.postopia.post.dto.SiliconRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.stereotype.Service;

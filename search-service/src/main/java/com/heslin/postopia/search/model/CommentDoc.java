@@ -22,9 +22,9 @@ public class CommentDoc {
     @Field(type = FieldType.Keyword)
     private String spaceId;
     @Field(type = FieldType.Keyword)
-    private String parentId;
-    @Field(type = FieldType.Keyword)
     private String postId;
+    @Field(type = FieldType.Keyword)
+    private String parentId;
     @Field(type = FieldType.Keyword)
     private String userId;
 }
