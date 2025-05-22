@@ -61,8 +61,8 @@ public class UserController {
     }
 
     @GetMapping("detail")
-    public ApiResponseEntity<UserDetail> getUserDetail(@RequestParam Long userId) {
-        return ApiResponseEntity.success(userService.getUserDetail(userId));
+    public ApiResponseEntity<UserDetail> getUserDetail(@RequestHeader Long xUserId, @RequestParam(required = false) Long userId) {
+        return ApiResponseEntity.success(userService.getUserDetail(userId == null? xUserId: userId));
     }
 
     @GetMapping("info")
