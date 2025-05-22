@@ -15,6 +15,6 @@ public interface UserClient {
     @PostMapping(value = "user/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     ResponseEntity<ApiResponse<String>> uploadAvatar(@RequestPart("file")MultipartFile file, @RequestParam boolean isVideo, @RequestHeader Long xUserId);
 
-    @GetMapping("user/search/infos")
+    @GetMapping("user/search")
     ResponseEntity<ApiResponse<List<UserInfo>>>  getSpaceUserInfo(@RequestParam List<Long> userId);
 }
