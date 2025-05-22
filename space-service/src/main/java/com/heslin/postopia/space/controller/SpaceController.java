@@ -144,7 +144,7 @@ public class SpaceController {
     }
 
     @GetMapping("info/vote")
-    public Pair<Boolean, VoteSpaceInfo> checkMemberForVote(Long spaceId, Long userId) {
+    public Pair<Boolean, VoteSpaceInfo> checkMemberForVote(@RequestParam Long spaceId, @RequestParam Long userId) {
         boolean isEligible = spaceService.isEligible(spaceId, userId);
         if (isEligible) {
             VoteSpaceInfo spaceInfo = spaceService.findVoteSpaceInfo(spaceId);

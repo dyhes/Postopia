@@ -19,5 +19,5 @@ public interface SpaceFeign {
     void updateInfo(@RequestParam Long spaceId, @RequestParam String description, @RequestParam String avatar);
 
     @GetMapping("/space/info/vote")
-    Pair<Boolean, VoteSpaceInfo> checkMemberForVote(Long spaceId, Long userId);
+    Pair<Boolean, VoteSpaceInfo> checkMemberForVote(@RequestParam Long spaceId, @RequestParam Long userId);
 }
