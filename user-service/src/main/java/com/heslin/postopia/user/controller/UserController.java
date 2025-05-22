@@ -76,7 +76,7 @@ public class UserController {
         return ApiResponseEntity.success(ret);
     }
 
-    @GetMapping("search/infos")
+    @GetMapping("search")
     public ApiResponseEntity<List<UserInfo>> getSearchedUserInfos(@RequestParam List<Long> userId) {
         List<UserInfo> ret = userService.getSearchUserInfos(userId);
         return ApiResponseEntity.success(ret);
