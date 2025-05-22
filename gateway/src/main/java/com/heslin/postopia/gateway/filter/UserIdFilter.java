@@ -34,7 +34,7 @@ import java.util.Objects;
 import java.util.function.Function;
 
 @Component
-@Order(-2)
+@Order(-10086)
 public class UserIdFilter implements GlobalFilter {
     private final ObjectMapper objectMapper;
 
@@ -101,7 +101,8 @@ public class UserIdFilter implements GlobalFilter {
             @Override
             public URI getURI() {
                 MultiValueMap<String, String> queryParams = originalRequest.getQueryParams();
-
+                System.out.println("overrided geturi");
+                System.out.println(super.getURI());
                 // 处理加密参数（例如 encryptedUserId）
                 if (queryParams.containsKey("userId")) {
                     List<String> userIds = queryParams.get("userId");

@@ -18,7 +18,7 @@ import java.time.Instant;
 @Builder
 @Table(name = "forbiddens",
 indexes = {
-@Index(name = "idx_space_user_id", columnList = "space_id, user_id", unique = true),
+@Index(name = "f_idx_space_user_id", columnList = "space_id, user_id", unique = true),
 })
 @EntityListeners(AuditingEntityListener.class)
 public class Forbidden {

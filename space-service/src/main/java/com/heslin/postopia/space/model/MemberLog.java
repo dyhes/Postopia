@@ -18,7 +18,7 @@ import java.time.Instant;
 @Entity
 @Table(name = "member_logs",
 indexes = {
-    @Index(name = "idx_space_user_name", columnList = "space_name, username", unique = true),
+    @Index(name = "m_idx_space_user_id", columnList = "space_id, user_id", unique = true),
 })
 @EntityListeners(AuditingEntityListener.class)
 public class MemberLog {
