@@ -11,10 +11,7 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -141,7 +138,7 @@ public class KafkaService {
         buildSql(sql, params, mp, shouldUpdateMember, Diff::shouldUpdateMember, Diff::getMemberDiff, "member_count");
 
         sql.delete(sql.length() - 2, sql.length());
-        sql.append(" WHERE id IN (:ids)");
+        sql.append(" WHERE %s IN (:ids)".formatted(Objects.equals(tableName, "users") ? "user_id" : "id"));
 
         System.out.println(sql.toString());
 
