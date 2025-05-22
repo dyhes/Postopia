@@ -16,6 +16,7 @@ import java.time.Instant;
 @AllArgsConstructor
 @Data
 @EntityListeners(AuditingEntityListener.class)
+@Table(name = "posts")
 public class Post {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
