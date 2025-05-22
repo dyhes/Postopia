@@ -6,6 +6,7 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.context.annotation.ComponentScan;
 
 @ComponentScan("com.heslin.postopia.common")
+@ComponentScan("com.heslin.postopia.opinion")
 @SpringBootApplication
 @EnableDiscoveryClient
 public class OpinionServiceApplication {

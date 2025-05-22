@@ -10,6 +10,7 @@ import org.springframework.context.annotation.ComponentScan;
 @EnableDiscoveryClient
 @EnableFeignClients
 @ComponentScan("com.heslin.postopia.common")
+@ComponentScan("com.heslin.postopia.post")
 public class PostServiceApplication {
     public static void main(String[] args) {
         SpringApplication.run(PostServiceApplication.class, args);

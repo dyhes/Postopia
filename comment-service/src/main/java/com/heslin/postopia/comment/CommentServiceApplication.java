@@ -9,6 +9,7 @@ import org.springframework.context.annotation.ComponentScan;
 @SpringBootApplication
 @EnableDiscoveryClient
 @ComponentScan("com.heslin.postopia.common")
+@ComponentScan("com.heslin.postopia.comment")
 @EnableFeignClients
 public class CommentServiceApplication {
     public static void main(String[] args) {

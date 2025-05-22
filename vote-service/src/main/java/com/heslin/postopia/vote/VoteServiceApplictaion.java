@@ -7,6 +7,7 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.annotation.ComponentScan;
 
 @ComponentScan("com.heslin.postopia.common")
+@ComponentScan("com.heslin.postopia.vote")
 @SpringBootApplication
 @EnableDiscoveryClient
 @EnableFeignClients

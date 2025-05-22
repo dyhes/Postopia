@@ -9,6 +9,7 @@ import org.springframework.context.annotation.ComponentScan;
 @SpringBootApplication(exclude = {DataSourceAutoConfiguration.class})
 @EnableDiscoveryClient
 @ComponentScan("com.heslin.postopia.common.kafka.consumer")
+@ComponentScan("com.heslin.postopia.search")
 public class SearchServiceApplication {
     public static void main(String[] args) {
         SpringApplication.run(SearchServiceApplication.class, args);
