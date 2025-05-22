@@ -40,7 +40,7 @@ public class MemberLog {
 
     private Instant muteUntil;
 
-    public boolean isMuted() {
-        return muteUntil != null && muteUntil.isAfter(Instant.now());
+    public boolean isEligible() {
+        return muteUntil == null || muteUntil.isBefore(Instant.now());
     }
 }

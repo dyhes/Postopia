@@ -142,8 +142,10 @@ public class SpaceService {
 
     public boolean isEligible(Long spaceId, Long userId) {
         try {
-            return memberService.findBySpaceIdAndUserId(spaceId, userId).isMuted();
+            return memberService.findBySpaceIdAndUserId(spaceId, userId).isEligible();
         } catch (RuntimeException e) {
+            System.out.println("is eligible error");
+            System.out.println(e.getMessage());
             return false;
         }
     }

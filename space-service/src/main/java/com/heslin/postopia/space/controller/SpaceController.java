@@ -140,7 +140,7 @@ public class SpaceController {
 
     @GetMapping("eligible")
     public boolean isEligible(@RequestParam Long userId, @RequestParam Long spaceId) {
-        return spaceService.isEligible(userId, spaceId);
+        return spaceService.isEligible(spaceId, userId);
     }
 
     @GetMapping("info/vote")
