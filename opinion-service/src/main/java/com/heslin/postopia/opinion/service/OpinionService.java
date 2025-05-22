@@ -73,6 +73,9 @@ public class OpinionService{
         if (isInsert) {
             kafkaService.sendToVote(voteId, isPositive? VoteOperation.AGREED : VoteOperation.DISAGREED);
             kafkaService.sendToUser(xUserId, UserOperation.CREDIT_EARNED);
+            if (isPositive) {
+                kafkaService.sendToUser(xUserId, UserOperation.CREDIT_EARNED);
+            }
         } else {
             kafkaService.sendToVote(voteId, isPositive? VoteOperation.SWITCH_TO_AGREE : VoteOperation.SWITCH_TO_DISAGREE);
         }

@@ -38,10 +38,20 @@ public class Comment {
     private boolean isPined;
 
      @Column(nullable = false, columnDefinition = "bigint default 0")
-    private long positiveCount;
+    private Long positiveCount = 0L;
 
      @Column(nullable = false, columnDefinition = "bigint default 0")
-    private long negativeCount;
+    private Long negativeCount = 0L;
+
+    @PrePersist
+    public void prePersist() {
+        if (positiveCount == null) {
+            positiveCount = 0L;
+        }
+        if (negativeCount == null) {
+            negativeCount = 0L;
+        }
+    }
 
     @CreatedDate
     private Instant createdAt;

@@ -23,7 +23,7 @@ indexes = {
 @EntityListeners(AuditingEntityListener.class)
 public class User {
     @Id
-    @Column(name = "user_id")
+    @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long userId;
 
@@ -48,11 +48,24 @@ public class User {
     private String introduction;
 
     @Column(nullable = false, columnDefinition = "bigint default 0")
-    private Long postCount;
+    private Long postCount = 0L;
+
+    @Column(nullable = false, columnDefinition = "bigint default 0")
+    private Long commentCount = 0L;
 
      @Column(nullable = false, columnDefinition = "bigint default 0")
-    private Long commentCount;
+    private Long credit = 0L;
 
-     @Column(nullable = false, columnDefinition = "bigint default 0")
-    private Long credit;
+    @PrePersist
+    public void prePersist() {
+        if (commentCount == null) {
+            commentCount = 0L;
+        }
+        if (postCount == null) {
+            postCount = 0L;
+        }
+        if (credit == null) {
+            credit = 0L;
+        }
+    }
 }

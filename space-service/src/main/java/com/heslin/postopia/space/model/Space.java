@@ -37,8 +37,18 @@ public class Space {
     private String avatar;
 
      @Column(nullable = false, columnDefinition = "bigint default 0")
-    private long memberCount;
+    private Long memberCount = 0L;
 
      @Column(nullable = false, columnDefinition = "bigint default 0")
-    private long postCount;
+    private Long postCount = 0L;
+
+    @PrePersist
+    public void prePersist() {
+        if (postCount == null) {
+            postCount = 0L;
+        }
+        if (memberCount == null) {
+            memberCount = 0L;
+        }
+    }
 }

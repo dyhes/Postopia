@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("opinon")
+@RequestMapping("opinion")
 public class OpinionController {
     private final OpinionService opinionService;
 

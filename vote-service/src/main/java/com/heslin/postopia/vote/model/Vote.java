@@ -33,10 +33,20 @@ public class Vote {
     private Long initiator;
 
     @Column(nullable = false, columnDefinition = "bigint default 1")
-    private long positiveCount;
+    private Long positiveCount = 1L;
 
     @Column(nullable = false, columnDefinition = "bigint default 0")
-    private long negativeCount;
+    private Long negativeCount = 0L;
+
+    @PrePersist
+    public void prePersist() {
+        if (positiveCount == null) {
+            positiveCount = 1L;
+        }
+        if (negativeCount == null) {
+            negativeCount = 0L;
+        }
+    }
 
     private long threshold;
 

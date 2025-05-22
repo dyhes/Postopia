@@ -138,7 +138,7 @@ public class KafkaService {
         buildSql(sql, params, mp, shouldUpdateMember, Diff::shouldUpdateMember, Diff::getMemberDiff, "member_count");
 
         sql.delete(sql.length() - 2, sql.length());
-        sql.append(" WHERE %s IN (:ids)".formatted(Objects.equals(tableName, "users") ? "user_id" : "id"));
+        sql.append(" WHERE id IN (:ids)");
 
         System.out.println(sql.toString());
 

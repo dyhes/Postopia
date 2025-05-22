@@ -34,7 +34,7 @@ import java.util.Objects;
 import java.util.function.Function;
 
 @Component
-@Order(-10086)
+@Order(10086)
 public class UserIdFilter implements GlobalFilter {
     private final ObjectMapper objectMapper;
 
