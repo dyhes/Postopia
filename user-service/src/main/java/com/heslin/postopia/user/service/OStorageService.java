@@ -25,10 +25,14 @@ public class OStorageService {
         var options = ObjectUtils.asMap("public_id_prefix", prefix, "public_id", publicId, "overwrite", false);
         if (isVideo) {
             options.put("resource_type", "video");
+        } else {
+            options.put("resource_type", "image");
         }
+        System.out.println(options.get("resource_type"));
         File tmp = new File(System.getProperty("java.io.tmpdir"), Objects.requireNonNull(file.getOriginalFilename()));
         file.transferTo(tmp);
         Map mp = cloudinary.uploader().upload(tmp, options);
+        System.out.println(mp);
         return (String) mp.get("secure_url");
     }
 }

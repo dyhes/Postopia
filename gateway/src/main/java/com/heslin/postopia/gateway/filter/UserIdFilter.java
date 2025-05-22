@@ -82,13 +82,20 @@ public class UserIdFilter implements GlobalFilter {
         ServerHttpRequest decoratedRequest = new ServerHttpRequestDecorator(originalRequest) {
             @Override
             public Flux<DataBuffer> getBody() {
-                System.out.println("request body mask");
-                return super.getBody()
-                .collectList()
-                .filter(list -> !list.isEmpty())  // 过滤空列表
-                .map(bufferFactory::join)
-                .flatMapMany(buffer -> Flux.just(processJsonStream.apply(buffer)))
-                .switchIfEmpty(Flux.empty());
+                String contentType = getHeaders().getFirst("Content-Type");
+                System.out.println("request");
+                System.out.println("request with content type: " + contentType);
+                if (contentType != null && contentType.contains("application/json")) {
+                    return super.getBody()
+                    .collectList()
+                    .filter(list -> !list.isEmpty())  // 过滤空列表
+                    .map(bufferFactory::join)
+                    .flatMapMany(buffer -> Flux.just(processJsonStream.apply(buffer)))
+                    .switchIfEmpty(Flux.empty());
+                } else {
+                    // 处理非 JSON 请求体
+                    return super.getBody();
+                }
             }
 
             @Override
@@ -150,7 +157,7 @@ public class UserIdFilter implements GlobalFilter {
             }
 
             private Flux<DataBuffer> processBody(Flux<DataBuffer> body) {
-                System.out.println("response body mask");
+                System.out.println("response");
                 return body
                 .collectList()
                 .map(bufferFactory::join)
