@@ -23,16 +23,16 @@ public class KafkaService {
     private final KafkaTemplate<Long, Integer> liKafkaTemplate;
     private final KafkaTemplate<String, String> ssKafkaTemplate;
     private final KafkaTemplate<Long, String> lsKfafkaTemplate;
-    private final ObjectMapper objectMapper;
     private final EntityManager entityManager;
+    private final ObjectMapper objectMapper;
 
     @Autowired
-    public KafkaService(KafkaTemplate<Long, Integer> liKafkaTemplate, KafkaTemplate<String, String> ssKafkaTemplate, KafkaTemplate<Long, String> lsKfafkaTemplate, ObjectMapper objectMapper, EntityManager entityManager) {
+    public KafkaService(KafkaTemplate<Long, Integer> liKafkaTemplate, KafkaTemplate<String, String> ssKafkaTemplate, KafkaTemplate<Long, String> lsKfafkaTemplate, EntityManager entityManager, ObjectMapper objectMapper) {
         this.liKafkaTemplate = liKafkaTemplate;
         this.ssKafkaTemplate = ssKafkaTemplate;
         this.lsKfafkaTemplate = lsKfafkaTemplate;
-        this.objectMapper = objectMapper;
         this.entityManager = entityManager;
+        this.objectMapper = objectMapper;
     }
 
     public void sendMessage(Long userId, String content) {

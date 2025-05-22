@@ -1,10 +1,9 @@
 package com.heslin.postopia.common.redis.model;
+
 import com.heslin.postopia.common.utils.PostopiaFormatter;
 import jakarta.persistence.Id;
-import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Data
 @NoArgsConstructor
 public abstract class OpinionAggregation {
     @Id
@@ -50,5 +49,13 @@ public abstract class OpinionAggregation {
                 messageBuilder.append("等 %d 人反对".formatted(negativeCount));
             }
         }
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public Long getSpaceId() {
+        return spaceId;
     }
 }

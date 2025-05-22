@@ -9,8 +9,9 @@ spring:
         server-addr: localhost:8848
         namespace: public
         group: DEFAULT_GROUP
-#      config:
-#        file-extension: yaml
-#        shared-configs:
-#          - data-id: shared.yaml
-#            refresh: true
+      config:
+        file-extension: yaml
+        shared-configs:
+          - data-id: shared-kafka.yaml
+            group: DEFAULT_GROUP
+            refresh: true

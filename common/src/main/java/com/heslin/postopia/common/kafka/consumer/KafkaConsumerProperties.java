@@ -1,4 +1,4 @@
-package com.heslin.postopia.common.kafka;
+package com.heslin.postopia.common.kafka.consumer;
 
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.springframework.beans.factory.annotation.Value;

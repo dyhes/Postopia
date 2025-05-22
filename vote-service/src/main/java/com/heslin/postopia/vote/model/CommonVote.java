@@ -20,5 +20,5 @@ indexes = {
 public class CommonVote extends Vote {
 
     @Enumerated(EnumType.ORDINAL)
-    private VoteType voteType;
+    private VoteType commonVoteType;
 }

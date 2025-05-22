@@ -1,8 +1,6 @@
 package com.heslin.postopia.vote.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.heslin.postopia.common.dto.response.ApiResponseEntity;
-import com.heslin.postopia.common.kafka.KafkaService;
 import com.heslin.postopia.common.utils.PostopiaFormatter;
 import com.heslin.postopia.common.utils.Utils;
 import com.heslin.postopia.opinion.dto.OpinionInfo;
@@ -42,9 +40,7 @@ import java.util.stream.Collectors;
 public class VoteService {
     private final CommonVoteRepository commonVoteRepository;
     private final SpaceVoteRepository spaceVoteRepository;
-    private final KafkaService kafkaService;
     private final VoteScheduleService scheduleService;
-    private final ObjectMapper objectMapper;
     private final UserFeign userFeign;
     private final SpaceFeign spaceFeign;
     private final PostFeign postFeign;
@@ -72,12 +68,10 @@ public class VoteService {
     private float spaceSmall;
 
     @Autowired
-    public VoteService(CommonVoteRepository commonVoteRepository, SpaceVoteRepository spaceVoteRepository, KafkaService kafkaService, VoteScheduleService scheduleService, ObjectMapper objectMapper, UserFeign userFeign, SpaceFeign spaceFeign, PostFeign postFeign, CommentFeign commentFeign, OpinionFeign opinionFeign) {
+    public VoteService(CommonVoteRepository commonVoteRepository, SpaceVoteRepository spaceVoteRepository, VoteScheduleService scheduleService, UserFeign userFeign, SpaceFeign spaceFeign, PostFeign postFeign, CommentFeign commentFeign, OpinionFeign opinionFeign) {
         this.commonVoteRepository = commonVoteRepository;
         this.spaceVoteRepository = spaceVoteRepository;
-        this.kafkaService = kafkaService;
         this.scheduleService = scheduleService;
-        this.objectMapper = objectMapper;
         this.userFeign = userFeign;
         this.spaceFeign = spaceFeign;
         this.postFeign = postFeign;
@@ -174,7 +168,7 @@ public class VoteService {
         .relatedUser(relatedUser)
         .startAt(start)
         .endAt(end)
-        .detailVoteType(detailVoteType)
+        .voteType(detailVoteType)
         .positiveCount(1)
         .negativeCount(0)
         .threshold(threshold)
@@ -226,11 +220,11 @@ public class VoteService {
         .relatedUser(relatedUser)
         .startAt(start)
         .endAt(end)
-        .detailVoteType(detailVoteType)
+        .voteType(detailVoteType)
         .positiveCount(1)
         .negativeCount(0)
         .threshold(threshold)
-        .voteType(voteType)
+        .commonVoteType(voteType)
         .build();
         return commonVoteRepository.save(vote);
     }

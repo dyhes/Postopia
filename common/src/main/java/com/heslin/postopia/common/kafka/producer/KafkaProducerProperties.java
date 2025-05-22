@@ -1,4 +1,4 @@
-package com.heslin.postopia.common.kafka;
+package com.heslin.postopia.common.kafka.producer;
 
 
 import org.apache.kafka.clients.producer.ProducerConfig;

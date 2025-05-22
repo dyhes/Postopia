@@ -72,8 +72,11 @@ services:
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
 
   elasticsearch:
-    image: 'elasticsearch:8.15.5'
-    container_name: postopia-elasticsearch
+    build:
+      context: ./elastic-search
+      dockerfile: Dockerfile
+    image: postopia-es
+    container_name: postopia-es
     environment:
       - discovery.type=single-node
       - xpack.security.enabled=false

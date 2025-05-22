@@ -18,29 +18,12 @@ public interface CommonVoteRepository extends JpaRepository<CommonVote, Long> {
             v.id,
             v.initiator,
             v.relatedEntity,
-            v.detailVoteType,
+            v.voteType,
             v.positiveCount,
             v.negativeCount,
             v.startAt,
             v.endAt
-        ) from CommonVote v where v.voteType = :voteType and v.relatedEntity in :ids
+        ) from CommonVote v where v.commonVoteType = :voteType and v.relatedEntity in :ids
 """)
     List<VotePart> findVotes(@Param("ids") List<Long> ids, @Param("voteType") VoteType voteType);
-
-    @Query("""
-        select new com.heslin.postopia.dto.VoteInfo(
-            v.relatedId,
-            v.id,
-            v.detailVoteType,
-            v.initiator,
-            v.positiveCount,
-            v.negativeCount,
-            v.startAt,
-            v.endAt,
-            v.additional
-        ) from Vote v where v.voteType = com.heslin.postopia.enums.VoteType.SPACE and v.relatedId = :id
-""")
-    VotePart findBySpace(@Param("id") Long id);
-
-    VotePart findSpaceVote(Long id);
 }

@@ -1,66 +1,23 @@
-package com.heslin.postopia.common.kafka;
+package com.heslin.postopia.common.kafka.consumer;
 
 import org.apache.kafka.clients.consumer.ConsumerConfig;
-import org.apache.kafka.clients.producer.ProducerConfig;
-import org.apache.kafka.common.serialization.*;
+import org.apache.kafka.common.serialization.IntegerDeserializer;
+import org.apache.kafka.common.serialization.LongDeserializer;
+import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.config.KafkaListenerContainerFactory;
-import org.springframework.kafka.core.*;
+import org.springframework.kafka.core.ConsumerFactory;
+import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 
 import java.util.Map;
 
 @Configuration
 @EnableKafka
-public class KafkaConfig {
-    @Bean
-    public ProducerFactory<Long, Integer> liProducerFactory(KafkaProducerProperties kafkaProducerProperties) {
-        Map<String, Object> configs = kafkaProducerProperties.buildConfigs();
-        configs.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, LongSerializer.class);
-        configs.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, IntegerSerializer.class);
-        return new DefaultKafkaProducerFactory<>(configs);
-    }
-
-    @Bean
-    public KafkaTemplate<Long, Integer> liKafkaTemplate(
-    @Qualifier("liProducerFactory") ProducerFactory<Long, Integer> producerFactory
-    ) {
-        return new KafkaTemplate<>(producerFactory);
-    }
-
-    @Bean
-    public ProducerFactory<String, String> ssProducerFactory(KafkaProducerProperties kafkaProducerProperties) { // 注入自动配置的 KafkaProperties
-        Map<String, Object> configs = kafkaProducerProperties.buildConfigs();
-        configs.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-        configs.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-        return new DefaultKafkaProducerFactory<>(configs);
-    }
-
-    @Bean
-    public KafkaTemplate<String, String> ssKafkaTemplate(
-    @Qualifier("ssProducerFactory") ProducerFactory<String, String> producerFactory
-    ) {
-        return new KafkaTemplate<>(producerFactory);
-    }
-
-    @Bean
-    public ProducerFactory<Long, String> lsProducerFactory(KafkaProducerProperties kafkaProducerProperties) { // 注入自动配置的 KafkaProperties
-        Map<String, Object> configs = kafkaProducerProperties.buildConfigs();
-        configs.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, LongSerializer.class);
-        configs.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-        return new DefaultKafkaProducerFactory<>(configs);
-    }
-
-    @Bean
-    public KafkaTemplate<Long, String> lsKafkaTemplate(
-    @Qualifier("lsProducerFactory") ProducerFactory<Long, String> producerFactory
-    ) {
-        return new KafkaTemplate<>(producerFactory);
-    }
-
+public class KafkaConsumerConfig {
     @Bean
     public ConsumerFactory<Long, Integer> liConsumerFactory(KafkaConsumerProperties kafkaConsumerProperties) {
         Map<String, Object> configs = kafkaConsumerProperties.buildConfigs();
@@ -68,8 +25,6 @@ public class KafkaConfig {
         configs.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, IntegerDeserializer.class);
         return new DefaultKafkaConsumerFactory<>(configs);
     }
-
-
 
     @Bean
     public KafkaListenerContainerFactory<?> batchLIFactory(@Qualifier("liConsumerFactory") ConsumerFactory<Long, Integer> consumerFactory) {

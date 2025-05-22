@@ -24,7 +24,7 @@ public class Vote {
     private Instant endAt;
 
     @Enumerated(EnumType.STRING)
-    private DetailVoteType detailVoteType;
+    private DetailVoteType voteType;
 
     private Long relatedEntity;
 
