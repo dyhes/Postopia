@@ -10,6 +10,6 @@ import java.util.concurrent.CompletableFuture;
 
 @FeignClient("vote-service")
 public interface VoteFeign {
-    @GetMapping("vote/comment")
-    CompletableFuture<List<VoteInfo>> getCommentVotes(@RequestParam Long userId, @RequestParam List<Long> ids);
+    @GetMapping("vote/post")
+    CompletableFuture<List<VoteInfo>> getPostVotes(@RequestParam Long userId, @RequestParam List<Long> ids);
 }

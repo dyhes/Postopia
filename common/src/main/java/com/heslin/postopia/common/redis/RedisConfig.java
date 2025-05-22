@@ -12,11 +12,11 @@ import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 @Configuration
-//@EnableRedisRepositories(
-//basePackages = "com.heslin.postopia.redis.repository", // 指定 Redis 仓库路径
-//enableKeyspaceEvents = RedisKeyValueAdapter.EnableKeyspaceEvents.ON_STARTUP,
-//considerNestedRepositories = true
-//)
+@EnableRedisRepositories(
+basePackages = "com.heslin.postopia.common.redis.repository", // 指定 Redis 仓库路径
+enableKeyspaceEvents = RedisKeyValueAdapter.EnableKeyspaceEvents.ON_STARTUP,
+considerNestedRepositories = true
+)
 public class RedisConfig {
 
     @Bean
