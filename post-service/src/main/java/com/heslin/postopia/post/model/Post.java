@@ -33,13 +33,13 @@ public class Post {
 
     private boolean isArchived;
 
-    @Column(columnDefinition = "bigint default 0")
+     @Column(nullable = false, columnDefinition = "bigint default 0")
     private long positiveCount;
 
-    @Column(columnDefinition = "bigint default 0")
+     @Column(nullable = false, columnDefinition = "bigint default 0")
     private long negativeCount;
 
-    @Column(columnDefinition = "bigint default 0")
+     @Column(nullable = false, columnDefinition = "bigint default 0")
     private long commentCount;
 
     @CreatedDate

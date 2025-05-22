@@ -47,12 +47,12 @@ public class User {
 
     private String introduction;
 
-    @Column(columnDefinition = "bigint default 0")
+    @Column(nullable = false, columnDefinition = "bigint default 0")
     private Long postCount;
 
-    @Column(columnDefinition = "bigint default 0")
+     @Column(nullable = false, columnDefinition = "bigint default 0")
     private Long commentCount;
 
-    @Column(columnDefinition = "bigint default 0")
+     @Column(nullable = false, columnDefinition = "bigint default 0")
     private Long credit;
 }

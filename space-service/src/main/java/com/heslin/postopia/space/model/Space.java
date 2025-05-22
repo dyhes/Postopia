@@ -36,9 +36,9 @@ public class Space {
 
     private String avatar;
 
-    @Column(columnDefinition = "bigint default 0")
+     @Column(nullable = false, columnDefinition = "bigint default 0")
     private long memberCount;
 
-    @Column(columnDefinition = "bigint default 0")
+     @Column(nullable = false, columnDefinition = "bigint default 0")
     private long postCount;
 }

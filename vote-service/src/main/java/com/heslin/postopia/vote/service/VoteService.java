@@ -169,8 +169,6 @@ public class VoteService {
         .startAt(start)
         .endAt(end)
         .voteType(detailVoteType)
-        .positiveCount(1)
-        .negativeCount(0)
         .threshold(threshold)
         .first(first)
         .second(second)
@@ -221,8 +219,6 @@ public class VoteService {
         .startAt(start)
         .endAt(end)
         .voteType(detailVoteType)
-        .positiveCount(1)
-        .negativeCount(0)
         .threshold(threshold)
         .commonVoteType(voteType)
         .build();

@@ -32,8 +32,10 @@ public class Vote {
 
     private Long initiator;
 
+    @Column(nullable = false, columnDefinition = "bigint default 1")
     private long positiveCount;
 
+    @Column(nullable = false, columnDefinition = "bigint default 0")
     private long negativeCount;
 
     private long threshold;
