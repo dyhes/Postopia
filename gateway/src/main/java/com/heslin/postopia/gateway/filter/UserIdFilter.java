@@ -7,6 +7,8 @@ import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.heslin.postopia.common.dto.UserId;
 import org.reactivestreams.Publisher;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
@@ -27,16 +29,15 @@ import reactor.core.publisher.Mono;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UncheckedIOException;
 import java.net.URI;
 import java.util.List;
 import java.util.Objects;
-import java.util.function.Function;
 
 @Component
-@Order(10086)
+@Order(-10086)
 public class UserIdFilter implements GlobalFilter {
     private final ObjectMapper objectMapper;
+    private static final Logger log = LoggerFactory.getLogger(UserIdFilter.class);
 
     @Autowired
     public UserIdFilter(ObjectMapper objectMapper) {
@@ -45,74 +46,82 @@ public class UserIdFilter implements GlobalFilter {
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
-
         ServerHttpRequest originalRequest = exchange.getRequest();
         ServerHttpResponse originalResponse = exchange.getResponse();
         DataBufferFactory bufferFactory = originalResponse.bufferFactory();
 
-        Function<DataBuffer, DataBuffer> processJsonStream = dataBuffer -> {
-            try (InputStream inputStream = dataBuffer.asInputStream();
-                 JsonParser parser = objectMapper.getFactory().createParser(inputStream);
-                 ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
+        // Process request
+        ServerHttpRequest decoratedRequest = decorateRequest(originalRequest, bufferFactory);
 
-                JsonGenerator generator = objectMapper.getFactory().createGenerator(outputStream, JsonEncoding.UTF8);
-
-                System.out.println("stream json");
-                // 流式处理逻辑
-                while (parser.nextToken() != null) {
-                    if (parser.currentToken() == JsonToken.FIELD_NAME && "userId".equals(parser.currentName())) {
-                        System.out.println("found userId");
-                        parser.nextToken();
-                        long userId = parser.getLongValue();
-                        System.out.println(userId);
-                        System.out.println("masked: " + UserId.masked(userId));
-                        generator.writeNumberField("userId", UserId.masked(userId));
-                    } else {
-                        generator.copyCurrentEvent(parser);
-                    }
+        // Process response
+        ServerHttpResponseDecorator decoratedResponse = new ServerHttpResponseDecorator(originalResponse) {
+            @Override
+            public Mono<Void> writeWith(Publisher<? extends DataBuffer> body) {
+                System.out.println("here");
+                if (!Objects.requireNonNull(getStatusCode()).is2xxSuccessful()) {
+                    return super.writeWith(body);
                 }
 
-                generator.flush();
-                return bufferFactory.wrap(outputStream.toByteArray());
-            } catch (IOException e) {
-                throw new UncheckedIOException("JSON流处理异常", e);
+                if (!(body instanceof Flux)) {
+                    return super.writeWith(body);
+                }
+
+                Flux<DataBuffer> fluxBody = (Flux<DataBuffer>) body;
+                return super.writeWith(fluxBody
+                .collectList()
+                .map(dataBuffers -> {
+                    DataBuffer joinedBuffer = bufferFactory.join(dataBuffers);
+                    try (InputStream inputStream = joinedBuffer.asInputStream();
+                         ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
+
+                        JsonParser parser = objectMapper.getFactory().createParser(inputStream);
+                        JsonGenerator generator = objectMapper.getFactory().createGenerator(outputStream, JsonEncoding.UTF8);
+
+                        while (parser.nextToken() != null) {
+                            if (parser.currentToken() == JsonToken.FIELD_NAME && "userId".equals(parser.currentName())) {
+                                generator.writeFieldName("userId");
+                                parser.nextToken();
+                                long userId = parser.getLongValue();
+                                generator.writeNumber(UserId.masked(userId));
+                            } else {
+                                generator.copyCurrentEvent(parser);
+                            }
+                        }
+
+                        generator.flush();
+                        return bufferFactory.wrap(outputStream.toByteArray());
+                    } catch (IOException e) {
+                        log.error("Error processing JSON response", e);
+                        return joinedBuffer;
+                    }
+                })
+                .flatMapMany(Flux::just));
             }
         };
 
-        ServerHttpRequest decoratedRequest = new ServerHttpRequestDecorator(originalRequest) {
-            @Override
-            public Flux<DataBuffer> getBody() {
-                String contentType = getHeaders().getFirst("Content-Type");
-                System.out.println("request");
-                System.out.println("request with content type: " + contentType);
-                if (contentType != null && contentType.contains("application/json")) {
-                    return super.getBody()
-                    .collectList()
-                    .filter(list -> !list.isEmpty())  // 过滤空列表
-                    .map(bufferFactory::join)
-                    .flatMapMany(buffer -> Flux.just(processJsonStream.apply(buffer)))
-                    .switchIfEmpty(Flux.empty());
-                } else {
-                    // 处理非 JSON 请求体
-                    return super.getBody();
-                }
-            }
+        System.out.println("mutated");
+        return chain.filter(exchange.mutate()
+        .request(decoratedRequest)
+        .response(decoratedResponse)
+        .build());
+    }
 
+    private ServerHttpRequest decorateRequest(ServerHttpRequest originalRequest, DataBufferFactory bufferFactory) {
+        return new ServerHttpRequestDecorator(originalRequest) {
             private URI cachedUri = null;
 
             @Override
             public URI getURI() {
                 if (cachedUri != null) {
-                    System.out.println("cache hit");
                     return cachedUri;
                 }
 
                 MultiValueMap<String, String> queryParams = originalRequest.getQueryParams();
-                // Only transform once
                 if (queryParams.containsKey("userId")) {
-                    System.out.println("mask userId queryParam");
                     List<String> userIds = queryParams.get("userId");
-                    List<String> maskedUserIds = userIds.stream().map(UserId::masked).toList();
+                    List<String> maskedUserIds = userIds.stream()
+                    .map(UserId::masked)
+                    .toList();
                     cachedUri = UriComponentsBuilder.fromUri(super.getURI())
                     .replaceQueryParam("userId", maskedUserIds)
                     .build().toUri();
@@ -123,143 +132,46 @@ public class UserIdFilter implements GlobalFilter {
                 return cachedUri;
             }
 
-//            @Override
-//            public URI getURI() {
-//                MultiValueMap<String, String> queryParams = originalRequest.getQueryParams();
-//                System.out.println("overrided geturi");
-//                System.out.println(super.getURI());
-//                // 处理加密参数（例如 encryptedUserId）
-//                if (queryParams.containsKey("userId")) {
-//                    List<String> userIds = queryParams.get("userId");
-//                    System.out.println("mask userId queryParam");
-//                    userIds.forEach(u -> System.out.println("userId: " + u));
-//                    List<String> maskedUserIds = userIds.stream().map(UserId::masked).toList();
-//                    URI uri = UriComponentsBuilder.fromUri(super.getURI())
-//                    .replaceQueryParam("userId", maskedUserIds)
-//                    .build().toUri();
-//                    System.out.println("query");
-//                    System.out.println(uri.getQuery());
-//                    return uri;
-//                }
-//                return super.getURI();
-//            }
-
-
-
             @Override
-            public MultiValueMap<String, String> getQueryParams() {
-                System.out.println("getqueryparams");
-                MultiValueMap<String, String> queryParams = originalRequest.getQueryParams();
+            public Flux<DataBuffer> getBody() {
+                String contentType = getHeaders().getFirst("Content-Type");
+                if (contentType != null && contentType.contains("application/json")) {
+                    return super.getBody()
+                    .collectList()
+                    .filter(list -> !list.isEmpty())
+                    .map(bufferFactory::join)
+                    .flatMapMany(buffer -> {
+                        try (InputStream inputStream = buffer.asInputStream();
+                             ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
 
-                // 处理加密参数（例如 encryptedUserId）
-                if (queryParams.containsKey("userId")) {
-                    System.out.println("before");
-                    System.out.println(queryParams);
-                    List<String> userIds = queryParams.remove("userId");
-                    System.out.println("mask userId queryParam");
-                    userIds.forEach(u -> System.out.println("userId: " + u));
-                    List<String> maskedUserIds = userIds.stream().map(UserId::masked).toList();
-                    queryParams.put("userId", maskedUserIds);
-                    System.out.println("after");
-                    System.out.println(queryParams);
+                            JsonParser parser = objectMapper.getFactory().createParser(inputStream);
+                            JsonGenerator generator = objectMapper.getFactory().createGenerator(outputStream, JsonEncoding.UTF8);
+
+                            while (parser.nextToken() != null) {
+                                if (parser.currentToken() == JsonToken.FIELD_NAME && "userId".equals(parser.currentName())) {
+                                    generator.writeFieldName("userId");
+                                    parser.nextToken();
+                                    long userId = parser.getLongValue();
+                                    generator.writeNumber(UserId.masked(userId));
+                                } else {
+                                    generator.copyCurrentEvent(parser);
+                                }
+                            }
+
+                            generator.flush();
+                            return Flux.just(bufferFactory.wrap(outputStream.toByteArray()));
+                        } catch (IOException e) {
+                            log.error("Error processing JSON request", e);
+                            return Flux.just(buffer);
+                        }
+                    })
+                    .switchIfEmpty(Flux.empty());
                 }
-                return queryParams;
+
+                return super.getBody();
             }
         };
-
-
-        ServerHttpResponseDecorator decoratedResponse = new ServerHttpResponseDecorator(originalResponse) {
-
-            @Override
-            public Mono<Void> writeWith(Publisher<? extends DataBuffer> body) {
-                if (!Objects.requireNonNull(originalResponse.getStatusCode()).is2xxSuccessful()) {
-                    return super.writeWith(body);
-                }
-                if (body instanceof Flux) {
-                    return super.writeWith(processBody((Flux<DataBuffer>) body));
-                }
-                System.out.println("not flux");
-                return super.writeWith(body);
-            }
-
-            private Flux<DataBuffer> processBody(Flux<DataBuffer> body) {
-                System.out.println("response");
-                return body
-                .collectList()
-                .map(bufferFactory::join)
-                .flatMapMany(buffer -> Flux.just(processJsonStream.apply(buffer)));
-            }
-
-        };
-
-        return chain.filter(exchange.mutate().request(decoratedRequest).response(decoratedResponse).build());
     }
-}
 
-//
-//@Component
-//@Order(-2)
-//public class UserIdFilter implements GlobalFilter {
-//    private final ObjectMapper mapper;
-//
-//    @Autowired
-//    public UserIdFilter(ObjectMapper mapper) {
-//        this.mapper = mapper;
-//    }
-//
-//    ObjectNode maskUserId(ObjectNode dataNode) {
-//        if (dataNode.has("userId")) {
-//            dataNode.put("userId", UserId.masked(dataNode.get("userId").asLong()));
-//        }
-//        return dataNode;
-//    }
-//
-//    @Override
-//    public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
-//        ServerHttpResponse originalResponse = exchange.getResponse();
-//        DataBufferFactory bufferFactory = originalResponse.bufferFactory();
-//
-//
-//        ServerHttpResponseDecorator decoratedResponse = new ServerHttpResponseDecorator(originalResponse) {
-//            @Override
-//            public Mono<Void> writeWith(Publisher<? extends DataBuffer> body) {
-//                if (body instanceof Flux) {
-//                    Flux<? extends DataBuffer> fluxBody = (Flux<? extends DataBuffer>) body;
-//                    return super.writeWith(fluxBody.buffer().map(dataBuffers -> {
-//                        // 合并数据流并转换为 JSON 字符串
-//                        String responseBody = dataBuffers.stream()
-//                        .map(buffer -> buffer.toString(StandardCharsets.UTF_8))
-//                        .collect(Collectors.joining());
-//
-//                        // 加密 userId
-//                        try {
-//                            ObjectNode responseNode = (ObjectNode) mapper.readTree(responseBody);
-//                            JsonNode dataNode = responseNode.get("data");
-//                            if (dataNode.isArray()) {
-//                                ArrayNode arrayNode = mapper.createArrayNode();
-//                                dataNode.forEach(child -> arrayNode.add(maskUserId((ObjectNode) child)));
-//                                responseNode.set("data", arrayNode);
-//                            } else {
-//                                ObjectNode objectDataNode = (ObjectNode) dataNode;
-//                                if (objectDataNode.has("currentPage")) {
-//                                    ArrayNode subDataNode = (ArrayNode) dataNode.get("data");
-//                                    ArrayNode newSubDataNode = mapper.createArrayNode();
-//                                    subDataNode.forEach(child -> newSubDataNode.add(maskUserId((ObjectNode) child)));
-//                                    objectDataNode.set("data", newSubDataNode);
-//                                    responseNode.set("data", objectDataNode);
-//                                } else {
-//                                    responseNode.set("data", maskUserId(objectDataNode));
-//                                }
-//                            }
-//                            return bufferFactory.wrap(mapper.writeValueAsBytes(responseNode));
-//                        } catch (JsonProcessingException e) {
-//                            throw new RuntimeException("JSON 处理异常", e);
-//                        }
-//                    }));
-//                }
-//                return super.writeWith(body);
-//            }
-//        };
-//        return chain.filter(exchange.mutate().response(decoratedResponse).build());
-//    }
-//}
+
+}

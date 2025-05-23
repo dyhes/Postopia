@@ -45,6 +45,9 @@ public class KafkaService {
     }
 
     public void sendToDocDelete(String fieldType, String id, String route){
+        System.out.println("sendToDocDelete: " + fieldType + "_delete");
+        System.out.println("id: " + id);
+        System.out.println("route: " + route);
         ssKafkaTemplate.send(fieldType + "_delete", id, route);
     }
 
@@ -52,6 +55,10 @@ public class KafkaService {
         try {
             String docUpdate = objectMapper.writeValueAsString(update);
             String value = objectMapper.writeValueAsString(new RoutedDocUpdate(routing, docUpdate));
+            System.out.println("sendToDocUpdate: " + fieldType + "_update");
+            System.out.println("key: " + key);
+            System.out.println("routing: " + routing);
+            System.out.println("value: " + value);
             ssKafkaTemplate.send(fieldType + "_update", key, value);
         } catch (JsonProcessingException e) {
             System.out.println("Kafka send error: " + e.getMessage());
@@ -61,6 +68,9 @@ public class KafkaService {
 
     public void sendToDocCreate(String docType, String key, Object value){
         try {
+            System.out.println("sendToDocCreate: " + docType + "_create");
+            System.out.println("key: " + key);
+            System.out.println("value: " + value);
             ssKafkaTemplate.send(docType + "_create", key, objectMapper.writeValueAsString(value));
         } catch (JsonProcessingException e) {
             System.out.println("Kafka send error: " + e.getMessage());
