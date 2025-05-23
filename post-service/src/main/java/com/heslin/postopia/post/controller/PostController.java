@@ -108,7 +108,7 @@ public class PostController {
     @RequestHeader Long xUserId,
     @RequestParam int page,
     @RequestParam(defaultValue = "20") int size) {
-        Pageable pageable = PageRequest.of(page, size);
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
         return postService.getPopularPosts(xUserId, pageable)
             .thenApply(PagedApiResponseEntity::success);
     }

@@ -134,12 +134,12 @@ public class PostService {
     }
 
     public CompletableFuture<Page<FeedPostInfo>> getPopularPosts(Long xUserId, Pageable pageable) {
-        Page<FeedPostPart> postPage = postRepository.findByCommentCountGreaterThan(popularThreshold, pageable);
+        System.out.println("getPopularPosts");
+        System.out.println("popular: " + popularThreshold);
+        Page<FeedPostPart> postPage = postRepository.findByCommentCountGreaterThanEqual(popularThreshold, pageable);
         List<FeedPostPart> posts = postPage.getContent();
         List<Long> postId = posts.stream().map(FeedPostPart::id).toList();
-        return getFeedPostInfos(xUserId, postId, posts).thenApply(postInfos -> {
-            return new PageImpl<>(postInfos, pageable, postPage.getTotalElements());
-        });
+        return getFeedPostInfos(xUserId, postId, posts).thenApply(postInfos -> new PageImpl<>(postInfos, pageable, postPage.getTotalElements()));
     }
 
     public CompletableFuture<Page<UserPostInfo>> getUserPosts(Long xUserId, Long queryId, Pageable pageable) {

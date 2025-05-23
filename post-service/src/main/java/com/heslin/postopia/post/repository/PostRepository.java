@@ -36,9 +36,6 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     @Query("update Post p set p.isArchived = :isArchived where p.id = :pid")
     void updateArchiveStatus(@Param("pid") Long postId, @Param("isArchived") boolean isArchived);
 
-    Page<FeedPostPart> findByCommentCountGreaterThan(long commentCountIsGreaterThan, Pageable pageable);
-
-
     Page<FeedPostPart> findByUserId(Long userId, Pageable pageable);
 
     Page<PostPart> findBySpaceId(Long spaceId, Pageable pageable);
@@ -50,4 +47,6 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     List<CommentPostInfo> findCommentPostInfosByIdIn(Collection<Long> ids);
 
     SummaryPostInfo findSummaryById(Long id);
+
+    Page<FeedPostPart> findByCommentCountGreaterThanEqual(Long commentCountIsGreaterThan, Pageable pageable);
 }
