@@ -1,6 +1,5 @@
 package com.heslin.postopia.space.service;
 
-import com.heslin.postopia.common.dto.response.ApiResponse;
 import com.heslin.postopia.common.dto.response.ResMessage;
 import com.heslin.postopia.common.kafka.KafkaService;
 import com.heslin.postopia.common.kafka.enums.SpaceOperation;
@@ -22,14 +21,12 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 @Service
 @RefreshScope
@@ -101,15 +98,12 @@ public class SpaceService {
         List<Long> userId = localRet.getContent().stream().map(MemberLog::getUserId).toList();
         System.out.println("userId");
         userId.forEach(System.out::println);
-        var  remoteRet = userClient.getSpaceUserInfo(userId);
-        List<UserInfo> infos = Objects.requireNonNull(remoteRet.getBody()).getData();
-        System.out.println("infos");
-        infos.forEach(System.out::println);
+        List<UserInfo> infos = userClient.getSpaceUserInfo(userId);
         return new PageImpl<>(infos, pageable, localRet.getTotalElements());
     }
 
-    public ResponseEntity<ApiResponse<String>> uploadAvatar(MultipartFile avatar, Long xUserId) {
-        return userClient.uploadAvatar(avatar, false, xUserId);
+    public String uploadAvatar(MultipartFile avatar, Long xUserId) {
+        return userClient.uploadAvatar(avatar, xUserId);
     }
 
 

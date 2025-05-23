@@ -31,6 +31,7 @@ public class OStorageService {
         System.out.println(options.get("resource_type"));
         File tmp = new File(System.getProperty("java.io.tmpdir"), Objects.requireNonNull(file.getOriginalFilename()));
         file.transferTo(tmp);
+        System.out.println("saved in local");
         Map mp = cloudinary.uploader().upload(tmp, options);
         System.out.println(mp);
         return (String) mp.get("secure_url");

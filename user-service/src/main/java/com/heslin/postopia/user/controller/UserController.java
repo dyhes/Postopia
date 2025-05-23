@@ -83,6 +83,15 @@ public class UserController {
         return ApiResponseEntity.success(ret);
     }
 
+    @PostMapping("upload/private")
+    public String uploadAsset(@RequestPart("file") MultipartFile file, @RequestHeader Long xUserId) {
+        try {
+            return userService.uploadAsset(new UserId(xUserId), file, false);
+        } catch (IOException e) {
+            return e.getMessage();
+        }
+    }
+
     @PostMapping("upload")
     public ApiResponseEntity<String> uploadAsset(@RequestPart("file") MultipartFile file, @RequestParam(defaultValue = "false") boolean isVideo, @RequestHeader Long xUserId) {
         try {

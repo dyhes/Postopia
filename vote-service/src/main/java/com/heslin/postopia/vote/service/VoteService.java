@@ -292,12 +292,7 @@ public class VoteService {
 
     public String uploadAvatar(Long xUserId, MultipartFile file) {
         if (file != null) {
-            var response = userFeign.uploadAvatar(file, false, xUserId);
-            if (response.getStatusCode().is2xxSuccessful() && Objects.requireNonNull(response.getBody()).isSuccess()) {
-                return Objects.requireNonNull(response.getBody()).getData();
-            } else {
-                throw new RuntimeException("上传图片失败");
-            }
+            return userFeign.uploadAvatar(file, xUserId);
         }
         return null;
     }

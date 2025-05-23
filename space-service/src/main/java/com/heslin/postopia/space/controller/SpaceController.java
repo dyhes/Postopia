@@ -22,7 +22,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
-import java.util.Objects;
 
 @RestController
 @RequestMapping("space")
@@ -60,11 +59,7 @@ public class SpaceController {
             var avatarResponse = spaceService.uploadAvatar(avatar, xUserId);
             System.out.println("res");
             System.out.println(avatarResponse);
-            System.out.println(Objects.requireNonNull(avatarResponse.getBody()).getMessage());
-            if (!Objects.requireNonNull(avatarResponse.getBody()).isSuccess()) {
-                return ApiResponseEntity.fail(avatarResponse.getBody().getMessage());
-            }
-            url = avatarResponse.getBody().getData();
+            url = avatarResponse;
         }
         try {
             Long id = spaceService.createSpace(xUsername, xUserId, info.name, info.description, url);
