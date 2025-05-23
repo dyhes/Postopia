@@ -1,10 +1,7 @@
 package com.heslin.postopia.comment.service;
 
 import com.heslin.postopia.comment.dto.*;
-import com.heslin.postopia.comment.feign.OpinionFeign;
-import com.heslin.postopia.comment.feign.PostFeign;
-import com.heslin.postopia.comment.feign.UserFeign;
-import com.heslin.postopia.comment.feign.VoteFeign;
+import com.heslin.postopia.comment.feign.*;
 import com.heslin.postopia.comment.model.Comment;
 import com.heslin.postopia.comment.repository.CommentRepository;
 import com.heslin.postopia.comment.request.CreateCommentRequest;
@@ -44,22 +41,31 @@ public class CommentService {
     private final UserFeign userFeign;
     private final PostFeign postFeign;
     private final VoteFeign voteFeign;
+    private final SpaceFeign spaceFeign;
 
     @Autowired
-    public CommentService(CommentRepository commentRepository, KafkaService kafkaService, OpinionFeign opinionFeign, UserFeign userFeign, PostFeign postFeign, VoteFeign voteFeign) {
+    public CommentService(CommentRepository commentRepository, KafkaService kafkaService, OpinionFeign opinionFeign, UserFeign userFeign, PostFeign postFeign, VoteFeign voteFeign, SpaceFeign spaceFeign) {
         this.commentRepository = commentRepository;
         this.kafkaService = kafkaService;
         this.opinionFeign = opinionFeign;
         this.userFeign = userFeign;
         this.postFeign = postFeign;
         this.voteFeign = voteFeign;
+        this.spaceFeign = spaceFeign;
     }
 
     public List<CommentOpinionHint> getOpinionHints(List<Long> list) {
         return commentRepository.findOpinionHints(list);
     }
 
+    void validate(Long xUserId, Long spaceId) {
+        if (!spaceFeign.isEligible(xUserId, spaceId)) {
+            throw new RuntimeException("无该空间互动权限");
+        }
+    }
+
     public Long createComment(Long xUserId, String xUsername, CreateCommentRequest request) {
+        validate(xUserId, request.spaceId());
         Comment parent  = request.parentId() != null? Comment.builder().id(request.parentId()).build() : null;
         Comment comment = Comment.builder()
         .spaceId(request.spaceId())
@@ -70,6 +76,8 @@ public class CommentService {
         .content(request.content())
         .build();
         comment = commentRepository.save(comment);
+
+
 
         kafkaService.sendToDocCreate("comment", comment.getId().toString(),
         new CommentDoc(

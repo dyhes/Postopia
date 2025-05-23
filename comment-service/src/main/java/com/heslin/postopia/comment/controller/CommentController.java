@@ -36,7 +36,7 @@ public class CommentController {
     }
 
     @PostMapping("create")
-    public ApiResponseEntity<Long> createComment(@RequestHeader Long xUserId, @RequestHeader String xUsername, @RequestParam CreateCommentRequest request) {
+    public ApiResponseEntity<Long> createComment(@RequestHeader Long xUserId, @RequestHeader String xUsername, @RequestBody CreateCommentRequest request) {
         Long id = commentService.createComment(xUserId, xUsername, request);
         return ApiResponseEntity.success(id);
     }
@@ -64,12 +64,12 @@ public class CommentController {
         @RequestParam(defaultValue = "30") int size,
         @RequestParam(defaultValue = "ASC") Sort.Direction direction
     ) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by(new Sort.Order(Sort.Direction.ASC, "is_pined"), new Sort.Order(direction, "created_at")));
+        Pageable pageable = PageRequest.of(page, size, Sort.by(new Sort.Order(Sort.Direction.ASC, "isPined"), new Sort.Order(direction, "createdAt")));
         return commentService.getCommentsByPost(xUserId, postId, pageable).thenApply(PagedApiResponseEntity::success);
     }
 
     @GetMapping("search")
-    public CompletableFuture<ApiResponseEntity<List<SearchCommentInfo>>> getCommentInfosInSearch(@RequestParam Long xUserId, @RequestParam List<Long> ids) {
+    public CompletableFuture<ApiResponseEntity<List<SearchCommentInfo>>> getCommentInfosInSearch(@RequestHeader Long xUserId, @RequestParam List<Long> ids) {
         return commentService.getSearchComments(xUserId, ids).thenApply(ApiResponseEntity::success);
     }
 
@@ -80,7 +80,7 @@ public class CommentController {
         @RequestParam(required = false) Long userId,
         @RequestParam(defaultValue = "30") int size,
         @RequestParam(defaultValue = "DESC") Sort.Direction direction) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, "created_at"));
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, "createdAt"));
         Long queryId = userId == null ? xUserId : userId;
         return commentService.getUserComments(xUserId, queryId, pageable)
         .thenApply(PagedApiResponseEntity::success);

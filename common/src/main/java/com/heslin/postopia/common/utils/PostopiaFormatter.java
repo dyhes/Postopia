@@ -13,7 +13,7 @@ public class PostopiaFormatter {
     }
 
     public static String formatSpace(Long spaceId, String spaceName) {
-        return String.format(" 空间postopia-space{%d;%s} ", spaceId, spaceName);
+        return String.format(" 空间 postopia-space{%d;%s} ", spaceId, spaceName);
     }
 
     public static String formatPost(Long spaceId, Long postId, String content) {
