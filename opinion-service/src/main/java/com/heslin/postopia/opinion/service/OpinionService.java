@@ -57,7 +57,7 @@ public class OpinionService{
     }
 
     @Transactional
-    public void upsertVoteOpinion(Long xUserId, Boolean isPositive, Long voteId) {
+    public void upsertVoteOpinion(Long xUserId, Boolean isPositive, Long voteId, boolean isCommon) {
         String sql = "INSERT INTO vote_opinions(updated_at, is_positive, user_id, vote_id) " +
         "VALUES (:ua, :ip, :uid, :vid) " +
         "ON CONFLICT (user_id, vote_id) " +
@@ -71,13 +71,21 @@ public class OpinionService{
         kafkaService.sendToUser(xUserId, UserOperation.CREDIT_EARNED);
         boolean isInsert = (boolean) query.getSingleResult();
         if (isInsert) {
-            kafkaService.sendToVote(voteId, isPositive? VoteOperation.AGREED : VoteOperation.DISAGREED);
+            if (isCommon) {
+                kafkaService.sendToCommonVote(voteId, isPositive? VoteOperation.AGREED : VoteOperation.DISAGREED);
+            } else {
+                kafkaService.sendToSpaceVote(voteId, isPositive? VoteOperation.AGREED : VoteOperation.DISAGREED);
+            }
             kafkaService.sendToUser(xUserId, UserOperation.CREDIT_EARNED);
             if (isPositive) {
                 kafkaService.sendToUser(xUserId, UserOperation.CREDIT_EARNED);
             }
         } else {
-            kafkaService.sendToVote(voteId, isPositive? VoteOperation.SWITCH_TO_AGREE : VoteOperation.SWITCH_TO_DISAGREE);
+            if (isCommon) {
+                kafkaService.sendToCommonVote(voteId, isPositive? VoteOperation.SWITCH_TO_AGREE : VoteOperation.SWITCH_TO_DISAGREE);
+            } else {
+                kafkaService.sendToSpaceVote(voteId, isPositive? VoteOperation.SWITCH_TO_AGREE : VoteOperation.SWITCH_TO_DISAGREE);
+            }
         }
     }
 

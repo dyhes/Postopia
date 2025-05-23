@@ -76,8 +76,12 @@ public class KafkaService {
         send("user", userId, operation);
     }
 
-    public void sendToVote(Long voteId, VoteOperation operation) {
-        send("vote", voteId, operation);
+    public void sendToCommonVote(Long voteId, VoteOperation operation) {
+        send("common_vote", voteId, operation);
+    }
+
+    public void sendToSpaceVote(Long voteId, VoteOperation operation) {
+        send("space_vote", voteId, operation);
     }
 
     public void sendToPost(Long postId, PostOperation value) {

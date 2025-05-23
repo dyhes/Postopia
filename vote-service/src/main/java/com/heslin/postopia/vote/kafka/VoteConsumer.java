@@ -20,14 +20,25 @@ public class VoteConsumer {
         this.kafkaService = kafkaService;
     }
 
-    @KafkaListener(topics = "vote", containerFactory = "batchLIFactory")
+    @KafkaListener(topics = "common_vote", containerFactory = "batchLIFactory")
     @Transactional
-    protected void processVoteOperations(List<ConsumerRecord<Long, Integer>> records) {
+    protected void processCommonVoteOperations(List<ConsumerRecord<Long, Integer>> records) {
         var mp = new HashMap<Long, Diff>();
         records.forEach(record -> {
             Diff diff = mp.computeIfAbsent(record.key(), k -> new VoteDiff());
             diff.updateDiff(record.value());
         });
-        kafkaService.executeBatchDiffOperations(mp, "votes");
+        kafkaService.executeBatchDiffOperations(mp, "common_votes");
+    }
+
+    @KafkaListener(topics = "space_vote", containerFactory = "batchLIFactory")
+    @Transactional
+    protected void processSpaceVoteOperations(List<ConsumerRecord<Long, Integer>> records) {
+        var mp = new HashMap<Long, Diff>();
+        records.forEach(record -> {
+            Diff diff = mp.computeIfAbsent(record.key(), k -> new VoteDiff());
+            diff.updateDiff(record.value());
+        });
+        kafkaService.executeBatchDiffOperations(mp, "space_votes");
     }
 }

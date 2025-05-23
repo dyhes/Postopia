@@ -1,7 +1,6 @@
 package com.heslin.postopia.vote.service;
 
 import com.heslin.postopia.common.kafka.KafkaService;
-import com.heslin.postopia.common.redis.RedisService;
 import com.heslin.postopia.common.utils.PostopiaFormatter;
 import com.heslin.postopia.vote.feign.CommentFeign;
 import com.heslin.postopia.vote.feign.OpinionFeign;
@@ -28,7 +27,6 @@ public class VoteScheduleService {
 //    private final MessageService messageService;
 //    private final CommentService commentService;
 //    private final PostService postService;
-    private final RedisService redisService;
     private final ThreadPoolTaskScheduler taskScheduler;
     private final CommonVoteRepository commonVoteRepository;
     private final SpaceVoteRepository spaceVoteRepository;
@@ -39,8 +37,7 @@ public class VoteScheduleService {
     private final KafkaService kafkaService;
 
     @Autowired
-    public VoteScheduleService(RedisService redisService, ThreadPoolTaskScheduler taskScheduler, CommonVoteRepository commonVoteRepository, SpaceVoteRepository spaceVoteRepository, SpaceFeign spaceFeign, OpinionFeign opinionFeign, PostFeign postFeign, CommentFeign commentFeign, KafkaService kafkaService) {
-        this.redisService = redisService;
+    public VoteScheduleService(ThreadPoolTaskScheduler taskScheduler, CommonVoteRepository commonVoteRepository, SpaceVoteRepository spaceVoteRepository, SpaceFeign spaceFeign, OpinionFeign opinionFeign, PostFeign postFeign, CommentFeign commentFeign, KafkaService kafkaService) {
         this.taskScheduler = taskScheduler;
         this.commonVoteRepository = commonVoteRepository;
         this.spaceVoteRepository = spaceVoteRepository;
@@ -53,6 +50,8 @@ public class VoteScheduleService {
 
     private void scheduledAction(boolean isCommon, Long voteId, String voteActionMessage, String relatedUserMessage, Function<Long, Void> voteAction) {
         Vote vote = isCommon? commonVoteRepository.findById(voteId).orElseThrow() : spaceVoteRepository.findById(voteId).orElseThrow();
+        System.out.println("here");
+        System.out.println(vote.getId());
         String tail;
         if (vote.isFulfilled()) {
             voteAction.apply(vote.getRelatedEntity());

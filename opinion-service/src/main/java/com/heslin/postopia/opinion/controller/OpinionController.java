@@ -57,9 +57,9 @@ public class OpinionController {
     }
 
     @PostMapping("vote")
-    public BasicApiResponseEntity createVoteOpinion(@RequestBody OpinionRequest request, @RequestHeader Long xUserId) {
+    public BasicApiResponseEntity createVoteOpinion(@RequestBody OpinionRequest request, @RequestHeader Long xUserId, @RequestParam boolean isCommon) {
         Utils.checkRequestBody(request);
-        opinionService.upsertVoteOpinion(xUserId, request.isPositive(), request.id());
+        opinionService.upsertVoteOpinion(xUserId, request.isPositive(), request.id(), isCommon);
         return BasicApiResponseEntity.success();
     }
 

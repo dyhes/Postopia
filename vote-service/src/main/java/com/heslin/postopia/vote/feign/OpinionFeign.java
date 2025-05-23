@@ -15,8 +15,8 @@ public interface OpinionFeign {
     @PostMapping("opinion/vote/notify")
     void notifyVoter(@RequestParam Long voteId, @RequestParam String message);
 
-    @PostMapping("vote")
-    void vote(@RequestBody OpinionRequest request, @RequestHeader Long xUserId);
+    @PostMapping("opinion/vote")
+    void vote(@RequestBody OpinionRequest request, @RequestHeader Long xUserId, @RequestParam boolean isCommon);
 
     @Async("feignAsyncExecutor")
     @GetMapping("opinion/vote")

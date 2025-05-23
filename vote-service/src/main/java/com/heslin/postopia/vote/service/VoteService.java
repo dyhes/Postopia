@@ -22,6 +22,7 @@ import com.heslin.postopia.vote.repository.SpaceVoteRepository;
 import com.heslin.postopia.vote.request.CommentVoteRequest;
 import com.heslin.postopia.vote.request.PostVoteRequest;
 import com.heslin.postopia.vote.request.SpaceUserRequest;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
@@ -152,7 +153,8 @@ public class VoteService {
         });
     }
 
-    private SpaceVote createSpaceVote(Long xUserId, Long relatedEntity, Long relatedUser, DetailVoteType detailVoteType, Long spaceMember, String first, String second) {
+    @Transactional
+    protected SpaceVote createSpaceVote(Long xUserId, Long relatedEntity, Long relatedUser, DetailVoteType detailVoteType, Long spaceMember, String first, String second) {
         Instant start = Instant.now();
         Long threshold;
         Instant end = start.plus(spaceDuration, ChronoUnit.MINUTES);
@@ -175,10 +177,11 @@ public class VoteService {
         .second(second)
         .build();
         vote = spaceVoteRepository.save(vote);
-        opinionFeign.vote(new OpinionRequest( vote.getId(), true), xUserId);
+        opinionFeign.vote(new OpinionRequest( vote.getId(), true), xUserId, false);
         return vote;
     }
 
+    @Transactional
     public Long expelSpaceUserVote(Long xUserId, VoteSpaceInfo voteSpaceInfo, SpaceUserRequest request) {
         SpaceVote vote = createSpaceVote(xUserId, request.spaceId(), request.userId(), DetailVoteType.EXPEL_USER, voteSpaceInfo.memberCount(), request.username(), request.reason());
         String spaceMessage = PostopiaFormatter.formatSpace(request.spaceId(), voteSpaceInfo.name());
@@ -186,6 +189,7 @@ public class VoteService {
         return vote.getId();
     }
 
+    @Transactional
     public Long muteSpaceUserVote(Long xUserId, VoteSpaceInfo voteSpaceInfo, SpaceUserRequest request) {
         SpaceVote vote = createSpaceVote(xUserId, request.spaceId(), request.userId(), DetailVoteType.MUTE_USER, voteSpaceInfo.memberCount(), request.username(), request.reason());
         String spaceMessage = PostopiaFormatter.formatSpace(request.spaceId(), voteSpaceInfo.name());
@@ -193,6 +197,7 @@ public class VoteService {
         return vote.getId();
     }
 
+    @Transactional
     public Long updateSpaceVote(Long xUserId, VoteSpaceInfo voteSpaceInfo, Long spaceId, String avatar, String description) {
         SpaceVote vote = createSpaceVote(xUserId, spaceId, null, DetailVoteType.UPDATE_SPACE, voteSpaceInfo.memberCount(), description, avatar);
         String spaceMessage = PostopiaFormatter.formatSpace(spaceId, voteSpaceInfo.name());
@@ -200,7 +205,8 @@ public class VoteService {
         return vote.getId();
     }
 
-    private CommonVote createCommonVote(Long xUserId, Long relatedEntity, Long relatedUser, VoteType voteType, DetailVoteType detailVoteType) {
+    @Transactional
+    protected CommonVote createCommonVote(Long xUserId, Long relatedEntity, Long relatedUser, VoteType voteType, DetailVoteType detailVoteType) {
         Instant start = Instant.now();
         Long threshold;
         Instant end;
@@ -226,17 +232,19 @@ public class VoteService {
         .commonVoteType(voteType)
         .build();
         vote = commonVoteRepository.save(vote);
-        opinionFeign.vote(new OpinionRequest( vote.getId(), true), xUserId);
+        opinionFeign.vote(new OpinionRequest( vote.getId(), true), xUserId, true);
         return vote;
     }
-    
+
+    @Transactional
     public Long deletePostVote(Long xUserId, PostVoteRequest request) {
         Vote vote = createCommonVote(xUserId, request.postId(), request.userId(), VoteType.POST, DetailVoteType.DELETE_POST);
         scheduleService.scheduleDeletePostVote(vote.getId(), request, vote.getEndAt());
         return vote.getId();
     }
 
-    private Long updateArchiveStatusVote(boolean isArchived, Long xUserId, PostVoteRequest request) {
+    @Transactional
+    protected Long updateArchiveStatusVote(boolean isArchived, Long xUserId, PostVoteRequest request) {
         if (!postFeign.checkPostArchiveStatus(request.postId(), isArchived)) {
             throw new RuntimeException(isArchived? "该评论归档" : "该评论未归档");
         }
@@ -245,24 +253,25 @@ public class VoteService {
         return vote.getId();
     }
 
-    
+    @Transactional
     public Long unArchivePostVote(Long xUserId, PostVoteRequest request) {
         return updateArchiveStatusVote(false, xUserId, request);
     }
 
-    
+    @Transactional
     public Long archivePostVote(Long xUserId, PostVoteRequest request) {
         return updateArchiveStatusVote(true, xUserId, request);
     }
 
-    
+    @Transactional
     public Long deleteCommentVote(Long xUserId, CommentVoteRequest request) {
         Vote vote = createCommonVote(xUserId, request.commentId(), request.userId(), VoteType.COMMENT, DetailVoteType.DELETE_COMMENT);
         scheduleService.scheduleDeleteCommentVote(vote.getId(), request, vote.getEndAt());
         return vote.getId();
     }
 
-    private Long updatePinStatusVote(boolean isPined, Long xUserId, CommentVoteRequest request) {
+    @Transactional
+    protected Long updatePinStatusVote(boolean isPined, Long xUserId, CommentVoteRequest request) {
         if (!commentFeign.checkPinStatus(request.commentId(), isPined)) {
             throw new RuntimeException(isPined? "该评论已置顶" : "该评论未置顶");
         }
@@ -271,12 +280,12 @@ public class VoteService {
         return vote.getId();
     }
 
-    
+    @Transactional
     public Long pinCommentVote(Long xUserId, CommentVoteRequest request) {
         return updatePinStatusVote(true, xUserId, request);
     }
 
-    
+    @Transactional
     public Long unPinCommentVote(Long xUserId, CommentVoteRequest request) {
         return updatePinStatusVote(false, xUserId, request);
     }
