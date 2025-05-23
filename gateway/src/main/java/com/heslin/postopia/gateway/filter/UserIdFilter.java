@@ -98,26 +98,51 @@ public class UserIdFilter implements GlobalFilter {
                 }
             }
 
+            private URI cachedUri = null;
+
             @Override
             public URI getURI() {
+                if (cachedUri != null) {
+                    System.out.println("cache hit");
+                    return cachedUri;
+                }
+
                 MultiValueMap<String, String> queryParams = originalRequest.getQueryParams();
-                System.out.println("overrided geturi");
-                System.out.println(super.getURI());
-                // 处理加密参数（例如 encryptedUserId）
+                // Only transform once
                 if (queryParams.containsKey("userId")) {
-                    List<String> userIds = queryParams.get("userId");
                     System.out.println("mask userId queryParam");
-                    userIds.forEach(u -> System.out.println("userId: " + u));
+                    List<String> userIds = queryParams.get("userId");
                     List<String> maskedUserIds = userIds.stream().map(UserId::masked).toList();
-                    URI uri = UriComponentsBuilder.fromUri(super.getURI())
+                    cachedUri = UriComponentsBuilder.fromUri(super.getURI())
                     .replaceQueryParam("userId", maskedUserIds)
                     .build().toUri();
-                    System.out.println("query");
-                    System.out.println(uri.getQuery());
-                    return uri;
+                    return cachedUri;
                 }
-                return super.getURI();
+
+                cachedUri = super.getURI();
+                return cachedUri;
             }
+
+//            @Override
+//            public URI getURI() {
+//                MultiValueMap<String, String> queryParams = originalRequest.getQueryParams();
+//                System.out.println("overrided geturi");
+//                System.out.println(super.getURI());
+//                // 处理加密参数（例如 encryptedUserId）
+//                if (queryParams.containsKey("userId")) {
+//                    List<String> userIds = queryParams.get("userId");
+//                    System.out.println("mask userId queryParam");
+//                    userIds.forEach(u -> System.out.println("userId: " + u));
+//                    List<String> maskedUserIds = userIds.stream().map(UserId::masked).toList();
+//                    URI uri = UriComponentsBuilder.fromUri(super.getURI())
+//                    .replaceQueryParam("userId", maskedUserIds)
+//                    .build().toUri();
+//                    System.out.println("query");
+//                    System.out.println(uri.getQuery());
+//                    return uri;
+//                }
+//                return super.getURI();
+//            }
 
 
 
