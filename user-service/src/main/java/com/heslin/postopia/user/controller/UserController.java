@@ -20,6 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 @RestController
 @RequestMapping("user")
@@ -66,8 +67,8 @@ public class UserController {
     }
 
     @GetMapping("info")
-    public List<UserInfo> getUserInfos(@RequestParam List<Long> userId) {
-        return userService.getUserInfos(userId);
+    public CompletableFuture<List<UserInfo>> getUserInfos(@RequestParam List<Long> userId) {
+        return CompletableFuture.completedFuture(userService.getUserInfos(userId));
     }
 
     @GetMapping("avatars")

@@ -28,7 +28,6 @@ public class User {
     private Long userId;
 
     @CreatedDate
-    @Column(updatable = false, nullable = false)
     private Instant createdAt;
 
     @Column(nullable = false, unique = true)

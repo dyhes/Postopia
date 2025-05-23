@@ -161,15 +161,22 @@ public class PostService {
         CompletableFuture<List<OpinionInfo>> futureOpinionInfo = opinionFeign.getOpinionInfos(xUserId, postId);
         CompletableFuture<List<UserInfo>> futureUserInfo = userFeign.getUserInfos(userIds);
         CompletableFuture<List<VoteInfo>> futureVoteInfo = voteFeign.getPostVotes(xUserId, postId);
+        System.out.println("before");
         return CompletableFuture.allOf(futureUserInfo, futureOpinionInfo, futureVoteInfo).thenApply(v -> {
+            System.out.println("after1");
             List<OpinionInfo> opinionInfos = futureOpinionInfo.join();
             List<UserInfo> userInfos = futureUserInfo.join();
             List<VoteInfo> voteInfos = futureVoteInfo.join();
+            System.out.println("after2");
             return Utils.quaMerge(posts,
             opinionInfos, OpinionInfo::mergeId, (postPart, mp) -> mp.get(postPart.id()),
             userInfos, UserInfo::userId, (postPart, mp) -> mp.get(postPart.userId()),
             voteInfos, VoteInfo::mergeId, (postPart, mp) -> mp.get(postPart.id()),
             PostInfo::new);
+        }).exceptionally(throwable ->{
+            System.out.println("Error in getPostInfos: " + throwable.getMessage());
+            System.out.println("Error in getPostInfos: " + throwable.getCause());
+            return List.of();
         });
     }
 
