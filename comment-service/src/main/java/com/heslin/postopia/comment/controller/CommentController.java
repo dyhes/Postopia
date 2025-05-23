@@ -64,7 +64,7 @@ public class CommentController {
         @RequestParam(defaultValue = "30") int size,
         @RequestParam(defaultValue = "ASC") Sort.Direction direction
     ) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by(new Sort.Order(Sort.Direction.ASC, "isPined"), new Sort.Order(direction, "createdAt")));
+        Pageable pageable = PageRequest.of(page, size, Sort.by(new Sort.Order(Sort.Direction.DESC, "isPined"), new Sort.Order(direction, "createdAt")));
         return commentService.getCommentsByPost(xUserId, postId, pageable).thenApply(PagedApiResponseEntity::success);
     }
 

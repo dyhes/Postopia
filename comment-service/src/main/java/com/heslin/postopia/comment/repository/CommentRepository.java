@@ -11,8 +11,10 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Repository
 public interface CommentRepository extends JpaRepository<Comment, Long> {
@@ -80,7 +82,23 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
             createdAt
         FROM comment_tree
         """, nativeQuery = true)
-    List<CommentPart> findSubs(@Param("topIds") List<Long> topIds);
+    List<Object[]> findSubsRaw(@Param("topIds") List<Long> topIds);
+
+    default List<CommentPart> findSubs(List<Long> parentIds) {
+        List<Object[]> results = findSubsRaw(parentIds);
+        return results.stream()
+        .map(row -> new CommentPart(
+        ((Number) row[0]).longValue(),
+        row[1] != null ? ((Number) row[1]).longValue() : null,
+        ((Number) row[2]).longValue(),
+        (String) row[3],
+        (Boolean) row[4],
+        ((Number) row[5]).longValue(),
+        ((Number) row[6]).longValue(),
+        (Instant) row[7]
+        ))
+        .collect(Collectors.toList());
+    }
 
     List<DeleteCommentDetail> findByPostIdIn(Collection<Long> postIds);
 
@@ -117,7 +135,18 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
         content
     FROM comment_tree
     """, nativeQuery = true)
-    List<DeleteCommentInfo> findByParentRecursive(@Param("commentId") Long commentId);
+    List<Object[]> findByParentRecursiveRaw(@Param("commentId") Long commentId);
+
+    default List<DeleteCommentInfo> findByParentRecursive(Long commentId) {
+        List<Object[]> results = findByParentRecursiveRaw(commentId);
+        return results.stream()
+        .map(row -> new DeleteCommentInfo(
+        ((Number) row[0]).longValue(),
+        ((Number) row[1]).longValue(),
+        (String) row[2]
+        ))
+        .collect(Collectors.toList());
+    }
 
     List<SummaryCommentInfo> findSummaryByPostId(Long postId);
 }
