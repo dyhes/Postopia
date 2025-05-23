@@ -163,7 +163,9 @@ public class CommentService {
             opinions, OpinionInfo::mergeId, (commentPart, mp) -> mp.get(commentPart.id()),
             userInfos, UserInfo::userId, (commentPart, mp) -> mp.get(commentPart.userId()),
             OpinionCommentInfo::new);
-            return new PageImpl<>(content, opinionInfos.getPageable(), opinionInfos.getTotalElements());
+            Map<Long, OpinionCommentInfo> map = content.stream().collect(Collectors.toMap(info -> info.opinion().mergeId(), Function.identity()));
+            List<OpinionCommentInfo> res = opinions.stream().map(opinionInfo -> map.get(opinionInfo.mergeId())).toList();
+            return new PageImpl<>(res, opinionInfos.getPageable(), opinionInfos.getTotalElements());
         });
     }
 

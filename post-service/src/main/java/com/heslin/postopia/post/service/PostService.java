@@ -30,6 +30,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 @RefreshScope
@@ -209,7 +211,9 @@ public class PostService {
             opinions, OpinionInfo::mergeId, (postPart, mp) -> mp.get(postPart.id()),
             userInfos, UserInfo::userId, (postPart, mp) -> mp.get(postPart.userId()),
             OpinionPostInfo::new);
-            return new PageImpl<>(content, opinionInfos.getPageable(), opinionInfos.getTotalElements());
+            Map<Long, OpinionPostInfo> map = content.stream().collect(Collectors.toMap(info -> info.opinion().mergeId(), Function.identity()));
+            List<OpinionPostInfo> res = opinions.stream().map(opinionInfo -> map.get(opinionInfo.mergeId())).toList();
+            return new PageImpl<>(res, opinionInfos.getPageable(), opinionInfos.getTotalElements());
         });
     }
 

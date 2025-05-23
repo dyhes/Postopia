@@ -30,6 +30,7 @@ public class OpinionController {
 
     @GetMapping("user/post")
     public Page<OpinionInfo> getUserPostOpinion(@RequestParam Long userId, @RequestParam int page, @RequestParam int size, @RequestParam Sort.Direction direction, @RequestParam OpinionStatus status) {
+        System.out.println("direction = " + direction);
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction, "updatedAt"));
         return opinionService.getUserPostOpinion(userId, status, pageable);
     }
