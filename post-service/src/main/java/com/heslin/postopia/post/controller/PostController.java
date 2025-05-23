@@ -46,6 +46,7 @@ public class PostController {
 
     @PostMapping("delete")
     private void deletePost(@RequestParam Long postId, @RequestParam Long spaceId, @RequestParam Long userId) {
+        System.out.println("delete post");
         postService.deletePost(postId, spaceId, userId);
     }
 

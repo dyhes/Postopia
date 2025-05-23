@@ -19,15 +19,21 @@ public class OpinionConsumer {
     }
 
 
-    @KafkaListener(topics = "comment_casade", containerFactory = "batchLIFactory")
+    @KafkaListener(topics = "comment_cascade", containerFactory = "batchLIFactory")
     @Transactional
     protected void processCommentDelete(List<ConsumerRecord<Long, Integer>> records) {
-        opinionService.deleteCommentOpinionInBatch(records.stream().map(ConsumerRecord::key).toList());
+        List<Long> ids = records.stream().map(ConsumerRecord::key).toList();
+        System.out.println("post_cascade_in opinion");
+        System.out.println(ids);
+        opinionService.deleteCommentOpinionInBatch(ids);
     }
 
-    @KafkaListener(topics = "post_casade", containerFactory = "batchLIFactory")
+    @KafkaListener(topics = "post_cascade", containerFactory = "batchLIFactory")
     @Transactional
     protected void processPostDelete(List<ConsumerRecord<Long, Integer>> records) {
-        opinionService.deletePostOpinionInBatch(records.stream().map(ConsumerRecord::key).toList());
+        List<Long> ids = records.stream().map(ConsumerRecord::key).toList();
+        System.out.println("post_cascade_in opinion");
+        System.out.println(ids);
+        opinionService.deletePostOpinionInBatch(ids);
     }
 }

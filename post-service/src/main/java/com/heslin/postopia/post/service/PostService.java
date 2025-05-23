@@ -63,8 +63,10 @@ public class PostService {
     }
 
     public void deletePost(Long postId, Long spaceId, Long userId) {
-        boolean success = postRepository.deletePost(postId);
+        boolean success = postRepository.deletePost(postId) > 0;
+        System.out.println("success: " + success);
         if (success) {
+            System.out.println("delete success " + postId);
             kafkaService.sendToUser(userId, UserOperation.POST_DELETED);
             kafkaService.sendToSpace(spaceId, SpaceOperation.POST_DELETED);
             String stringSpaceId = spaceId.toString();

@@ -89,6 +89,7 @@ public class OpinionService{
         }
     }
 
+    @Transactional
     public void upsertPostOpinion(Long xUserId, String xUsername, UpsertPostRequest request) {
         String sql = "INSERT INTO post_opinions(updated_at, is_positive, user_id, post_id) " +
         "VALUES (:ua, :ip, :uid, :pid) " +
@@ -114,6 +115,7 @@ public class OpinionService{
         redisService.updatePOOpinionAggregation(request.spaceId(), request.postId(), xUserId, xUsername, request.isPositive());
     }
 
+    @Transactional
     public void upsertCommentOpinion(Long xUserId, String xUsername, UpsertCommentRequest request) {
         String sql = "INSERT INTO comment_opinions(updated_at, is_positive, user_id, comment_id) " +
         "VALUES (:ua, :ip, :uid, :cid) " +
@@ -145,6 +147,7 @@ public class OpinionService{
         });
     }
 
+    @Transactional
     public List<OpinionInfo> getOpinion(Long userId, List<Long> idList, OpinionType opinionType) {
         List<OpinionInfo> opinionInfos;
         switch (opinionType) {
@@ -154,10 +157,10 @@ public class OpinionService{
             default -> throw new IllegalArgumentException("Invalid opinion type: " + opinionType);
         }
         Map<Long, OpinionInfo> mergeIdMap = opinionInfos.stream().collect(Collectors.toMap(OpinionInfo::mergeId, opinionPart -> opinionPart));
-        List<OpinionInfo> res = idList.stream().map(id -> mergeIdMap.getOrDefault(id, new OpinionInfo(id, OpinionStatus.NIL, null))).toList();
-        return res;
+        return idList.stream().map(id -> mergeIdMap.getOrDefault(id, new OpinionInfo(id, OpinionStatus.NIL, null))).toList();
     }
 
+    @Transactional
     public Page<OpinionInfo> getUserPostOpinion(Long userId, OpinionStatus status, Pageable pageable) {
         if (status == OpinionStatus.NIL) {
             return opinionRepository.findPostOpinionsByUserId(userId, pageable);
@@ -166,6 +169,7 @@ public class OpinionService{
         }
     }
 
+    @Transactional
     public Page<OpinionInfo> getUserCommentOpinion(Long userId, OpinionStatus status, Pageable pageable) {
         if (status == OpinionStatus.NIL) {
             return opinionRepository.findCommentOpinionsByUserId(userId, pageable);
@@ -174,10 +178,12 @@ public class OpinionService{
         }
     }
 
+    @Transactional
     public void deleteCommentOpinionInBatch(List<Long> list) {
         opinionRepository.deleteCommentPinionInBatch(list);
     }
 
+    @Transactional
     public void deletePostOpinionInBatch(List<Long> list) {
         opinionRepository.deletePostPinionInBatch(list);
     }

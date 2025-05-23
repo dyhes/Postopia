@@ -34,9 +34,12 @@ public class CommentConsumer {
         kafkaService.executeBatchDiffOperations(mp, "comments");
     }
 
-    @KafkaListener(topics = "post_casade", containerFactory = "batchLIFactory")
+    @KafkaListener(topics = "post_cascade", containerFactory = "batchLIFactory")
     @Transactional
     protected void processPostDelete(List<ConsumerRecord<Long, Integer>> records) {
-        commentService.deleteCommentByPostIds(records.stream().map(ConsumerRecord::key).toList());
+        List<Long> ids = records.stream().map(ConsumerRecord::key).toList();
+        System.out.println("post_cascade_in comment");
+        System.out.println(ids);
+        commentService.deleteCommentByPostIds(ids);
     }
 }

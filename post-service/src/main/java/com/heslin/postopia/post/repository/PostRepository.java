@@ -19,7 +19,7 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     @Modifying
     @Transactional
     @Query("delete from Post p where p.id = ?1")
-    boolean deletePost(Long postId);
+    int deletePost(Long postId);
 
     List<PostOpinionHint> findPOHByIdIn(Collection<Long> ids);
 
