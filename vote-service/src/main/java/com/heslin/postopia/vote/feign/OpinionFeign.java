@@ -1,11 +1,10 @@
 package com.heslin.postopia.vote.feign;
 
 import com.heslin.postopia.opinion.dto.OpinionInfo;
+import com.heslin.postopia.opinion.request.OpinionRequest;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.scheduling.annotation.Async;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -15,6 +14,9 @@ public interface OpinionFeign {
 
     @PostMapping("opinion/vote/notify")
     void notifyVoter(@RequestParam Long voteId, @RequestParam String message);
+
+    @PostMapping("vote")
+    void vote(@RequestBody OpinionRequest request, @RequestHeader Long xUserId);
 
     @Async("feignAsyncExecutor")
     @GetMapping("opinion/vote")

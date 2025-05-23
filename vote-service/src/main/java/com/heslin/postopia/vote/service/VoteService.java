@@ -4,6 +4,7 @@ import com.heslin.postopia.common.dto.response.ApiResponseEntity;
 import com.heslin.postopia.common.utils.PostopiaFormatter;
 import com.heslin.postopia.common.utils.Utils;
 import com.heslin.postopia.opinion.dto.OpinionInfo;
+import com.heslin.postopia.opinion.request.OpinionRequest;
 import com.heslin.postopia.space.dto.VoteSpaceInfo;
 import com.heslin.postopia.user.dto.UserInfo;
 import com.heslin.postopia.vote.dto.SpaceVoteInfo;
@@ -173,7 +174,9 @@ public class VoteService {
         .first(first)
         .second(second)
         .build();
-        return spaceVoteRepository.save(vote);
+        vote = spaceVoteRepository.save(vote);
+        opinionFeign.vote(new OpinionRequest( vote.getId(), true), xUserId);
+        return vote;
     }
 
     public Long expelSpaceUserVote(Long xUserId, VoteSpaceInfo voteSpaceInfo, SpaceUserRequest request) {
@@ -222,7 +225,9 @@ public class VoteService {
         .threshold(threshold)
         .commonVoteType(voteType)
         .build();
-        return commonVoteRepository.save(vote);
+        vote = commonVoteRepository.save(vote);
+        opinionFeign.vote(new OpinionRequest( vote.getId(), true), xUserId);
+        return vote;
     }
     
     public Long deletePostVote(Long xUserId, PostVoteRequest request) {

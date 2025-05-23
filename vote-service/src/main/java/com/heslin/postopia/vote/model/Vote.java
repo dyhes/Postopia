@@ -32,8 +32,8 @@ public class Vote {
 
     private Long initiator;
 
-    @Column(nullable = false, columnDefinition = "bigint default 1")
-    private Long positiveCount = 1L;
+    @Column(nullable = false, columnDefinition = "bigint default 0")
+    private Long positiveCount = 0L;
 
     @Column(nullable = false, columnDefinition = "bigint default 0")
     private Long negativeCount = 0L;
@@ -41,7 +41,7 @@ public class Vote {
     @PrePersist
     public void prePersist() {
         if (positiveCount == null) {
-            positiveCount = 1L;
+            positiveCount = 0L;
         }
         if (negativeCount == null) {
             negativeCount = 0L;
