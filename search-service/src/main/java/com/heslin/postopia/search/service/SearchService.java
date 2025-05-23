@@ -49,7 +49,11 @@ public class SearchService {
 
     
     public Page<PostDoc> searchPosts(String query, Pageable pageable) {
-        return postDocRepository.matchPostDoc(query, pageable);
+        System.out.println("here");
+        Page<PostDoc> res = postDocRepository.matchPostDoc(query, pageable);
+        System.out.println("res");
+        System.out.println(res.getContent());
+        return res;
     }
 
     

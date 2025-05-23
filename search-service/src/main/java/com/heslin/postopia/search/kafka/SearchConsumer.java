@@ -35,6 +35,7 @@ public class SearchConsumer {
     }
 
     private <T> void processDocCreate(List<ConsumerRecord<String, String>> records, Function<T, String> getRouting, Class<T> documentClass) {
+        System.out.println("processDocCreate");
         var queries = records.stream()
                 .map(record -> {
                     try {

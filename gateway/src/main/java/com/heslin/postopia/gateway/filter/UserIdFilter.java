@@ -57,7 +57,6 @@ public class UserIdFilter implements GlobalFilter {
         ServerHttpResponseDecorator decoratedResponse = new ServerHttpResponseDecorator(originalResponse) {
             @Override
             public Mono<Void> writeWith(Publisher<? extends DataBuffer> body) {
-                System.out.println("here");
                 if (!Objects.requireNonNull(getStatusCode()).is2xxSuccessful()) {
                     return super.writeWith(body);
                 }
@@ -81,7 +80,7 @@ public class UserIdFilter implements GlobalFilter {
                             if (parser.currentToken() == JsonToken.FIELD_NAME && "userId".equals(parser.currentName())) {
                                 generator.writeFieldName("userId");
                                 parser.nextToken();
-                                long userId = parser.getLongValue();
+                                String userId = parser.getValueAsString();
                                 generator.writeNumber(UserId.masked(userId));
                             } else {
                                 generator.copyCurrentEvent(parser);
