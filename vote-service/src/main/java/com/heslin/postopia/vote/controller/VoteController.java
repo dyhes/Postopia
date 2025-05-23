@@ -1,6 +1,7 @@
 package com.heslin.postopia.vote.controller;
 
 import com.heslin.postopia.common.dto.response.ApiResponseEntity;
+import com.heslin.postopia.common.json.PairAdapter;
 import com.heslin.postopia.common.utils.Utils;
 import com.heslin.postopia.space.dto.VoteSpaceInfo;
 import com.heslin.postopia.vote.dto.SpaceVoteInfo;
@@ -12,7 +13,6 @@ import com.heslin.postopia.vote.request.SpaceUserRequest;
 import com.heslin.postopia.vote.service.VoteService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.data.util.Pair;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -46,7 +46,7 @@ public class VoteController {
 
 
     private VoteSpaceInfo spaceMemberCheck(Long spaceId, Long userId) {
-        Pair<Boolean, VoteSpaceInfo> pair = voteService.spaceMemberCheck(spaceId, userId);
+        PairAdapter<Boolean, VoteSpaceInfo> pair = voteService.spaceMemberCheck(spaceId, userId);
         if (!pair.getFirst()) {
             throw new RuntimeException("该用户不在该空间内");
         }

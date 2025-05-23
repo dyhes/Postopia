@@ -1,6 +1,7 @@
 package com.heslin.postopia.vote.service;
 
 import com.heslin.postopia.common.dto.response.ApiResponseEntity;
+import com.heslin.postopia.common.json.PairAdapter;
 import com.heslin.postopia.common.utils.PostopiaFormatter;
 import com.heslin.postopia.common.utils.Utils;
 import com.heslin.postopia.opinion.dto.OpinionInfo;
@@ -26,7 +27,6 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
-import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -81,7 +81,7 @@ public class VoteService {
         this.opinionFeign = opinionFeign;
     }
 
-    public Pair<Boolean, VoteSpaceInfo> spaceMemberCheck(Long spaceId, Long userId) {
+    public PairAdapter<Boolean, VoteSpaceInfo> spaceMemberCheck(Long spaceId, Long userId) {
         return spaceFeign.checkMemberForVote(spaceId, userId);
     }
 

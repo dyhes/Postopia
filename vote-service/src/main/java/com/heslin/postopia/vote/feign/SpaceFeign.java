@@ -1,8 +1,8 @@
 package com.heslin.postopia.vote.feign;
 
+import com.heslin.postopia.common.json.PairAdapter;
 import com.heslin.postopia.space.dto.VoteSpaceInfo;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.data.util.Pair;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -19,5 +19,5 @@ public interface SpaceFeign {
     void updateInfo(@RequestParam Long spaceId, @RequestParam String description, @RequestParam String avatar);
 
     @GetMapping("/space/info/vote")
-    Pair<Boolean, VoteSpaceInfo> checkMemberForVote(@RequestParam Long spaceId, @RequestParam Long userId);
+    PairAdapter<Boolean, VoteSpaceInfo> checkMemberForVote(@RequestParam Long spaceId, @RequestParam Long userId);
 }
