@@ -34,8 +34,17 @@ public interface CommentDocRepository extends ElasticsearchRepository<CommentDoc
           }
         ],
         "filter": [
-          { "term": { "spaceId": "?1" , "_routing": [ "?1" ]} }
-        ]
+            {
+              "term": {
+                "spaceId": "?1"
+              }
+            },
+            {
+              "term": {
+                "_routing": "?1"
+              }
+            }
+          ]
       }
     }
     """)
@@ -52,7 +61,7 @@ public interface CommentDocRepository extends ElasticsearchRepository<CommentDoc
           }
         ],
         "filter": [
-          { "term": { "username": "?1" } }
+          { "term": { "userId": "?1" } }
         ]
       }
     }
@@ -70,10 +79,19 @@ public interface CommentDocRepository extends ElasticsearchRepository<CommentDoc
           }
         ],
         "filter": [
-          { "term": { "postId": "?1", "_routing": [ "?2" ] } }
-        ]
+            {
+              "term": {
+                "postId": "?1"
+              }
+            },
+            {
+              "term": {
+                "_routing": "?2"
+              }
+            }
+          ]
       }
     }
     """)
-    Page<CommentDoc> matchCommentDocByPost(String query, String postId, String spaceName, Pageable pageable);
+    Page<CommentDoc> matchCommentDocByPost(String query, String postId, String spaceId, Pageable pageable);
 }

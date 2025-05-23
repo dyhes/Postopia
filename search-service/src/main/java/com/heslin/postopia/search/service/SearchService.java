@@ -37,14 +37,15 @@ public class SearchService {
     }
 
     
-    public Page<PostDoc> searchPostsByUser(String query, String userName, Pageable pageable) {
-        return postDocRepository.matchPostDocByUser(query, userName, pageable);
+    public Page<PostDoc> searchPostsByUser(String query, String userId, Pageable pageable) {
+        System.out.println("query " + query + "userId " + userId);
+        return postDocRepository.matchPostDocByUser(query, userId, pageable);
     }
 
     
-    public Page<PostDoc> searchPostsBySpace(String query, String spaceName, Pageable pageable) {
-        System.out.println("searchPostsBySpace: query:" + query + ", spacename: " + spaceName);
-        return postDocRepository.matchPostDocBySpace(query, spaceName, pageable);
+    public Page<PostDoc> searchPostsBySpace(String query, String spaceId, Pageable pageable) {
+        System.out.println("searchPostsBySpace: query:" + query + ", spaceId: " + spaceId);
+        return postDocRepository.matchPostDocBySpace(query, spaceId, pageable);
     }
 
     
@@ -62,17 +63,17 @@ public class SearchService {
     }
 
     
-    public Page<CommentDoc> searchCommentsByUser(String query, String userName, Pageable pageable) {
-        return commentDocRepository.matchCommentDocByUser(query, userName, pageable);
+    public Page<CommentDoc> searchCommentsByUser(String query, String userId, Pageable pageable) {
+        return commentDocRepository.matchCommentDocByUser(query, userId, pageable);
     }
 
     
-    public Page<CommentDoc> searchCommentsBySpace(String query, String spaceName, Pageable pageable) {
-        return commentDocRepository.matchCommentDocBySpace(query, spaceName, pageable);
+    public Page<CommentDoc> searchCommentsBySpace(String query, String spaceId, Pageable pageable) {
+        return commentDocRepository.matchCommentDocBySpace(query, spaceId, pageable);
     }
 
     
-    public Page<CommentDoc> searchCommentsByPost(String query, String postId, String spaceName, Pageable pageable) {
-        return commentDocRepository.matchCommentDocByPost(query, postId, spaceName, pageable);
+    public Page<CommentDoc> searchCommentsByPost(String query, String postId, String spaceId, Pageable pageable) {
+        return commentDocRepository.matchCommentDocByPost(query, postId, spaceId, pageable);
     }
 }

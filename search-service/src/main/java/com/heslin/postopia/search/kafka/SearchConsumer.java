@@ -127,12 +127,17 @@ public class SearchConsumer {
     @KafkaListener(topics = "post_delete", containerFactory = "ssFactory")
     @Transactional
     protected void processPostDelete(ConsumerRecord<String, String> record) {
-        processDocDelete(record.key(), record.value(), PostDoc.class, "postId", CommentDoc.class);
+        System.out.println("processPostDelete:");
+        System.out.println(record.key());
+        elasticsearchOperations.delete(record.key(), PostDoc.class);
+        //processDocDelete(record.key(), record.value(), PostDoc.class, "postId", CommentDoc.class);
     }
 
     @KafkaListener(topics = "comment_delete", containerFactory = "ssFactory")
     @Transactional
     protected void processCommentDelete(ConsumerRecord<String, String> record) {
+        System.out.println("processCommentDelete:");
+        System.out.println(record.key());
         elasticsearchOperations.delete(record.key(), CommentDoc.class);
         //processDocDelete(record.key(), record.value(), CommentDoc.class, "parentId", CommentDoc.class);
     }

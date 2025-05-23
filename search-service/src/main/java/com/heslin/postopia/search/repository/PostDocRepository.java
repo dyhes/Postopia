@@ -42,8 +42,12 @@ public interface PostDocRepository extends ElasticsearchRepository<PostDoc, Long
           "filter": [
             {
               "term": {
-                "spaceId": "?1",
-                "_routing": [ "?1" ]
+                "spaceId": "?1"
+              }
+            },
+            {
+              "term": {
+                "_routing": "?1"
               }
             }
           ]
@@ -71,7 +75,7 @@ public interface PostDocRepository extends ElasticsearchRepository<PostDoc, Long
       "filter": [
         {
           "term": {
-            "username": "?1"
+            "userId": "?1"
           }
         }
       ]
