@@ -37,18 +37,21 @@ public abstract class OpinionAggregation {
         if (positiveCount > 0) {
             messageBuilder.append(PostopiaFormatter.formatUser(positiveId, positiveUser));
             if (positiveCount > 1) {
-                messageBuilder.append("等 %d 人赞同".formatted(positiveCount));
+                messageBuilder.append("等 %d 人".formatted(positiveCount));
             }
+            messageBuilder.append("赞同");
         }
-        if (positiveId > 0 && negativeCount > 0) {
+        if (positiveCount > 0 && negativeCount > 0) {
             messageBuilder.append("，");
         }
         if (negativeCount > 0) {
             messageBuilder.append(PostopiaFormatter.formatUser(negativeId, negativeUser));
             if (positiveCount > 1) {
-                messageBuilder.append("等 %d 人反对".formatted(negativeCount));
+                messageBuilder.append("等 %d 人".formatted(negativeCount));
             }
+            messageBuilder.append("反对");
         }
+
     }
 
     public Long getId() {

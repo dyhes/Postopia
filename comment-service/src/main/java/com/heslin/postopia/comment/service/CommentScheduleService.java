@@ -39,7 +39,7 @@ public class CommentScheduleService {
             StringBuilder messageContent = new StringBuilder();
             String link = PostopiaFormatter.formatComment(aggregation.getSpaceId(), commentOpinionHint.postId(), commentOpinionHint.id());
             aggregation.buildMessage(messageContent);
-            messageContent.append(String.format("了你的评论: %s...%s", commentOpinionHint.hint(), link));
+            messageContent.append(String.format("了你的评论: %s %s", commentOpinionHint.content(), link));
             kafkaService.sendMessage(commentOpinionHint.userId(), messageContent.toString());
         });
     }

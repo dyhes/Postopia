@@ -55,7 +55,7 @@ public class CommentService {
     }
 
     public List<CommentOpinionHint> getOpinionHints(List<Long> list) {
-        return commentRepository.findOpinionHints(list);
+        return commentRepository.findOpinionHintsByIdIn(list);
     }
 
     void validate(Long xUserId, Long spaceId) {

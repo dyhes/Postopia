@@ -19,8 +19,7 @@ import java.util.stream.Collectors;
 @Repository
 public interface CommentRepository extends JpaRepository<Comment, Long> {
 
-    @Query("select new com.heslin.postopia.comment.dto.CommentOpinionHint(c.id, c.postId, c.userId, SUBSTRING(c.content, 100)) from Comment c where c.id in ?1")
-    List<CommentOpinionHint> findOpinionHints(List<Long> list);
+    List<CommentOpinionHint> findOpinionHintsByIdIn(List<Long> list);
 
     @Query("select count(*) from Comment c where c.id = :cid and c.isPined = :isPined")
     int checkCommentPinStatus(@Param("cid") Long commentId,@Param("isPined") boolean isPined);

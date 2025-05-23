@@ -30,22 +30,27 @@ public class PostScheduleService {
     }
 
     public void batchMessageSender(List<String> keys) {
+        System.out.println("keys");
+        System.out.println(keys);
         List<POAggregation> aggregations = keys.stream().map(key -> poAggregationRepository.findById(Long.parseLong(key.split(":")[1])).orElseThrow()).toList();
         poAggregationRepository.deleteAll(aggregations);
         Map<Long, POAggregation> aggragationMap = aggregations.stream().collect(Collectors.toMap(POAggregation::getId, aggregation -> aggregation));
         List<PostOpinionHint> hints = postService.getOpinionHints(aggregations.stream().map(POAggregation::getId).toList());
         hints.forEach(postOpinionHint -> {
+            System.out.println("postOpinionHint");
+            System.out.println(postOpinionHint);
             POAggregation aggregation = aggragationMap.get(postOpinionHint.id());
             StringBuilder messageContent = new StringBuilder();
             String link = PostopiaFormatter.formatPost(aggregation.getSpaceId(), postOpinionHint.id());
             aggregation.buildMessage(messageContent);
-            messageContent.append(String.format("了你的帖子: %s...%s", postOpinionHint.subject(), link));
+            messageContent.append(String.format("了你的帖子: %s %s", postOpinionHint.subject(), link));
             kafkaService.sendMessage(postOpinionHint.userId(), messageContent.toString());
         });
     }
 
     @Scheduled(cron = "0 * * * * *")
     public void opinionMessageSender() {
+        System.out.println("Scheduled task in post");
         redisService.sendOpinionMessage(this::batchMessageSender, "po_aggregation:*");
     }
 }

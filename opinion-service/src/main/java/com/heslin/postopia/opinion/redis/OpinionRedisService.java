@@ -20,12 +20,16 @@ public class OpinionRedisService {
 
     public void updatePOOpinionAggregation(Long spaceId, Long postId, Long userId, String username, boolean isPositive) {
         POAggregation opinionAggregation = POAggregationRepository.findById(postId).orElse(new POAggregation(postId, spaceId));
+        System.out.println("poaggregation");
+        System.out.println(opinionAggregation);
         opinionAggregation.update(userId, username, isPositive);
         POAggregationRepository.save(opinionAggregation);
     }
 
     public void updateCOOpinionAggregation(Long spaceId, Long commentId, Long userId, String username, boolean isPositive) {
         COAggragation opinionAggregation = COAggregationRepository.findById(commentId).orElse(new COAggragation(commentId, spaceId));
+        System.out.println("coaggregation");
+        System.out.println(opinionAggregation);
         opinionAggregation.update(userId, username, isPositive);
         COAggregationRepository.save(opinionAggregation);
     }

@@ -34,6 +34,7 @@ public class RedisService {
 
     public void sendOpinionMessage(Consumer<List<String>> consumer, String pattern) {
         int pageSize = 1000;
+        System.out.println("RedisService: sendOpinionMessage");
         ScanOptions options = ScanOptions.scanOptions()
         .match(pattern) //"opinion_aggregation:*")
         .count(pageSize)
