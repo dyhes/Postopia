@@ -117,13 +117,24 @@ public class UserIdFilter implements GlobalFilter {
 
                 MultiValueMap<String, String> queryParams = originalRequest.getQueryParams();
                 if (queryParams.containsKey("userId")) {
-                    List<String> userIds = queryParams.get("userId");
-                    List<String> maskedUserIds = userIds.stream()
-                    .map(UserId::masked)
-                    .toList();
-                    cachedUri = UriComponentsBuilder.fromUri(super.getURI())
-                    .replaceQueryParam("userId", maskedUserIds)
-                    .build().toUri();
+                    // Get the base URI without query parameters
+                    UriComponentsBuilder builder = UriComponentsBuilder
+                    .fromUriString(super.getURI().toString())
+                    .replaceQuery(null);
+
+                    // Add all query parameters back, replacing just the userId
+                    queryParams.forEach((key, values) -> {
+                        if ("userId".equals(key)) {
+                            List<String> maskedUserIds = values.stream()
+                            .map(UserId::masked)
+                            .toList();
+                            builder.queryParam(key, maskedUserIds.toArray());
+                        } else {
+                            builder.queryParam(key, values.toArray());
+                        }
+                    });
+
+                    cachedUri = builder.build(false).toUri(); // false means don't encode twice
                     return cachedUri;
                 }
 
