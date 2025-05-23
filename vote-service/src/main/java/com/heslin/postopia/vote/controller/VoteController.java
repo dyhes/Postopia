@@ -40,15 +40,15 @@ public class VoteController {
     }
 
     @GetMapping("space")
-    public CompletableFuture<ApiResponseEntity<List<SpaceVoteInfo>>> getSpaceVote(@RequestParam Long userId, @RequestParam Long spaceId) {
-        return voteService.getSpaceVote(userId, spaceId);
+    public CompletableFuture<ApiResponseEntity<List<SpaceVoteInfo>>> getSpaceVote(@RequestHeader Long xUserId, @RequestParam Long spaceId) {
+        return voteService.getSpaceVote(xUserId, spaceId);
     }
 
 
     private VoteSpaceInfo spaceMemberCheck(Long spaceId, Long userId) {
         PairAdapter<Boolean, VoteSpaceInfo> pair = voteService.spaceMemberCheck(spaceId, userId);
         if (!pair.getFirst()) {
-            throw new RuntimeException("该用户不在该空间内");
+            throw new RuntimeException("用户无空间活动权限");
         }
         return pair.getSecond();
     }

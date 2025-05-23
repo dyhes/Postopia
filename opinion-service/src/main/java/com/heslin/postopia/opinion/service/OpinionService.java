@@ -140,6 +140,7 @@ public class OpinionService{
         redisService.updateCOOpinionAggregation(request.spaceId(), request.commentId(), xUserId, xUsername, request.isPositive());
     }
 
+    @Transactional
     public void notifyVoter(Long voteId, String message) {
         Stream<VoteOpinionInfo> opinionStream = opinionRepository.findStreamVoteOpinions(voteId);
         opinionStream.forEach(info -> {

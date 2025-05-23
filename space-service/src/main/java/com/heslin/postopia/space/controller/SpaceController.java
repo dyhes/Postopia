@@ -146,6 +146,10 @@ public class SpaceController {
     @GetMapping("info/vote")
     public Pair<Boolean, VoteSpaceInfo> checkMemberForVote(@RequestParam Long spaceId, @RequestParam Long userId) {
         boolean isEligible = spaceService.isEligible(spaceId, userId);
+        System.out.println("spaceId " + spaceId);
+        System.out.println("userId " + userId);
+        System.out.println("isEligible：");
+        System.out.println(isEligible);
         if (isEligible) {
             VoteSpaceInfo spaceInfo = spaceService.findVoteSpaceInfo(spaceId);
             return Pair.of(true, spaceInfo);
