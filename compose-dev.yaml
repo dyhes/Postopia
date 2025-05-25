@@ -48,6 +48,14 @@ services:
       - nacos_data_volume:/home/nacos/data
     restart: always
 
+  # redis
+  redis:
+    image: redis:latest
+    container_name: postopia-redis
+    ports:
+      - "6379:6379"
+
+  # kafka
   zookeeper:
     image: confluentinc/cp-zookeeper:latest
     container_name: postopia-zookeeper
@@ -71,6 +79,7 @@ services:
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
 
+  # elasticsearch
   elasticsearch:
     build:
       context: ./elastic-search
@@ -161,22 +170,7 @@ services:
     ports:
       - "54327:5432"
 
-  redis:
-    image: redis:latest
-    container_name: postopia-redis
-    ports:
-      - "6379:6379"
 volumes:
   nacos_volume:
   mysql_volume:
   nacos_data_volume:
-
-#  postgres:
-#    image: 'postgres:latest'
-#    container_name: postopia-db
-#    environment:
-#      - POSTGRES_DB=postopia_dev
-#      - POSTGRES_PASSWORD=postopia_dev
-#      - POSTGRES_USER=postopia_dev
-#    ports:
-#      - "5432:5432"

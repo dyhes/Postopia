@@ -25,9 +25,9 @@ allprojects {
 
 subprojects {
     apply plugin: 'java'
-    apply plugin: 'org.springframework.boot'
     apply plugin: 'idea'
     apply plugin: 'io.spring.dependency-management'
+    apply plugin: 'org.springframework.boot'
 
     java {
         toolchain {
@@ -39,6 +39,10 @@ subprojects {
         compileOnly {
             extendsFrom annotationProcessor
         }
+    }
+
+    bootJar {
+        archiveFileName = "${project.name}.jar"
     }
 
     if (it.name.endsWith("-service")) {
@@ -54,7 +58,7 @@ subprojects {
             implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
             implementation 'io.github.openfeign:feign-okhttp'
         }
-        if (it.name != "search-searvice") {
+        if (it.name != "search-service") {
             dependencies {
                 // postgres
                 implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
@@ -63,7 +67,7 @@ subprojects {
         }
     }
 
-    if (it.name != "common") {
+    if (it.name != "common" && it.name != "jwt") {
         dependencies {
             implementation 'org.springframework.cloud:spring-cloud-starter-bootstrap'
             implementation 'org.springframework.boot:spring-boot-starter-actuator'
