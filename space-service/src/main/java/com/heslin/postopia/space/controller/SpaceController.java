@@ -7,10 +7,7 @@ import com.heslin.postopia.common.dto.response.PagedApiResponseEntity;
 import com.heslin.postopia.common.dto.response.ResMessage;
 import com.heslin.postopia.common.utils.PostopiaFormatter;
 import com.heslin.postopia.common.utils.Utils;
-import com.heslin.postopia.space.dto.SearchSpaceInfo;
-import com.heslin.postopia.space.dto.SpaceAvatar;
-import com.heslin.postopia.space.dto.SpaceInfo;
-import com.heslin.postopia.space.dto.VoteSpaceInfo;
+import com.heslin.postopia.space.dto.*;
 import com.heslin.postopia.space.service.SpaceService;
 import com.heslin.postopia.user.dto.UserInfo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -97,7 +94,7 @@ public class SpaceController {
     }
 
     @GetMapping("user")
-    public PagedApiResponseEntity<SpaceInfo> getUserSpaces(
+    public PagedApiResponseEntity<SpacePart> getUserSpaces(
         @RequestHeader Long xUserId,
         @RequestParam int page,
         @RequestParam(required = false) UserId userId,
@@ -109,15 +106,16 @@ public class SpaceController {
 
     @GetMapping("popular")
     public PagedApiResponseEntity<SpaceInfo> getPopularSpaces(
+        @RequestHeader Long xUserId,
         @RequestParam int page,
         @RequestParam(required = false, defaultValue = "250") int size) {
         Pageable pageable = PageRequest.of(page, size);
-        return PagedApiResponseEntity.success(spaceService.getPopularSpaces(pageable));
+        return PagedApiResponseEntity.success(spaceService.getPopularSpaces(pageable, xUserId));
     }
 
     @GetMapping("info")
-    public ApiResponseEntity<SpaceInfo> getSpaceInfo(@RequestParam(name = "id") Long spaceId) {
-        SpaceInfo space = spaceService.getSpaceInfo(spaceId);
+    public ApiResponseEntity<SpaceInfo> getSpaceInfo(@RequestParam(name = "id") Long spaceId, @RequestHeader Long xUserId) {
+        SpaceInfo space = spaceService.getSpaceInfo(spaceId, xUserId);
         return ApiResponseEntity.success(space);
     }
 
@@ -128,8 +126,8 @@ public class SpaceController {
     }
 
     @GetMapping("search")
-    public ApiResponseEntity<List<SearchSpaceInfo>> getSearchedSpaceInfos(@RequestParam List<Long> ids) {
-        var ret = spaceService.getSearchSpaceInfos(ids);
+    public ApiResponseEntity<List<SearchSpaceInfo>> getSearchedSpaceInfos(@RequestParam List<Long> ids, @RequestHeader Long xUserId) {
+        var ret = spaceService.getSearchSpaceInfos(ids, xUserId);
         return ApiResponseEntity.success(ret);
     }
 

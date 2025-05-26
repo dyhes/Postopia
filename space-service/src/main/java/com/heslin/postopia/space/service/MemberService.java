@@ -12,6 +12,8 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
+import java.util.Set;
 
 @Service
 public class MemberService {
@@ -58,5 +60,9 @@ public class MemberService {
 
     public MemberLog findBySpaceIdAndUserId(Long spaceId, Long userId) {
         return memberRepository.findBySpaceIdAndUserId(spaceId, userId).orElseThrow();
+    }
+
+    public Set<Long> findMember(Long xUserId, List<Long> spaces) {
+        return memberRepository.findMember(xUserId, spaces);
     }
 }

@@ -4,10 +4,7 @@ import com.heslin.postopia.common.dto.response.ResMessage;
 import com.heslin.postopia.common.kafka.KafkaService;
 import com.heslin.postopia.common.kafka.enums.SpaceOperation;
 import com.heslin.postopia.search.model.SpaceDoc;
-import com.heslin.postopia.space.dto.SearchSpaceInfo;
-import com.heslin.postopia.space.dto.SpaceAvatar;
-import com.heslin.postopia.space.dto.SpaceInfo;
-import com.heslin.postopia.space.dto.VoteSpaceInfo;
+import com.heslin.postopia.space.dto.*;
 import com.heslin.postopia.space.feign.UserClient;
 import com.heslin.postopia.space.model.MemberLog;
 import com.heslin.postopia.space.model.Space;
@@ -27,6 +24,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @Service
 @RefreshScope
@@ -37,6 +35,18 @@ public class SpaceService {
     @Value("${postopia.avatar.space}")
     private String defaultSpaceAvatar;
     private final UserClient userClient;
+
+    private List<SpaceInfo> completeSpaceInfo(Long xUserId, List<SpacePart> spaceParts) {
+        List<Long> spaceIds = spaceParts.stream().map(SpacePart::id).toList();
+        Set<Long> ids = memberService.findMember(xUserId, spaceIds);
+        return spaceParts.stream().map(spacePart -> ids.contains(spacePart.id())? new SpaceInfo(spacePart, true) : new SpaceInfo(spacePart, false)).toList();
+    }
+
+    private List<SearchSpaceInfo> completeSearchSpaceInfo(Long xUserId, List<SearchSpacePart> spaceParts) {
+        List<Long> spaceIds = spaceParts.stream().map(SearchSpacePart::id).toList();
+        Set<Long> ids = memberService.findMember(xUserId, spaceIds);
+        return spaceParts.stream().map(spacePart -> ids.contains(spacePart.id())? new SearchSpaceInfo(spacePart, true) : new SearchSpaceInfo(spacePart, false)).toList();
+    }
 
     @Autowired
     public SpaceService(SpaceRepository spaceRepository, MemberService memberService, KafkaService kafkaService, UserClient userClient) {
@@ -73,24 +83,29 @@ public class SpaceService {
         return new ResMessage(success ? "退出成功" : "退出失败, 尚未加入空间", success);
     }
 
-    public Page<SpaceInfo> getPopularSpaces(Pageable pageable) {
-        return spaceRepository.findSpaceInfosByPopularity(pageable);
+    public Page<SpaceInfo> getPopularSpaces(Pageable pageable, Long xUserId) {
+        Page<SpacePart> spaceParts = spaceRepository.findSpaceInfosByPopularity(pageable);
+        List<SpaceInfo> spaceInfos = completeSpaceInfo(xUserId, spaceParts.getContent());
+        return new PageImpl<>(spaceInfos, pageable, spaceParts.getTotalElements());
     }
 
-    public Page<SpaceInfo> getUserSpaces(Long queryId, Pageable pageable) {
+    public Page<SpacePart> getUserSpaces(Long queryId, Pageable pageable) {
         return spaceRepository.findSpaceInfosByUserId(queryId, pageable);
     }
 
-    public SpaceInfo getSpaceInfo(Long spaceId) {
-        return spaceRepository.findSpaceInfoById(spaceId);
+    public SpaceInfo getSpaceInfo(Long spaceId, Long userId) {
+        SpacePart spacePart = spaceRepository.findSpaceInfoById(spaceId);
+        List<SpaceInfo> spaceInfos = completeSpaceInfo(userId, List.of(spacePart));
+        return spaceInfos.get(0);
     }
 
     public List<SpaceAvatar> getSpaceAvatars(List<Long> ids) {
         return spaceRepository.findSpaceAvatarsByIdIn(ids);
     }
 
-    public List<SearchSpaceInfo> getSearchSpaceInfos(List<Long> ids) {
-        return spaceRepository.findSearchSpaceInfosByIdIn(ids);
+    public List<SearchSpaceInfo> getSearchSpaceInfos(List<Long> ids, Long xUserId) {
+        List<SearchSpacePart> searchSpaceParts = spaceRepository.findSearchSpaceInfosByIdIn(ids);
+        return completeSearchSpaceInfo(xUserId, searchSpaceParts);
     }
 
     public Page<UserInfo> searchMemberByPrefix(Long spaceId, String prefix, Pageable pageable) {

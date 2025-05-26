@@ -11,7 +11,9 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Repository
 public interface MemberRepository extends JpaRepository<MemberLog, Long> {
@@ -28,4 +30,7 @@ public interface MemberRepository extends JpaRepository<MemberLog, Long> {
     void mute(@Param("spaceId") Long spaceId,@Param("userId") Long userId, @Param("muteUntil") Instant muteUntil);
 
     Optional<MemberLog> findBySpaceIdAndUserId(Long spaceId, Long userId);
+
+    @Query("select m.spaceId from MemberLog m where m.userId = :userId and m.spaceId in :spaces")
+    Set<Long> findMember(@Param("userId") Long xUserId, @Param("spaces") List<Long> spaces);
 }
