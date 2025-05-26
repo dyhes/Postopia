@@ -1,0 +1,92 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user-postgres
+  namespace: postopia
+spec:
+  selector:
+    matchLabels:
+      app: user-postgres
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: user-postgres
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_DB
+              value: postopia_user
+            - name: POSTGRES_PASSWORD
+              value: postopia_user
+            - name: POSTGRES_USER
+              value: postopia_user
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: user-postgres
+  namespace: postopia
+spec:
+  ports:
+    - port: 5432
+      targetPort: 5432
+  selector:
+    app: user-postgres
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user-service
+  namespace: postopia
+spec:
+  selector:
+    matchLabels:
+      app: user-service
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: user-service
+    spec:
+      containers:
+        - name: user-service
+          image: postopia-user:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8081
+          env:
+            - name: spring.cloud.nacos.discovery.server-addr
+              value: "nacos:8848"
+            - name: spring.cloud.nacos.config.server-addr
+              value: "nacos:8848"
+            - name: spring.datasource.url
+              value: "jdbc:postgresql://user-postgres:5432/postopia_user"
+            - name: spring.datasource.username
+              value: "postopia_user"
+            - name: spring.datasource.password
+              value: "postopia_user"
+            - name: spring.kafka.bootstrap-servers
+              value: "kafka:9092"
+            - name: spring.redis.host
+              value: "redis.postopia.svc.cluster.local"
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: user-service
+  namespace: postopia
+spec:
+  ports:
+    - port: 8081
+      targetPort: 8081
+  selector:
+    app: user-service

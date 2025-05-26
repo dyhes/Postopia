@@ -1,0 +1,170 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql
+  namespace: postopia
+spec:
+  selector:
+    matchLabels:
+      app: mysql
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: mysql
+    spec:
+      securityContext:
+        fsGroup: 999  # mysql group ID
+      containers:
+        - name: nacos-mysql
+          image: postopia-nacos-mysql:latest
+          imagePullPolicy: Never
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              value: root
+            - name: MYSQL_USER
+              value: nacos_config
+            - name: MYSQL_PASSWORD
+              value: nacos_config
+            - name: MYSQL_DATABASE
+              value: nacos_config
+            - name: LANG
+              value: C.UTF-8
+          ports:
+            - containerPort: 3306
+              name: mysql
+          volumeMounts:
+            - name: mysql-storage
+              mountPath: /var/lib/mysql
+            - name: mysql-run
+              mountPath: /var/run/mysqld
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          # Use tcpSocket probe instead, which is more reliable
+          livenessProbe:
+            tcpSocket:
+              port: 3306
+            initialDelaySeconds: 90
+            periodSeconds: 20
+            timeoutSeconds: 5
+            failureThreshold: 3
+          startupProbe:
+            tcpSocket:
+              port: 3306
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 15  # Allow up to ~2.5 minutes for startup
+      volumes:
+        - name: mysql-storage
+          persistentVolumeClaim:
+            claimName: mysql-pvc
+        - name: mysql-run
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql
+  namespace: postopia
+spec:
+  ports:
+    - port: 3306
+      targetPort: 3306
+      name: mysql
+  selector:
+    app: mysql
+  type: ClusterIP
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nacos
+  namespace: postopia
+spec:
+  selector:
+    matchLabels:
+      app: nacos
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: nacos
+    spec:
+      containers:
+        - name: nacos
+          image: nacos/nacos-server:v2.4.0
+          ports:
+            - containerPort: 8848
+              name: server
+            - containerPort: 9848
+              name: grpc
+          env:
+            - name: MYSQL_SERVICE_PORT
+              value: "3306"
+            - name: MODE
+              value: "standalone"
+            - name: PREFER_HOST_MODE
+              value: "ip"  # Changed from hostname to ip
+            - name: SPRING_DATASOURCE_PLATFORM
+              value: "mysql"
+            - name: MYSQL_DATABASE_NUM
+              value: "1"
+            - name: NACOS_AUTH_ENABLE
+              value: "false"
+            - name: MYSQL_SERVICE_HOST
+              value: "mysql.postopia.svc.cluster.local"  # Use FQDN
+            - name: MYSQL_SERVICE_USER
+              value: "nacos_config"
+            - name: MYSQL_SERVICE_PASSWORD
+              value: "nacos_config"
+            - name: MYSQL_SERVICE_DB_NAME
+              value: "nacos_config"
+            - name: MYSQL_SERVICE_DB_PARAM
+              value: "characterEncoding=utf8&connectTimeout=1000&socketTimeout=3000&autoReconnect=true&useUnicode=true&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true"
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "250m"
+            limits:
+              memory: "1Gi"
+              cpu: "500m"
+          startupProbe:
+            httpGet:
+              path: /nacos/v1/console/health/readiness
+              port: 8848
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 15
+          livenessProbe:
+            httpGet:
+              path: /nacos/v1/console/health/liveness
+              port: 8848
+            periodSeconds: 30
+            timeoutSeconds: 5
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nacos
+  namespace: postopia
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 8848
+      targetPort: 8848
+      name: server
+    - port: 9848
+      targetPort: 9848
+      name: grpc
+  selector:
+    app: nacos

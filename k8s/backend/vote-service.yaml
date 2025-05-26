@@ -1,0 +1,90 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vote-postgres
+  namespace: postopia
+spec:
+  selector:
+    matchLabels:
+      app: vote-postgres
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: vote-postgres
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_DB
+              value: postopia_vote
+            - name: POSTGRES_PASSWORD
+              value: postopia_vote
+            - name: POSTGRES_USER
+              value: postopia_vote
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: vote-postgres
+  namespace: postopia
+spec:
+  ports:
+    - port: 5432
+      targetPort: 5432
+  selector:
+    app: vote-postgres
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vote-service
+  namespace: postopia
+spec:
+  selector:
+    matchLabels:
+      app: vote-service
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: vote-service
+    spec:
+      containers:
+        - name: vote-service
+          image: postopia-vote:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8086
+          env:
+            - name: spring.cloud.nacos.discovery.server-addr
+              value: "nacos:8848"
+            - name: spring.cloud.nacos.config.server-addr
+              value: "nacos:8848"
+            - name: spring.datasource.url
+              value: "jdbc:postgresql://vote-postgres:5432/postopia_vote"
+            - name: spring.datasource.username
+              value: "postopia_vote"
+            - name: spring.datasource.password
+              value: "postopia_vote"
+            - name: spring.kafka.bootstrap-servers
+              value: "kafka:9092"
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: vote-service
+  namespace: postopia
+spec:
+  ports:
+    - port: 8086
+      targetPort: 8086
+  selector:
+    app: vote-service

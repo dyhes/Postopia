@@ -1,0 +1,90 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: space-postgres
+  namespace: postopia
+spec:
+  selector:
+    matchLabels:
+      app: space-postgres
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: space-postgres
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_DB
+              value: postopia_space
+            - name: POSTGRES_PASSWORD
+              value: postopia_space
+            - name: POSTGRES_USER
+              value: postopia_space
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: space-postgres
+  namespace: postopia
+spec:
+  ports:
+    - port: 5432
+      targetPort: 5432
+  selector:
+    app: space-postgres
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: space-service
+  namespace: postopia
+spec:
+  selector:
+    matchLabels:
+      app: space-service
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: space-service
+    spec:
+      containers:
+        - name: space-service
+          image: postopia-space:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8082
+          env:
+            - name: spring.cloud.nacos.discovery.server-addr
+              value: "nacos:8848"
+            - name: spring.cloud.nacos.config.server-addr
+              value: "nacos:8848"
+            - name: spring.datasource.url
+              value: "jdbc:postgresql://space-postgres:5432/postopia_space"
+            - name: spring.datasource.username
+              value: "postopia_space"
+            - name: spring.datasource.password
+              value: "postopia_space"
+            - name: spring.kafka.bootstrap-servers
+              value: "kafka:9092"
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: space-service
+  namespace: postopia
+spec:
+  ports:
+    - port: 8082
+      targetPort: 8082
+  selector:
+    app: space-service

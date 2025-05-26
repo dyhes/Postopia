@@ -1,0 +1,92 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: opinion-postgres
+  namespace: postopia
+spec:
+  selector:
+    matchLabels:
+      app: opinion-postgres
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: opinion-postgres
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_DB
+              value: postopia_opinion
+            - name: POSTGRES_PASSWORD
+              value: postopia_opinion
+            - name: POSTGRES_USER
+              value: postopia_opinion
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: opinion-postgres
+  namespace: postopia
+spec:
+  ports:
+    - port: 5432
+      targetPort: 5432
+  selector:
+    app: opinion-postgres
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: opinion-service
+  namespace: postopia
+spec:
+  selector:
+    matchLabels:
+      app: opinion-service
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: opinion-service
+    spec:
+      containers:
+        - name: opinion-service
+          image: postopia-opinion:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8087
+          env:
+            - name: spring.cloud.nacos.discovery.server-addr
+              value: "nacos:8848"
+            - name: spring.cloud.nacos.config.server-addr
+              value: "nacos:8848"
+            - name: spring.datasource.url
+              value: "jdbc:postgresql://opinion-postgres:5432/postopia_opinion"
+            - name: spring.datasource.username
+              value: "postopia_opinion"
+            - name: spring.datasource.password
+              value: "postopia_opinion"
+            - name: spring.kafka.bootstrap-servers
+              value: "kafka:9092"
+            - name: spring.redis.host
+              value: "redis.postopia.svc.cluster.local"
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: opinion-service
+  namespace: postopia
+spec:
+  ports:
+    - port: 8087
+      targetPort: 8087
+  selector:
+    app: opinion-service

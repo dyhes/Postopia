@@ -1,0 +1,92 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: comment-postgres
+  namespace: postopia
+spec:
+  selector:
+    matchLabels:
+      app: comment-postgres
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: comment-postgres
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_DB
+              value: postopia_comment
+            - name: POSTGRES_PASSWORD
+              value: postopia_comment
+            - name: POSTGRES_USER
+              value: postopia_comment
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: comment-postgres
+  namespace: postopia
+spec:
+  ports:
+    - port: 5432
+      targetPort: 5432
+  selector:
+    app: comment-postgres
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: comment-service
+  namespace: postopia
+spec:
+  selector:
+    matchLabels:
+      app: comment-service
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: comment-service
+    spec:
+      containers:
+        - name: comment-service
+          image: postopia-comment:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8084
+          env:
+            - name: spring.cloud.nacos.discovery.server-addr
+              value: "nacos:8848"
+            - name: spring.cloud.nacos.config.server-addr
+              value: "nacos:8848"
+            - name: spring.datasource.url
+              value: "jdbc:postgresql://comment-postgres:5432/postopia_comment"
+            - name: spring.datasource.username
+              value: "postopia_comment"
+            - name: spring.datasource.password
+              value: "postopia_comment"
+            - name: spring.kafka.bootstrap-servers
+              value: "kafka:9092"
+            - name: spring.redis.host
+              value: "redis.postopia.svc.cluster.local"
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: comment-service
+  namespace: postopia
+spec:
+  ports:
+    - port: 8084
+      targetPort: 8084
+  selector:
+    app: comment-service

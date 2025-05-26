@@ -8,6 +8,9 @@ spring:
       config:
         file-extension: yaml
         shared-configs:
+          - data-id: shared-redis.yaml
+            group: DEFAULT_GROUP
+            refresh: true
           - data-id: shared-feign.yaml
             group: DEFAULT_GROUP
             refresh: true

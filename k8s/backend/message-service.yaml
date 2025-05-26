@@ -1,0 +1,90 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: message-postgres
+  namespace: postopia
+spec:
+  selector:
+    matchLabels:
+      app: message-postgres
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: message-postgres
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_DB
+              value: postopia_message
+            - name: POSTGRES_PASSWORD
+              value: postopia_message
+            - name: POSTGRES_USER
+              value: postopia_message
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: message-postgres
+  namespace: postopia
+spec:
+  ports:
+    - port: 5432
+      targetPort: 5432
+  selector:
+    app: message-postgres
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: message-service
+  namespace: postopia
+spec:
+  selector:
+    matchLabels:
+      app: message-service
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: message-service
+    spec:
+      containers:
+        - name: message-service
+          image: postopia-message:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8085
+          env:
+            - name: spring.cloud.nacos.discovery.server-addr
+              value: "nacos:8848"
+            - name: spring.cloud.nacos.config.server-addr
+              value: "nacos:8848"
+            - name: spring.datasource.url
+              value: "jdbc:postgresql://message-postgres:5432/postopia_message"
+            - name: spring.datasource.username
+              value: "postopia_message"
+            - name: spring.datasource.password
+              value: "postopia_message"
+            - name: spring.kafka.bootstrap-servers
+              value: "kafka:9092"
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: message-service
+  namespace: postopia
+spec:
+  ports:
+    - port: 8085
+      targetPort: 8085
+  selector:
+    app: message-service
