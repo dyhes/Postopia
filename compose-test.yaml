@@ -122,8 +122,8 @@ services:
     image: postopia-user
     network_mode: "host"
     container_name: postopia-user
-    ports:
-      - "8081:8081"
+#    ports:
+#      - "8081:8081"
     depends_on:
       - user-postgres
       - redis
@@ -148,8 +148,8 @@ services:
     image: postopia-space
     network_mode: "host"
     container_name: postopia-space
-    ports:
-      - "8082:8082"
+#    ports:
+#      - "8082:8082"
     depends_on:
       - space-postgres
       - kafka
@@ -173,8 +173,8 @@ services:
     image: postopia-post
     network_mode: "host"
     container_name: postopia-post
-    ports:
-      - "8083:8083"
+#    ports:
+#      - "8083:8083"
     depends_on:
       - post-postgres
       - kafka
@@ -199,8 +199,8 @@ services:
     image: postopia-comment
     network_mode: "host"
     container_name: postopia-comment
-    ports:
-      - "8084:8084"
+#    ports:
+#      - "8084:8084"
     depends_on:
       - comment-postgres
       - kafka
@@ -225,8 +225,8 @@ services:
     image: postopia-message
     network_mode: "host"
     container_name: postopia-message
-    ports:
-      - "8085:8085"
+#    ports:
+#      - "8085:8085"
     depends_on:
       - message-postgres
       - kafka
@@ -250,8 +250,8 @@ services:
     image: postopia-vote
     network_mode: "host"
     container_name: postopia-vote
-    ports:
-      - "8086:8086"
+#    ports:
+#      - "8086:8086"
     depends_on:
       - vote-postgres
       - kafka
@@ -275,8 +275,8 @@ services:
     image: postopia-opinion
     network_mode: "host"
     container_name: postopia-opinion
-    ports:
-      - "8087:8087"
+#    ports:
+#      - "8087:8087"
     depends_on:
       - opinion-postgres
       - kafka
@@ -301,8 +301,8 @@ services:
     image: postopia-search
     network_mode: "host"
     container_name: postopia-search
-    ports:
-      - "8088:8088"
+#    ports:
+#      - "8088:8088"
     depends_on:
       - elasticsearch
       - kafka
