@@ -1,0 +1,269 @@
+version: '3.8'
+services:
+#  # front end
+#  nginx:
+#    build:
+#      context: ./postopia-fe
+#      dockerfile: Dockerfile
+#    image: postopia-nginx
+#    container_name: postopia-nginx
+#    ports:
+#      - "80:80"
+#    depends_on:
+#      - gateway
+  redis:
+    image: redis:latest
+    container_name: postopia-redis
+    ports:
+      - "6379:6379"
+  # gateway
+  gateway:
+    build:
+      context: ./gateway
+      dockerfile: Dockerfile
+    image: postopia-gateway
+    environment:
+      - spring.cloud.nacos.discovery.server-addr=47.96.131.62:8848
+      - spring.cloud.nacos.config.server-addr=47.96.131.62:8848
+    #network_mode: "host"
+    container_name: postopia-gateway
+    ports:
+      - "8080:8080"
+    depends_on:
+      - user-service
+      - search-service
+      - space-service
+      - post-service
+      - comment-service
+      - message-service
+      - vote-service
+      - opinion-service
+
+  # user-service
+  user-service:
+    build:
+      context: ./user-service
+      dockerfile: Dockerfile
+    image: postopia-user
+    environment:
+      - spring.cloud.nacos.discovery.server-addr=47.96.131.62:8848
+      - spring.cloud.nacos.config.server-addr=47.96.131.62:8848
+    network_mode: "host"
+    container_name: postopia-user
+#    ports:
+#      - "8081:8081"
+#    depends_on:
+#      - user-postgres
+#      - redis
+#      - kafka
+#      - nacos
+
+#  user-postgres:
+#    image: 'postgres:latest'
+#    container_name: user-db
+#    environment:
+#      - POSTGRES_DB=postopia_user
+#      - POSTGRES_PASSWORD=postopia_user
+#      - POSTGRES_USER=postopia_user
+#    ports:
+#      - "54321:5432"
+
+  # space-service
+  space-service:
+    build:
+      context: ./space-service
+      dockerfile: Dockerfile
+    image: postopia-space
+    environment:
+      - spring.cloud.nacos.discovery.server-addr=47.96.131.62:8848
+      - spring.cloud.nacos.config.server-addr=47.96.131.62:8848
+    network_mode: "host"
+    container_name: postopia-space
+#    ports:
+#      - "8082:8082"
+#    depends_on:
+#      - space-postgres
+#      - kafka
+#      - nacos
+
+#  space-postgres:
+#    image: 'postgres:latest'
+#    container_name: space-db
+#    environment:
+#      - POSTGRES_DB=postopia_space
+#      - POSTGRES_PASSWORD=postopia_space
+#      - POSTGRES_USER=postopia_space
+#    ports:
+#      - "54322:5432"
+
+  # post-service
+  post-service:
+    build:
+      context: ./post-service
+      dockerfile: Dockerfile
+    image: postopia-post
+    environment:
+      - spring.cloud.nacos.discovery.server-addr=47.96.131.62:8848
+      - spring.cloud.nacos.config.server-addr=47.96.131.62:8848
+    network_mode: "host"
+    container_name: postopia-post
+#    ports:
+#      - "8083:8083"
+#    depends_on:
+#      - post-postgres
+#      - kafka
+#      - nacos
+#      - redis
+#
+#  post-postgres:
+#    image: 'postgres:latest'
+#    container_name: post-db
+#    environment:
+#      - POSTGRES_DB=postopia_post
+#      - POSTGRES_PASSWORD=postopia_post
+#      - POSTGRES_USER=postopia_post
+#    ports:
+#      - "54323:5432"
+
+  # comment-service
+  comment-service:
+    build:
+      context: ./comment-service
+      dockerfile: Dockerfile
+    image: postopia-comment
+    environment:
+      - spring.cloud.nacos.discovery.server-addr=47.96.131.62:8848
+      - spring.cloud.nacos.config.server-addr=47.96.131.62:8848
+    network_mode: "host"
+    container_name: postopia-comment
+#    ports:
+#      - "8084:8084"
+#    depends_on:
+#      - comment-postgres
+#      - kafka
+#      - nacos
+#      - redis
+
+#  comment-postgres:
+#    image: 'postgres:latest'
+#    container_name: comment-db
+#    environment:
+#      - POSTGRES_DB=postopia_comment
+#      - POSTGRES_PASSWORD=postopia_comment
+#      - POSTGRES_USER=postopia_comment
+#    ports:
+#      - "54324:5432"
+
+  # message-service
+  message-service:
+    build:
+      context: ./message-service
+      dockerfile: Dockerfile
+    image: postopia-message
+    environment:
+      - spring.cloud.nacos.discovery.server-addr=47.96.131.62:8848
+      - spring.cloud.nacos.config.server-addr=47.96.131.62:8848
+    network_mode: "host"
+    container_name: postopia-message
+#    ports:
+#      - "8085:8085"
+#    depends_on:
+#      - message-postgres
+#      - kafka
+#      - nacos
+
+#  message-postgres:
+#    image: 'postgres:latest'
+#    container_name: message-db
+#    environment:
+#      - POSTGRES_DB=postopia_message
+#      - POSTGRES_PASSWORD=postopia_message
+#      - POSTGRES_USER=postopia_message
+#    ports:
+#      - "54325:5432"
+
+  # vote-service
+  vote-service:
+    build:
+      context: ./vote-service
+      dockerfile: Dockerfile
+    image: postopia-vote
+    environment:
+      - spring.cloud.nacos.discovery.server-addr=47.96.131.62:8848
+      - spring.cloud.nacos.config.server-addr=47.96.131.62:8848
+    network_mode: "host"
+    container_name: postopia-vote
+#    ports:
+#      - "8086:8086"
+#    depends_on:
+#      - vote-postgres
+#      - kafka
+#      - nacos
+#
+#  vote-postgres:
+#    image: 'postgres:latest'
+#    container_name: vote-db
+#    environment:
+#      - POSTGRES_DB=postopia_vote
+#      - POSTGRES_PASSWORD=postopia_vote
+#      - POSTGRES_USER=postopia_vote
+#    ports:
+#      - "54326:5432"
+
+  # opinion-service
+  opinion-service:
+    build:
+      context: ./opinion-service
+      dockerfile: Dockerfile
+    image: postopia-opinion
+    environment:
+      - spring.cloud.nacos.discovery.server-addr=47.96.131.62:8848
+      - spring.cloud.nacos.config.server-addr=47.96.131.62:8848
+    network_mode: "host"
+    container_name: postopia-opinion
+#    ports:
+#      - "8087:8087"
+
+
+#  opinion-postgres:
+#    image: 'postgres:latest'
+#    container_name: opinion-db
+#    environment:
+#      - POSTGRES_DB=postopia_opinion
+#      - POSTGRES_PASSWORD=postopia_opinion
+#      - POSTGRES_USER=postopia_opinion
+#    ports:
+#      - "54327:5432"
+
+  # search-service
+  search-service:
+    build:
+      context: ./search-service
+      dockerfile: Dockerfile
+    image: postopia-search
+    environment:
+      - spring.cloud.nacos.discovery.server-addr=47.96.131.62:8848
+      - spring.cloud.nacos.config.server-addr=47.96.131.62:8848
+    #network_mode: "host"
+    container_name: postopia-search
+    ports:
+      - "8088:8088"
+
+  # elasticsearch
+#  elasticsearch:
+#    build:
+#      context: ./elastic-search
+#      dockerfile: Dockerfile
+#    image: postopia-es
+#    container_name: postopia-es
+#    environment:
+#      - discovery.type=single-node
+#      - xpack.security.enabled=false
+#    ports:
+#      - "9200:9200"
+#      - "9300:9300"
+
+volumes:
+  nacos_volume:
+  mysql_volume:
+  nacos_data_volume:
