@@ -6,7 +6,10 @@ buildscript {
         springCloudAlibabaVersion = '2023.0.1.0' // Use appropriate version compatible with your Spring Boot
     }
     repositories {
+
+        maven { url 'https://mirrors.cloud.tencent.com/gradle/' }    // Gradle发行版镜像
         maven { url 'https://maven.aliyun.com/repository/public/' }
+        maven { url 'https://maven.aliyun.com/repository/google' }   // Google相关库
         mavenCentral()
     }
     dependencies {
