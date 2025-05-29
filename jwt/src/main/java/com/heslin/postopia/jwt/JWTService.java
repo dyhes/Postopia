@@ -68,7 +68,7 @@ public class JWTService {
         if (validateToken(token)) {
             return generateAccessToken(extractUserId(token), extractUsername(token));
         }
-        return null;
+        throw new RuntimeException("Token is invalid or expired");
     }
 
     private String createToken(Long id, String subject, Long expiration) {

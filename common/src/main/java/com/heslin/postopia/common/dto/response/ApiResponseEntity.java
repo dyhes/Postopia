@@ -16,6 +16,10 @@ public class ApiResponseEntity<T> extends ResponseEntity<ApiResponse<T>> {
         this(data, "成功", true);
     }
 
+    protected ApiResponseEntity(HttpStatus status) {
+        super(new ApiResponse<>(null, "failed", false), status);
+    }
+
     public static <T> ApiResponseEntity<T> res(T data, ResMessage message) {
         return new ApiResponseEntity<>(data, message.message(), message.success());
     }
@@ -34,5 +38,9 @@ public class ApiResponseEntity<T> extends ResponseEntity<ApiResponse<T>> {
 
     public static <T> ApiResponseEntity<T> fail() {
         return new ApiResponseEntity<>(null, "操作失败", false);
+    }
+
+    public static <T> ApiResponseEntity<T> unauthorized() {
+        return new ApiResponseEntity<>(HttpStatus.UNAUTHORIZED);
     }
 }

@@ -57,7 +57,7 @@ public class UserController {
             String token = userService.refresh(refreshRequest);
             return ApiResponseEntity.success(token);
         } catch (RuntimeException e) {
-            return ApiResponseEntity.fail();
+            return ApiResponseEntity.unauthorized();
         }
     }
 
