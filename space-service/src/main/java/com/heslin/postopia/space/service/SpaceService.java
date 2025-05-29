@@ -73,6 +73,7 @@ public class SpaceService {
 
     public void joinSpace(String username, Long userId, Long spaceId) {
         memberService.joinSpace(username, userId, spaceId);
+        kafkaService.sendToSpace(spaceId, SpaceOperation.MEMBER_JOINED);
     }
 
     public ResMessage leaveSpace(Long userId, Long spaceId) {

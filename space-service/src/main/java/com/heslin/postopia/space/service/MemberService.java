@@ -41,7 +41,7 @@ public class MemberService {
     }
 
     public boolean leaveSpace(Long userId, Long spaceId) {
-        return memberRepository.deleteBySpaceIdAndUserId(userId, spaceId) > 1;
+        return memberRepository.deleteBySpaceIdAndUserId(userId, spaceId) > 0;
     }
 
     public Page<MemberLog> searchByPrefix(Long spaceId, String prefix, Pageable pageable) {
