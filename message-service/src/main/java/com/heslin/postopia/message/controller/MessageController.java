@@ -1,5 +1,6 @@
 package com.heslin.postopia.message.controller;
 
+import com.heslin.postopia.common.dto.response.ApiResponseEntity;
 import com.heslin.postopia.common.dto.response.BasicApiResponseEntity;
 import com.heslin.postopia.common.dto.response.PagedApiResponseEntity;
 import com.heslin.postopia.common.utils.Utils;
@@ -20,6 +21,12 @@ public class MessageController {
     @Autowired
     public MessageController(MessageService messageService) {
         this.messageService = messageService;
+    }
+
+    @GetMapping("unread")
+    public ApiResponseEntity<Long> getMessageCount(
+    @RequestHeader Long xUserId) {
+        return ApiResponseEntity.success(messageService.getMessageCount(xUserId));
     }
 
     @GetMapping("user")

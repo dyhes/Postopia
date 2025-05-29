@@ -24,7 +24,7 @@ public class MessageConsumer {
     @Transactional
     protected void processMessages(List<ConsumerRecord<Long, String>> records) {
         Instant current = Instant.now();
-        List<Message> messages = records.stream().map(record -> Message.builder().userId(record.key()).content(record.value()).isRead(false).createdAt(current).build()
+        List<Message> messages = records.stream().map(record -> Message.builder().userId(record.key()).content(record.value()).read(false).createdAt(current).build()
         ).toList();
         messageService.saveAll(messages);
     }

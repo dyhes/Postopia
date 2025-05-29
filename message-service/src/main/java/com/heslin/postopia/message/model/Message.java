@@ -34,7 +34,8 @@ public class Message {
     private Long id;
     private String content;
     private Long userId;
-    private boolean isRead = false;
+    @Column(name = "is_read")
+    private boolean read;
     @CreatedDate
     Instant createdAt;
 }

@@ -50,4 +50,8 @@ public class MessageService{
     public void saveAll(List<Message> messages) {
         messageRepository.saveAll(messages);
     }
+
+    public Long getMessageCount(Long xUserId) {
+        return messageRepository.countByUserIdAndReadIsFalse(xUserId);
+    }
 }

@@ -17,15 +17,15 @@ import java.util.List;
 public interface MessageRepository extends JpaRepository<Message, Long> {
 
     @Query("""
-    SELECT new com.heslin.postopia.message.dto.MessageInfo(m.id, m.content, m.isRead, m.createdAt)
-           FROM Message m WHERE m.userId = :userId order by m.isRead asc, m.createdAt desc
+    SELECT new com.heslin.postopia.message.dto.MessageInfo(m.id, m.content, m.read, m.createdAt)
+           FROM Message m WHERE m.userId = :userId order by m.read asc, m.createdAt desc
     """)
     Page<MessageInfo> findByUserId(@Param("userId") Long userId, Pageable pageable);
 
     @Modifying
     @Transactional
     @Query("""
-        update Message m set m.isRead = true
+        update Message m set m.read = true
         where m.userId = :userId and m.id in (:ids)
     """)
     void readMessages(@Param("userId") Long userId, @Param("ids") List<Long> ids);
@@ -42,15 +42,17 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
     @Transactional
     @Query("""
         delete Message m
-        where m.userId = :userId and m.isRead = true
+        where m.userId = :userId and m.read = true
     """)
     void deleteAllRead(@Param("userId") Long userId);
 
     @Modifying
     @Transactional
     @Query("""
-        update Message m set m.isRead = true
+        update Message m set m.read = true
         where m.userId = :userId
     """)
     void readAll(@Param("userId") Long userId);
+
+    Long countByUserIdAndReadIsFalse(Long userId);
 }
