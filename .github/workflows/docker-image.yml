@@ -16,15 +16,17 @@ jobs:
           echo "${{ secrets.SERVER_SSH_KEY }}"
           echo "${{ secrets.SERVER_HOST }}"
           echo "${{ secrets.SERVER_USER }}"
-          echo "${{ secrets.SERVER_SSH_KEY }}" > deploy_key.pem
-          chmod 600 deploy_key.pem  # 设置密钥权限
+          echo "${{ secrets.SERVER_SSH_KEY }}" > deploy_key
+          chmod 400 deploy_key  # 设置密钥权限
+          ssh-keyscan github.com >> ~/.ssh/known_hosts
 
       - name: Run Remote Commands
         uses: appleboy/ssh-action@master  # SSH 执行命令
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
-          key: deploy_key.pem
+          key: deploy_key
+          
           script: |  # 自定义操作示例
             cd /root/Postopia
             git pull origin main
