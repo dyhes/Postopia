@@ -13,7 +13,7 @@ import java.util.concurrent.CompletableFuture;
 @FeignClient("user-service")
 public interface UserFeign {
     @PostMapping(value = "user/upload/private", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    String uploadAvatar(@RequestPart("file") MultipartFile file, @RequestHeader Long userId);
+    String uploadAvatar(@RequestPart("file") MultipartFile file, @RequestHeader Long xUserId);
 
     @Async("feignAsyncExecutor")
     @GetMapping("user/info")
