@@ -13,6 +13,9 @@ jobs:
 
       - name: Add SSH Key
         run: |
+          echo "${{ secrets.SERVER_SSH_KEY }}"
+          echo "${{ secrets.SERVER_HOST }}"
+          echo "${{ secrets.SERVER_USER }}"
           echo "${{ secrets.SERVER_SSH_KEY }}" > deploy_key.pem
           chmod 600 deploy_key.pem  # 设置密钥权限
 
