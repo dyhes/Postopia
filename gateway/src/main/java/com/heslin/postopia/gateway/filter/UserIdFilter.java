@@ -156,12 +156,11 @@ public class UserIdFilter implements GlobalFilter {
 
                             JsonParser parser = objectMapper.getFactory().createParser(inputStream);
                             JsonGenerator generator = objectMapper.getFactory().createGenerator(outputStream, JsonEncoding.UTF8);
-
                             while (parser.nextToken() != null) {
                                 if (parser.currentToken() == JsonToken.FIELD_NAME && "userId".equals(parser.currentName())) {
                                     generator.writeFieldName("userId");
                                     parser.nextToken();
-                                    long userId = parser.getLongValue();
+                                    String userId = parser.getValueAsString();
                                     generator.writeNumber(UserId.masked(userId));
                                 } else {
                                     generator.copyCurrentEvent(parser);
