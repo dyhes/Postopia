@@ -23,17 +23,17 @@ jobs:
 
       - name: Add SSH Key
         run: |
-          echo "${{ secrets.SERVER_SSH_KEY }}" > deploy_key
+          echo "${{ secrets.SERVER_SSH_KEY }}" > deploy_key  # 移除多余符号
           chmod 400 deploy_key  # 设置密钥权限
+          echo deploy_key
+          ssh -i deploy_key root@47.97.225.160 "echo Connected!"
         env:
           SECRET: ${{ secrets.SERVER_SSH_KEY }}
           
       - name: Run Remote Commands
-        env:
-          SECRET: ${{ secrets.SERVER_HOST }}
         uses: appleboy/ssh-action@master  # SSH 执行命令
         with:
-          host: ${{ secrets.SERVER_HOST }}
+          host: 47.97.225.160
           username: root
           key: deploy_key
           
