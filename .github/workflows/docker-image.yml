@@ -8,9 +8,16 @@ jobs:
   execute-commands:
     runs-on: ubuntu-latest
     steps:
+
       - name: Checkout code
         uses: actions/checkout@v4  # 检出代码
 
+      - name: Add server host key to known_hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan 47.97.225.160 >> ~/.ssh/known_hosts  # 替换 your_server_ip
+          chmod 600 ~/.ssh/known_hosts
+          
       - name: Test Secret Access
         run: |
           if [ -n "${{ secrets.SERVER_SSH_KEY }}" ]; then
