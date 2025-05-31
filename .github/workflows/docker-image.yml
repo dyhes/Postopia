@@ -23,9 +23,12 @@ jobs:
 
       - name: Add SSH Key
         run: |
+          echo "here"
           echo "${{ secrets.SERVER_SSH_KEY }}" > deploy_key  # 移除多余符号
           chmod 600 deploy_key  # 设置密钥权限
+          echo "d1"
           cat deploy_key
+          echo "d2"
           ssh -i deploy_key root@47.97.225.160 "echo Connected!"
         env:
           SECRET: ${{ secrets.SERVER_SSH_KEY }}
