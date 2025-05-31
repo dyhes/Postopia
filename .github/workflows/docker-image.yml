@@ -28,37 +28,11 @@ jobs:
         env:
           SECRET: ${{ secrets.SERVER_SSH_KEY }}
 
-      - name: Add SSH Key
+      - name: SSH Connection
         run: |
-          echo "here"
           echo "${{ secrets.SERVER_SSH_KEY }}" > deploy_key  # 移除多余符号
           chmod 600 deploy_key  # 设置密钥权限
-          echo "d1"
-          cat deploy_key
-          echo "d2"
-          ssh -i deploy_key root@47.97.225.160 "echo Connected!"
+          ssh -i deploy_key root@47.97.225.160 "/root/starter.sh"
         env:
           SECRET: ${{ secrets.SERVER_SSH_KEY }}
-          
-      - name: Run Remote Commands
-        uses: appleboy/ssh-action@master  # SSH 执行命令
-        with:
-          host: 47.97.225.160
-          username: root
-          key: deploy_key
-          
-          script: |  # 自定义操作示例
-            cd /root/Postopia
-            git pull origin main
-            ./gradlew clean build
-            docker-compose down
-            docker build -t postopia-gateway:latest ./gateway
-            docker build -t postopia-user:latest ./user-service
-            docker build -t postopia-space:latest ./space-service
-            docker build -t postopia-post:latest ./post-service
-            docker build -t postopia-comment:latest ./comment-service
-            docker build -t postopia-message:latest ./message-service
-            docker build -t postopia-vote:latest ./vote-service
-            docker build -t postopia-opinion:latest ./opinion-service
-            docker build -t postopia-search:latest ./search-service
-            docker-compose up -d
+        
