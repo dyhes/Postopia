@@ -14,7 +14,7 @@ import lombok.experimental.SuperBuilder;
 @Table(
 name = "common_votes",
 indexes = {
-@Index(name = "type_related_entity_idx", columnList = "vote_type, relatedEntity", unique = true),
+@Index(name = "common_type_related_entity_idx", columnList = "common_vote_type, relatedEntity", unique = true),
 }
 )
 public class CommonVote extends Vote {
