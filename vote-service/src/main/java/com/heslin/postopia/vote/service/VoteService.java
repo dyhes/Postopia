@@ -246,7 +246,7 @@ public class VoteService {
     @Transactional
     protected Long updateArchiveStatusVote(boolean isArchived, Long xUserId, PostVoteRequest request) {
         if (!postFeign.checkPostArchiveStatus(request.postId(), isArchived)) {
-            throw new RuntimeException(isArchived? "该评论归档" : "该评论未归档");
+            throw new RuntimeException(isArchived? "该帖子归档" : "该帖子未归档");
         }
         Vote vote = createCommonVote(xUserId, request.postId(), request.userId(), VoteType.POST, isArchived? DetailVoteType.ARCHIVE_POST : DetailVoteType.UNARCHIVE_POST);
         scheduleService.scheduleUpdatePostArchiveStatusVote(vote.getId(), isArchived, request, vote.getEndAt());

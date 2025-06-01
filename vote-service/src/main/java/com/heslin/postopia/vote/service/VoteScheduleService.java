@@ -16,6 +16,7 @@ import com.heslin.postopia.vote.request.PostVoteRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.function.Function;
@@ -48,7 +49,8 @@ public class VoteScheduleService {
         this.kafkaService = kafkaService;
     }
 
-    private void scheduledAction(boolean isCommon, Long voteId, String voteActionMessage, String relatedUserMessage, Function<Long, Void> voteAction) {
+    @Transactional
+    protected void scheduledAction(boolean isCommon, Long voteId, String voteActionMessage, String relatedUserMessage, Function<Long, Void> voteAction) {
         Vote vote = isCommon? commonVoteRepository.findById(voteId).orElseThrow() : spaceVoteRepository.findById(voteId).orElseThrow();
         System.out.println("here");
         System.out.println(vote.getId());
