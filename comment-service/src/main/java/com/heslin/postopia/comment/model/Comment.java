@@ -23,6 +23,7 @@ public class Comment {
     @GeneratedValue(strategy = jakarta.persistence.GenerationType.IDENTITY)
     private Long id;
 
+    @Column(length = 1000)
     private String content;
 
     Long userId;

@@ -24,6 +24,7 @@ public class Post {
 
     private String subject;
 
+    @Column(length = 1000)
     private String content;
 
     private Long userId;

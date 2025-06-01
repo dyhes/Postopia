@@ -32,6 +32,7 @@ public class Message {
     allocationSize = 1000  // 每次分配的序列值数量（需与数据库序列的 INCREMENT 一致）
     )
     private Long id;
+    @Column(length = 1200)
     private String content;
     private Long userId;
     @Column(name = "is_read")
