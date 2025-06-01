@@ -135,7 +135,7 @@ public class VoteService {
         .forEach(votePart -> {
             voteIds.add(votePart.id());
             initiator.add(votePart.initiator());
-            relatedUsers.add(votePart.relatedEntity());
+            relatedUsers.add(votePart.relatedUser());
         });
         CompletableFuture<List<OpinionInfo>> futureOpinionInfo = opinionFeign.getOpinionInfos(userId, voteIds);
         CompletableFuture<List<UserInfo>> futureUserInfo = userFeign.getUserInfos(initiator);
