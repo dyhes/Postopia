@@ -37,6 +37,8 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
 
     Page<CommentPart> findByPostIdAndParentIdIsNull(Long postId, Pageable pageable);
 
+    CommentPart findCommentPartById(Long id);
+
     @Query(value =
         """
         WITH RECURSIVE comment_tree AS (

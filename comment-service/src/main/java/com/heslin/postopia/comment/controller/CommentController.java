@@ -68,6 +68,14 @@ public class CommentController {
         return commentService.getCommentsByPost(xUserId, postId, pageable).thenApply(PagedApiResponseEntity::success);
     }
 
+    @GetMapping("info")
+    public CompletableFuture<ApiResponseEntity<RecursiveComment>> getComment(
+    @RequestHeader Long xUserId,
+    @RequestParam Long commentId
+    ) {
+        return commentService.getComment(xUserId, commentId).thenApply(ApiResponseEntity::success);
+    }
+
     @GetMapping("search")
     public CompletableFuture<ApiResponseEntity<List<SearchCommentInfo>>> getCommentInfosInSearch(@RequestHeader Long xUserId, @RequestParam List<Long> ids) {
         return commentService.getSearchComments(xUserId, ids).thenApply(ApiResponseEntity::success);

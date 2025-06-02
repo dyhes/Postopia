@@ -197,6 +197,37 @@ public class CommentService {
             );
     }
 
+    public CompletableFuture<RecursiveComment> getComment(Long xUserId, Long xcommentId) {
+        CommentPart self = commentRepository.findCommentPartById(xcommentId);
+        List<CommentPart> top = List.of(self);
+        List<Long> topIds = List.of(xcommentId);
+        List<CommentPart> subs = commentRepository.findSubs(topIds);
+        List<CommentPart> commentParts = Stream.concat(top.stream(), subs.stream()).toList();
+        List<Long> commentId = commentParts.stream().map(CommentPart::id).toList();
+        CompletableFuture<List<OpinionInfo>> futureOpinionInfo = opinionFeign.getOpinionInfos(xUserId, commentId);
+        CompletableFuture<List<UserInfo>> futureUserInfo = userFeign.getUserInfos(commentParts.stream().map(CommentPart::userId).toList());
+        CompletableFuture<List<VoteInfo>> futureVoteInfo = voteFeign.getCommentVotes(xUserId, commentId);
+        return CompletableFuture.allOf(futureOpinionInfo, futureUserInfo, futureVoteInfo).thenApply(v -> {
+            List<OpinionInfo> opinions = futureOpinionInfo.join();
+            List<UserInfo> userInfos = futureUserInfo.join();
+            List<VoteInfo> voteInfos = futureVoteInfo.join();
+            List<CommentInfo> commentInfos = Utils.quaMerge(commentParts,
+            opinions, OpinionInfo::mergeId, (commentPart, mp) -> mp.get(commentPart.id()),
+            userInfos, UserInfo::userId, (commentPart, mp) -> mp.get(commentPart.userId()),
+            voteInfos, VoteInfo::mergeId, (commentPart, mp) -> mp.getOrDefault(commentPart.id(), null),
+            CommentInfo::new);
+            List<RecursiveComment> comments = commentInfos.stream().map(RecursiveComment::new).toList();
+            Map<Long, RecursiveComment> mp = comments.stream().collect(Collectors.toMap(c->c.getComment().comment().id(), Function.identity()));
+            for (RecursiveComment comment : comments) {
+                if (comment.getComment().comment().parentId() != null) {
+                    RecursiveComment parent = mp.get(comment.getComment().comment().parentId());
+                    parent.getChildren().add(comment);
+                }
+            }
+            return mp.get(xcommentId);
+        });
+    }
+
     public CompletableFuture<Page<RecursiveComment>> getCommentsByPost(Long xUserId, Long postId, Pageable pageable) {
         Page<CommentPart> commentPage = commentRepository.findByPostIdAndParentIdIsNull(postId, pageable);
         List<CommentPart> tops = commentPage.getContent();
