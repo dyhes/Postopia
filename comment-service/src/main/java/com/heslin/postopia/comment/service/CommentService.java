@@ -214,7 +214,7 @@ public class CommentService {
             List<CommentInfo> commentInfos = Utils.quaMerge(commentParts,
             opinions, OpinionInfo::mergeId, (commentPart, mp) -> mp.get(commentPart.id()),
             userInfos, UserInfo::userId, (commentPart, mp) -> mp.get(commentPart.userId()),
-            voteInfos, VoteInfo::mergeId, (commentPart, mp) -> mp.get(commentPart.id()),
+            voteInfos, VoteInfo::mergeId, (commentPart, mp) -> mp.getOrDefault(commentPart.id(), null),
             CommentInfo::new);
             List<RecursiveComment> comments = commentInfos.stream().map(RecursiveComment::new).toList();
             Map<Long, RecursiveComment> mp = comments.stream().collect(Collectors.toMap(c->c.getComment().comment().id(), Function.identity()));

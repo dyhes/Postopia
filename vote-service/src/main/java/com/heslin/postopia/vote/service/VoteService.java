@@ -107,7 +107,7 @@ public class VoteService {
             (votePart, opinionInfo, userInfo) -> new VoteInfo(votePart.relatedEntity(), votePart, userInfo, opinionInfo)
             );
             Map<Long, VoteInfo> voteInfoMap = partial.stream().collect(Collectors.toMap(VoteInfo::mergeId, Function.identity()));
-            return ids.stream().map(id -> voteInfoMap.getOrDefault(id, null)).toList();
+            return ids.stream().map(id -> voteInfoMap.getOrDefault(id, null)).filter(Objects::nonNull).toList();
         });
     }
 

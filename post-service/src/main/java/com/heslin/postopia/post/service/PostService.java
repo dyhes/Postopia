@@ -127,7 +127,7 @@ public class PostService {
             return Utils.quaMerge(posts,
             opinionInfos, OpinionInfo::mergeId, (postPart, mp) -> mp.get(postPart.id()),
             userInfos, UserInfo::userId, (postPart, mp) -> mp.get(postPart.userId()),
-            voteInfos, VoteInfo::mergeId, (postPart, mp) -> mp.get(postPart.id()),
+            voteInfos, VoteInfo::mergeId, (postPart, mp) -> mp.getOrDefault(postPart.id(), null),
             FeedPostInfo::new);
         });
     }
@@ -175,7 +175,7 @@ public class PostService {
             return Utils.quaMerge(posts,
             opinionInfos, OpinionInfo::mergeId, (postPart, mp) -> mp.get(postPart.id()),
             userInfos, UserInfo::userId, (postPart, mp) -> mp.get(postPart.userId()),
-            voteInfos, VoteInfo::mergeId, (postPart, mp) -> mp.get(postPart.id()),
+            voteInfos, VoteInfo::mergeId, (postPart, mp) -> mp.getOrDefault(postPart.id(), null),
             PostInfo::new);
         }).exceptionally(throwable ->{
             System.out.println("Error in getPostInfos: " + throwable.getMessage());
