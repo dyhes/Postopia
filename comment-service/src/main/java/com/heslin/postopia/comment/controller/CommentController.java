@@ -1,6 +1,5 @@
 package com.heslin.postopia.comment.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.heslin.postopia.comment.dto.OpinionCommentInfo;
 import com.heslin.postopia.comment.dto.RecursiveComment;
 import com.heslin.postopia.comment.dto.SearchCommentInfo;
@@ -20,6 +19,7 @@ import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -99,16 +99,17 @@ public class CommentController {
         .thenApply(PagedApiResponseEntity::success);
     }
 
-    @GetMapping(value = "summary", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    @GetMapping(path = "/summary", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<ServerSentEvent<String>> summary(@RequestParam Long postId) {
-        return Flux.create(sink -> {
-            CompletableFuture.runAsync(() -> {
-                try {
-                    intelligenceService.summary(sink, postId);
-                } catch (JsonProcessingException e) {
-                    throw new RuntimeException(e);
-                }
-            });
+        return Flux.<ServerSentEvent<String>>create(sink -> {
+            try {
+                intelligenceService.summary(sink, postId);
+            } catch (Exception e) {
+                sink.error(e);
+            }
+        }).timeout(Duration.ofSeconds(300))
+        .onErrorResume(e -> {
+            return Flux.just(ServerSentEvent.builder("Error: " + e.getMessage()).build());
         });
     }
 }

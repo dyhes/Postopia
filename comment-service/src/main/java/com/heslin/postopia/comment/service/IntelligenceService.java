@@ -34,15 +34,120 @@ public class IntelligenceService {
         this.objectMapper = objectMapper;
     }
 
+//    public void summary(FluxSink<ServerSentEvent<String>> sink, Long postId) throws JsonProcessingException {
+//        String userPrompt = objectMapper.writeValueAsString(commentService.getSummaryInfo(postId));
+//        SiliconRequest body = new SiliconRequest(model, sysPrompt);
+//        body.append(userPrompt);
+//
+//        Flux<String> firstRequest = webClient.post()
+//        .uri("/chat/completions")
+//        .header("Authorization", "Bearer " + apiKey)
+//        .contentType(MediaType.APPLICATION_JSON)
+//        .bodyValue(body)
+//        .retrieve()
+//        .bodyToFlux(String.class)
+//        .onErrorResume(e -> {
+//            e.printStackTrace();
+//            System.out.println("Error in first request: " + e.getMessage());
+//            sink.error(e);
+//            return Flux.empty();
+//        });
+//
+//        Flux<String> secondRequest = firstRequest.thenMany(
+//        Flux.defer(() -> {
+//            try {
+//                sink.next(ServerSentEvent.builder("[SUMMARY]").build());
+//                body.setStream(true);
+//                body.append(summaryPrompt);
+//                return webClient.post()
+//                .uri("/chat/completions")
+//                .header("Authorization", "Bearer " + apiKey)
+//                .contentType(MediaType.APPLICATION_JSON)
+//                .bodyValue(body)
+//                .retrieve()
+//                .bodyToFlux(String.class)
+//                .onErrorResume(e -> {
+//                    sink.error(e);
+//                    return Flux.empty();
+//                });
+//            } catch (Exception e) {
+//                sink.error(e);
+//                return Flux.empty();
+//            }
+//        })
+//        );
+//
+//        secondRequest
+//        .publishOn(Schedulers.boundedElastic())
+//        .doOnNext(data -> {
+//            try {
+//                sink.next(ServerSentEvent.builder(data).build());
+//            } catch (Exception e) {
+//                // Handle situation where sink might be closed
+//                System.out.println("Sink already closed, cannot send data: " + e.getMessage());
+//                sink.error(e);
+//            }
+//        })
+//        .doOnError(e -> {
+//            try {
+//                System.out.println("Error occurred: " + e.getMessage());
+//                sink.error(e);
+//            } catch (Exception ex) {
+//                // Already closed
+//            }
+//        })
+//        .doOnComplete(() -> {
+//            try {
+//                sink.complete();
+//            } catch (Exception e) {
+//                // Already closed
+//            }
+//        })
+//        .subscribe();
+//    }
+//    public void summary(FluxSink<ServerSentEvent<String>> sink, Long postId) throws JsonProcessingException {
+//        String userPrompt = objectMapper.writeValueAsString(commentService.getSummaryInfo(postId));
+//        SiliconRequest body = new SiliconRequest(model, sysPrompt);
+//        body.append(userPrompt);
+//
+//        Flux<String> firstRequest = webClient.post()
+//        .uri("/chat/completions")
+//        .header("Authorization", "Bearer " + apiKey)
+//        .bodyValue(body)
+//        .retrieve()
+//        .bodyToFlux(String.class);
+//
+//        Flux<String> secondRequest = firstRequest.thenMany(
+//        Flux.defer(() -> {
+//            sink.next(ServerSentEvent.builder("[SUMMARY]").build());
+//            body.setStream(true);
+//            body.append(summaryPrompt);
+//            return webClient.post()
+//            .uri("/chat/completions")
+//            .header("Authorization", "Bearer " + apiKey)
+//            .bodyValue(body)
+//            .retrieve()
+//            .bodyToFlux(String.class);
+//        })
+//        );
+//
+//        secondRequest
+//        .doOnNext(data -> sink.next(ServerSentEvent.builder(data).build()))
+//        .doOnError(sink::error)
+//        .doOnComplete(sink::complete)
+//        .subscribeOn(Schedulers.boundedElastic())
+//        .subscribe();
+//    }
+
     public void summary(FluxSink<ServerSentEvent<String>> sink, Long postId) throws JsonProcessingException {
         System.out.println("sysPrompt:");
         System.out.println(sysPrompt);
-        System.out.println("userPrompt:");
         String userPrompt = objectMapper.writeValueAsString(commentService.getSummaryInfo(postId));
+        System.out.println("userPrompt:");
         System.out.println(userPrompt);
         SiliconRequest body = new SiliconRequest(model, sysPrompt);
         body.append(userPrompt);
-        // Simulate some processing
+        System.out.println("request 1");
         webClient
         .post()
         .uri("/chat/completions")
@@ -56,6 +161,7 @@ public class IntelligenceService {
         .doOnComplete(
         () -> {
             sink.next(ServerSentEvent.builder("[SUMMARY]").build());
+            System.out.println("request 2");
             body.setStream(true);
             body.append(summaryPrompt);
             webClient
