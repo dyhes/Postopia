@@ -29,14 +29,18 @@ public class JWTFilter implements GlobalFilter {
         }
         String authorization = exchange.getRequest().getHeaders().getFirst("Authorization");
         System.out.println("Authorization: " + authorization);
-        if (authorization != null && authorization.startsWith("Bearer ")) {
-            String token = authorization.substring(7);
-            if (jwtService.validateToken(token)) {
-                Long userId = jwtService.extractUserId(token);
-                String username = jwtService.extractUsername(token);
-                exchange.getRequest().mutate().header("xUserId", String.valueOf(userId)).header("xUsername", username).build();
-                return chain.filter(exchange);
+        try {
+            if (authorization != null && authorization.startsWith("Bearer ")) {
+                String token = authorization.substring(7);
+                if (jwtService.validateToken(token)) {
+                    Long userId = jwtService.extractUserId(token);
+                    String username = jwtService.extractUsername(token);
+                    exchange.getRequest().mutate().header("xUserId", String.valueOf(userId)).header("xUsername", username).build();
+                    return chain.filter(exchange);
+                }
             }
+        } catch (RuntimeException e) {
+            System.out.println("Invalid JWT token: " + e.getMessage());
         }
         System.out.println("unorthorized");
         exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
