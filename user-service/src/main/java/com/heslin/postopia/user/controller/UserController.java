@@ -79,7 +79,7 @@ public class UserController {
 
     @GetMapping("search")
     public ApiResponseEntity<List<UserInfo>> getSearchedUserInfos(@RequestParam List<Long> userId) {
-        List<UserInfo> ret = userService.getSearchUserInfos(userId);
+        List<UserInfo> ret = userService.getUserInfos(userId);
         return ApiResponseEntity.success(ret);
     }
 

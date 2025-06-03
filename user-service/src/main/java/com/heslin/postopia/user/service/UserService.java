@@ -114,10 +114,6 @@ public class UserService {
         return userRepository.findAvatarsByUserIdIn(ids);
     }
 
-    public List<UserInfo> getSearchUserInfos(List<Long> ids) {
-        return userRepository.findSearchUserInfosByUserIdIn(ids);
-    }
-
     public String uploadAsset(UserId userId, MultipartFile file, boolean isVideo) throws IOException {
         return oStorageService.uploadAsset(userId.toString(), file.getOriginalFilename(), file, isVideo);
     }
