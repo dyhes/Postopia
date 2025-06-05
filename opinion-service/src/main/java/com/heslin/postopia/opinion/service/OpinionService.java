@@ -69,7 +69,13 @@ public class OpinionService{
         query.setParameter("uid", xUserId);
         query.setParameter("vid", voteId);
         kafkaService.sendToUser(xUserId, UserOperation.CREDIT_EARNED);
-        boolean isInsert = (boolean) query.getSingleResult();
+        boolean isInsert;
+        try {
+            isInsert = (boolean) query.getSingleResult();
+        } catch (Exception e) {
+            System.out.println("Error inserting/updating vote opinion: " + e.getMessage());
+            throw new RuntimeException("Error inserting/updating vote opinion: " + e.getMessage());
+        }
         if (isInsert) {
             if (isCommon) {
                 kafkaService.sendToCommonVote(voteId, isPositive? VoteOperation.AGREED : VoteOperation.DISAGREED);
@@ -102,7 +108,13 @@ public class OpinionService{
         query.setParameter("uid", xUserId);
         query.setParameter("pid", request.postId());
         kafkaService.sendToUser(xUserId, UserOperation.CREDIT_EARNED);
-        boolean isInsert = (boolean) query.getSingleResult();
+        boolean isInsert;
+        try {
+            isInsert = (boolean) query.getSingleResult();
+        } catch (Exception e) {
+            System.out.println("Error inserting/updating post opinion: " + e.getMessage());
+            throw new RuntimeException("Error inserting/updating post opinion: " + e.getMessage());
+        }
         if (isInsert) {
             kafkaService.sendToPost(request.postId(), request.isPositive()? PostOperation.LIKED : PostOperation.DISLIKED);
             kafkaService.sendToUser(xUserId, UserOperation.CREDIT_EARNED);
@@ -127,7 +139,13 @@ public class OpinionService{
         query.setParameter("ip", request.isPositive());
         query.setParameter("uid", xUserId);
         query.setParameter("cid", request.commentId());
-        boolean isInsert = (boolean) query.getSingleResult();
+        boolean isInsert;
+        try {
+            isInsert = (boolean) query.getSingleResult();
+        } catch (Exception e) {
+            System.out.println("Error inserting/updating comment opinion: " + e.getMessage());
+            throw new RuntimeException("Error inserting/updating comment opinion: " + e.getMessage());
+        }
         if (isInsert) {
             kafkaService.sendToComment(request.commentId(), request.isPositive()? CommentOperation.LIKED : CommentOperation.DISLIKED );
             kafkaService.sendToUser(xUserId, UserOperation.CREDIT_EARNED);
